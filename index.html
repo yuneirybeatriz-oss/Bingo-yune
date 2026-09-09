@@ -157,7 +157,7 @@
             <!-- Sección de Selección y Compra de Cartones con bloqueo visual -->
             <div class="bg-slate-800 border border-slate-700 p-6 rounded-3xl card-shadow flex flex-col gap-4">
                 <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (Total: 50 Disponibles)</h3>
+                    <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (Máximo 10)</h3>
                     <button onclick="confirmSelectedCards()" class="px-5 py-2 bg-green-600 hover:bg-green-500 font-bold text-xs rounded-xl transition shadow">Confirmar Mis Cartones</button>
                 </div>
                 <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-48 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl border border-slate-700"></div>
@@ -208,6 +208,17 @@
                 lastBallDrawn = val.lastBall || '--';
                 gamePattern = val.pattern || 'line';
                 marketCards = val.cards || {};
+
+                // Sincronizar mis cartones seleccionados directamente desde la base de datos
+                if(currentUser.name) {
+                    mySelectedCards = [];
+                    for(let cardId in marketCards) {
+                        if(marketCards[cardId] === currentUser.name) {
+                            mySelectedCards.push(parseInt(cardId));
+                        }
+                    }
+                    renderMyCards();
+                }
 
                 updateUIFromState();
             });
@@ -389,10 +400,11 @@
 
             const index = mySelectedCards.indexOf(cardNum);
             if(index > -1) {
+                // Si ya lo tenía seleccionado, lo quitamos de la lista local
                 mySelectedCards.splice(index, 1);
             } else {
-                if(mySelectedCards.length >= 4) {
-                    alert("Puedes seleccionar máximo 4 cartones por jugadora.");
+                if(mySelectedCards.length >= 10) {
+                    alert("Puedes seleccionar máximo 10 cartones por jugadora.");
                     return;
                 }
                 mySelectedCards.push(cardNum);
@@ -402,17 +414,19 @@
 
         function confirmSelectedCards() {
             let updates = {};
+            // Limpiamos los cartones viejos que eran míos en la base de datos
             for(let i=1; i<=50; i++) {
                 if(marketCards[i] === currentUser.name) {
                     updates[`cards/${i}`] = null;
                 }
             }
+            // Agregamos los nuevos cartones seleccionados actualmente
             mySelectedCards.forEach(num => {
                 updates[`cards/${num}`] = currentUser.name;
             });
             
             db.ref('system').update(updates);
-            alert("¡Cartones confirmados con éxito en la red!");
+            alert("¡Cartones actualizados y guardados con éxito en la red!");
             renderMyCards();
         }
 
@@ -486,7 +500,6 @@
             if(!grid) return;
             grid.innerHTML = '';
 
-            // Generar números por columna de acuerdo a las reglas oficiales del Bingo (B:1-15, I:16-30, N:31-45, G:46-60, O:61-75)
             let colRanges = [
                 {min: 1, max: 15},   // B
                 {min: 16, max: 30},  // I
@@ -510,13 +523,11 @@
                 colsData.push(colNums);
             }
 
-            // Organizar en filas (fila 0 de todas las columnas, fila 1, etc.)
             for(let r = 0; r < 5; r++) {
                 for(let c = 0; c < 5; c++) {
                     const cell = document.createElement('div');
                     cell.className = "h-9 bg-slate-800 border border-slate-700/60 rounded-lg flex items-center justify-center text-xs font-bold text-white";
                     
-                    // Casilla central libre ⭐ (Columna 2, Fila 2)
                     if(r === 2 && c === 2) {
                         cell.innerText = "⭐";
                         cell.className += " bg-pink-600/40 text-pink-300";
