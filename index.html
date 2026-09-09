@@ -154,13 +154,13 @@
                 </div>
             </div>
 
-            <!-- Sección de Selección y Compra de Cartones con bloqueo visual -->
+            <!-- Sección de Selección y Compra de Cartones con los 50 disponibles -->
             <div class="bg-slate-800 border border-slate-700 p-6 rounded-3xl card-shadow flex flex-col gap-4">
                 <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (Máximo 10)</h3>
+                    <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones del 1 al 50 (Máx. 10)</h3>
                     <button onclick="confirmSelectedCards()" class="px-5 py-2 bg-green-600 hover:bg-green-500 font-bold text-xs rounded-xl transition shadow">Confirmar Mis Cartones</button>
                 </div>
-                <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-48 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl border border-slate-700"></div>
+                <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl border border-slate-700"></div>
             </div>
 
             <!-- Cartones Activos de la Jugadora -->
@@ -209,7 +209,6 @@
                 gamePattern = val.pattern || 'line';
                 marketCards = val.cards || {};
 
-                // Sincronizar mis cartones seleccionados directamente desde la base de datos
                 if(currentUser.name) {
                     mySelectedCards = [];
                     for(let cardId in marketCards) {
@@ -381,6 +380,7 @@
             const market = document.getElementById('cards-market-grid');
             if(!market) return;
             market.innerHTML = '';
+            // Generar los 50 cartones oficiales completos
             for(let i=1; i<=50; i++) {
                 const cardBtn = document.createElement('button');
                 cardBtn.id = `market-card-${i}`;
@@ -400,7 +400,6 @@
 
             const index = mySelectedCards.indexOf(cardNum);
             if(index > -1) {
-                // Si ya lo tenía seleccionado, lo quitamos de la lista local
                 mySelectedCards.splice(index, 1);
             } else {
                 if(mySelectedCards.length >= 10) {
@@ -414,13 +413,11 @@
 
         function confirmSelectedCards() {
             let updates = {};
-            // Limpiamos los cartones viejos que eran míos en la base de datos
             for(let i=1; i<=50; i++) {
                 if(marketCards[i] === currentUser.name) {
                     updates[`cards/${i}`] = null;
                 }
             }
-            // Agregamos los nuevos cartones seleccionados actualmente
             mySelectedCards.forEach(num => {
                 updates[`cards/${num}`] = currentUser.name;
             });
