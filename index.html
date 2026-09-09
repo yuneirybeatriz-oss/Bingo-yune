@@ -78,7 +78,7 @@
             </div>
         </div>
 
-        <!-- SECCIÓN 4: PANEL DE ADMINISTRACIÓN (TORRE DE CONTROL) - SALA SIEMPRE ABIERTA -->
+        <!-- SECCIÓN 4: PANEL DE ADMINISTRACIÓN (TORRE DE CONTROL) -->
         <div id="view-admin-panel" class="w-full flex flex-col gap-6 hidden">
             <div class="bg-slate-800 border border-slate-700 p-6 rounded-3xl card-shadow flex flex-col md:flex-row justify-between items-center gap-4">
                 <div>
@@ -133,9 +133,7 @@
             <!-- Tablero 1 al 75 para Admin -->
             <div class="bg-slate-800 border border-slate-700 p-6 rounded-3xl card-shadow">
                 <h3 class="font-bold text-yellow-300 mb-4">Tablero General (1 - 75)</h3>
-                <div id="admin-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1.5">
-                    <!-- Generado por JavaScript -->
-                </div>
+                <div id="admin-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1.5"></div>
             </div>
         </div>
 
@@ -156,15 +154,13 @@
                 </div>
             </div>
 
-            <!-- Sección de Selección y Compra de Cartones -->
+            <!-- Sección de Selección y Compra de Cartones con bloqueo visual -->
             <div class="bg-slate-800 border border-slate-700 p-6 rounded-3xl card-shadow flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (Total: 50 Disponibles)</h3>
                     <button onclick="confirmSelectedCards()" class="px-5 py-2 bg-green-600 hover:bg-green-500 font-bold text-xs rounded-xl transition shadow">Confirmar Mis Cartones</button>
                 </div>
-                <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-48 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl border border-slate-700">
-                    <!-- Se llena con JS -->
-                </div>
+                <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-48 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl border border-slate-700"></div>
             </div>
 
             <!-- Cartones Activos de la Jugadora -->
@@ -185,14 +181,12 @@
 
     <!-- SCRIPT DE LÓGICA Y FIREBASE -->
     <script>
-        // CONFIGURACIÓN FIREBASE
         const firebaseConfig = {
             databaseURL: "https://bingo-lineal-yune-default-rtdb.firebaseio.com/"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // ESTADO GLOBAL DE LA APLICACIÓN
         let currentUser = { name: '', control: '', isAdmin: false };
         let autoDrawInterval = null;
         let drawnBalls = [];
@@ -201,7 +195,6 @@
         let mySelectedCards = [];
         let lastBallDrawn = null;
 
-        // INICIALIZACIÓN Y ESCUCHA EN TIEMPO REAL
         window.onload = function() {
             initAdminBoard();
             initCardsMarket();
@@ -225,7 +218,6 @@
             });
         }
 
-        // CONTROL DE VISTAS
         function hideAllViews() {
             document.getElementById('view-home').classList.add('hidden');
             document.getElementById('view-admin-login').classList.add('hidden');
@@ -258,7 +250,6 @@
             document.getElementById('view-home').classList.remove('hidden');
         }
 
-        // VERIFICAR ADMIN
         function verifyAdminPassword() {
             const pass = document.getElementById('admin-password-input').value;
             if(pass === "1234" || pass === "Yune2026") {
@@ -270,7 +261,6 @@
             }
         }
 
-        // REGISTRO DE JUGADORA (INGRESO DIRECTO SIN BARRERAS)
         function registerPlayer() {
             const name = document.getElementById('player-name-input').value.trim();
             const control = document.getElementById('player-control-input').value.trim();
@@ -296,9 +286,16 @@
             document.getElementById('view-player-room').classList.remove('hidden');
             document.getElementById('player-display-name').innerText = name;
             document.getElementById('player-display-control').innerText = control;
+            
+            mySelectedCards = [];
+            for(let cardId in marketCards) {
+                if(marketCards[cardId] === name) {
+                    mySelectedCards.push(parseInt(cardId));
+                }
+            }
+            renderMyCards();
         }
 
-        // SORTEO MANUAL DE BOLA
         function drawBallManually() {
             if(drawnBalls.length >= 75) {
                 alert("¡Ya se han cantado todas las 75 bolas!");
@@ -339,12 +336,15 @@
         }
 
         function resetGame() {
-            if(confirm("¿Estás segura de reiniciar la partida y limpiar las bolas?")) {
+            if(confirm("¿Estás segura de reiniciar la partida y limpiar las bolas y cartones?")) {
                 db.ref('system').update({
                     drawnBalls: [],
                     lastBall: '--',
+                    cards: null,
                     winner: null
                 });
+                mySelectedCards = [];
+                renderMyCards();
             }
         }
 
@@ -353,7 +353,6 @@
             db.ref('system/pattern').set(pattern);
         }
 
-        // INICIALIZACIÓN DE TABLEROS Y MERCADO
         function initAdminBoard() {
             const grid = document.getElementById('admin-board-grid');
             if(!grid) return;
@@ -382,47 +381,100 @@
         }
 
         function toggleSelectCard(cardNum) {
+            const currentOwner = marketCards[cardNum];
+            if(currentOwner && currentOwner !== currentUser.name) {
+                alert(`Este cartón ya fue comprado por ${currentOwner}.`);
+                return;
+            }
+
             const index = mySelectedCards.indexOf(cardNum);
-            const btn = document.getElementById(`market-card-${cardNum}`);
             if(index > -1) {
                 mySelectedCards.splice(index, 1);
-                btn.classList.remove('border-pink-500', 'bg-pink-600/20');
             } else {
                 if(mySelectedCards.length >= 4) {
                     alert("Puedes seleccionar máximo 4 cartones por jugadora.");
                     return;
                 }
                 mySelectedCards.push(cardNum);
-                btn.classList.add('border-pink-500', 'bg-pink-600/20');
             }
+            updateMarketUI();
         }
 
         function confirmSelectedCards() {
-            if(mySelectedCards.length === 0) {
-                alert("Selecciona al menos un cartón para jugar.");
-                return;
-            }
             let updates = {};
+            for(let i=1; i<=50; i++) {
+                if(marketCards[i] === currentUser.name) {
+                    updates[`cards/${i}`] = null;
+                }
+            }
             mySelectedCards.forEach(num => {
                 updates[`cards/${num}`] = currentUser.name;
             });
+            
             db.ref('system').update(updates);
-            alert("¡Cartones confirmados con éxito! Prepárate para ganar.");
+            alert("¡Cartones confirmados con éxito en la red!");
             renderMyCards();
+        }
+
+        function updateMarketUI() {
+            for(let i=1; i<=50; i++) {
+                const btn = document.getElementById(`market-card-${i}`);
+                const ownerSpan = document.getElementById(`owner-card-${i}`);
+                if(!btn || !ownerSpan) continue;
+
+                const owner = marketCards[i];
+                const isSelectedByMe = mySelectedCards.includes(i);
+
+                if(owner) {
+                    ownerSpan.innerText = `Dueño: ${owner}`;
+                    if(owner === currentUser.name) {
+                        ownerSpan.className = "text-[10px] text-green-400 font-semibold";
+                        btn.className = "p-2 bg-green-950/40 border border-green-500 rounded-xl text-xs font-bold text-white flex flex-col items-center gap-1 transition shadow";
+                    } else {
+                        ownerSpan.className = "text-[10px] text-red-400 font-semibold";
+                        btn.className = "p-2 bg-slate-900 border border-slate-800 rounded-xl text-xs font-bold text-slate-600 flex flex-col items-center gap-1 cursor-not-allowed opacity-60";
+                    }
+                } else {
+                    if(isSelectedByMe) {
+                        ownerSpan.innerText = "Seleccionado";
+                        ownerSpan.className = "text-[10px] text-pink-400 font-semibold";
+                        btn.className = "p-2 bg-pink-600/20 border border-pink-500 rounded-xl text-xs font-bold text-white flex flex-col items-center gap-1 transition shadow";
+                    } else {
+                        ownerSpan.innerText = "Disponible";
+                        ownerSpan.className = "text-[10px] text-slate-500 font-normal";
+                        btn.className = "p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-bold text-slate-300 flex flex-col items-center gap-1 transition";
+                    }
+                }
+            }
         }
 
         function renderMyCards() {
             const container = document.getElementById('player-my-cards-container');
             container.innerHTML = '';
+            
+            if(mySelectedCards.length === 0) {
+                container.innerHTML = '<span class="text-slate-500 text-sm">Aún no has seleccionado cartones. Elige arriba y confirma.</span>';
+                return;
+            }
+
             mySelectedCards.forEach(cardId => {
                 const cardDiv = document.createElement('div');
                 cardDiv.className = "bg-slate-900 border border-slate-700 p-4 rounded-2xl flex flex-col gap-3 card-shadow";
                 cardDiv.innerHTML = `
                     <div class="flex justify-between items-center text-xs font-bold text-yellow-300">
                         <span>Cartón #${cardId}</span>
-                        <span class="text-pink-400 font-normal">Tus números</span>
+                        <span class="text-pink-400 font-normal">Estructura B-I-N-G-O</span>
                     </div>
-                    <div class="grid grid-cols-5 gap-1.5 text-center" id="card-grid-${cardId}"></div>
+                    <!-- Cabeceras B-I-N-G-O -->
+                    <div class="grid grid-cols-5 gap-1 text-center font-extrabold text-xs text-pink-400">
+                        <div class="bg-slate-800 py-1 rounded">B</div>
+                        <div class="bg-slate-800 py-1 rounded">I</div>
+                        <div class="bg-slate-800 py-1 rounded">N</div>
+                        <div class="bg-slate-800 py-1 rounded">G</div>
+                        <div class="bg-slate-800 py-1 rounded">O</div>
+                    </div>
+                    <!-- Cuadrícula de números organizada por columnas -->
+                    <div class="grid grid-cols-5 gap-1" id="card-grid-${cardId}"></div>
                 `;
                 container.appendChild(cardDiv);
                 generateCardNumbers(cardId);
@@ -431,23 +483,52 @@
 
         function generateCardNumbers(cardId) {
             const grid = document.getElementById(`card-grid-${cardId}`);
-            let seed = cardId * 15;
-            for(let i=0; i<25; i++) {
-                seed = (seed * 9301 + 49297) % 233280;
-                let num = Math.floor((seed / 233280) * 75) + 1;
-                const cell = document.createElement('div');
-                cell.className = "h-9 bg-slate-800 border border-slate-700/60 rounded-lg flex items-center justify-center text-xs font-bold text-white";
-                if(i === 12) {
-                    cell.innerText = "⭐";
-                    cell.className += " bg-pink-600/40 text-pink-300";
-                } else {
-                    cell.innerText = num;
-                    cell.id = `c-${cardId}-num-${num}`;
-                    if(drawnBalls.includes(num)) {
-                        cell.classList.add('bg-green-600', 'text-white', 'border-green-400');
+            if(!grid) return;
+            grid.innerHTML = '';
+
+            // Generar números por columna de acuerdo a las reglas oficiales del Bingo (B:1-15, I:16-30, N:31-45, G:46-60, O:61-75)
+            let colRanges = [
+                {min: 1, max: 15},   // B
+                {min: 16, max: 30},  // I
+                {min: 31, max: 45},  // N
+                {min: 46, max: 60},  // G
+                {min: 61, max: 75}   // O
+            ];
+
+            let colsData = [];
+            for(let c = 0; c < 5; c++) {
+                let seed = cardId * (c + 7);
+                let colNums = [];
+                while(colNums.length < 5) {
+                    seed = (seed * 9301 + 49297) % 233280;
+                    let num = Math.floor((seed / 233280) * (colRanges[c].max - colRanges[c].min + 1)) + colRanges[c].min;
+                    if(!colNums.includes(num)) {
+                        colNums.push(num);
                     }
                 }
-                grid.appendChild(cell);
+                colNums.sort((a, b) => a - b);
+                colsData.push(colNums);
+            }
+
+            // Organizar en filas (fila 0 de todas las columnas, fila 1, etc.)
+            for(let r = 0; r < 5; r++) {
+                for(let c = 0; c < 5; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = "h-9 bg-slate-800 border border-slate-700/60 rounded-lg flex items-center justify-center text-xs font-bold text-white";
+                    
+                    // Casilla central libre ⭐ (Columna 2, Fila 2)
+                    if(r === 2 && c === 2) {
+                        cell.innerText = "⭐";
+                        cell.className += " bg-pink-600/40 text-pink-300";
+                    } else {
+                        let num = colsData[c][r];
+                        cell.innerText = num;
+                        if(drawnBalls.includes(num)) {
+                            cell.classList.add('bg-green-600', 'text-white', 'border-green-400');
+                        }
+                    }
+                    grid.appendChild(cell);
+                }
             }
         }
 
@@ -469,17 +550,12 @@
                 }
             }
 
-            for(let i=1; i<=50; i++) {
-                const ownerSpan = document.getElementById(`owner-card-${i}`);
-                if(ownerSpan) {
-                    if(marketCards[i]) {
-                        ownerSpan.innerText = `Dueño: ${marketCards[i]}`;
-                        ownerSpan.className = "text-[10px] text-pink-400 font-semibold";
-                    } else {
-                        ownerSpan.innerText = "Disponible";
-                        ownerSpan.className = "text-[10px] text-slate-500 font-normal";
-                    }
-                }
+            updateMarketUI();
+
+            const countCards = document.getElementById('admin-count-cards');
+            if(countCards) {
+                let soldCount = Object.keys(marketCards || {}).length;
+                countCards.innerText = soldCount;
             }
 
             const patternDisplay = document.getElementById('player-display-pattern');
