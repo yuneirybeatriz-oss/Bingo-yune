@@ -232,7 +232,8 @@
         function listenFirebaseData() {
             db.ref('system').on('value', (snapshot) => {
                 const val = snapshot.val() || {};
-                systemState = val.state || false;
+                // Aseguramos que systemState sea un booleano real
+                systemState = val.state === true; 
                 drawnBalls = val.drawnBalls || [];
                 lastBallDrawn = val.lastBall || '--';
                 gamePattern = val.pattern || 'line';
@@ -330,10 +331,15 @@
             }
         }
 
-        // INTERRUPTOR GENERAL ON/OFF
+        // INTERRUPTOR GENERAL ON/OFF CORREGIDO
         function toggleSystemState() {
             const newState = !systemState;
-            db.ref('system/state').set(newState);
+            db.ref('system').update({
+                state: newState
+            }).catch((error) => {
+                console.error("Error al cambiar el estado:", error);
+                alert("No se pudo actualizar el estado en Firebase.");
+            });
         }
 
         // SORTEO MANUAL DE BOLA
@@ -567,3 +573,4 @@
     </script>
 </body>
 </html>
+
