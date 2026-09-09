@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bingo Lineal Yune - Sala de Jugador</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; text-align: center; margin: 0; padding: 15px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 4px 8px rgba(0,0,0,0.1); max-width: 400px; margin: 20px auto; }
+        input, button { padding: 12px; font-size: 16px; margin: 10px 0; width: 90%; border-radius: 5px; border: 1px solid #ccc; }
+        button { background-color: #2ed573; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #26af5f; }
+        .hidden { display: none; }
+        .bingo-btn { background-color: #ff4757; font-size: 20px; margin-top: 20px; }
+        .bingo-btn:hover { background-color: #ff6b81; }
+        .numero-gigante { font-size: 60px; color: #ff4757; font-weight: bold; margin: 10px 0; }
+        @keyframes titilar {
+            0% { background-color: white; }
+            50% { background-color: #ffeaa7; }
+            100% { background-color: white; }
+        }
+        .alerta-cerca { animation: titilar 1s infinite; border: 2px solid #fdcb6e; }
+    </style>
+</head>
+<body>
+
+    <!-- Pantalla de Ingreso del Jugador -->
+    <div id="pantalla-registro" class="card">
+        <h2>🎲 Bingo Lineal Yune</h2>
+        <p>Ingresa tu nombre y el número de cartón que deseas:</p>
+        <input type="text" id="nombre-jugador" placeholder="Tu Nombre">
+        <input type="number" id="numero-carton" placeholder="Número de Cartón (ej. 1, 2, 3...)">
+        <br>
+        <button onclick="unirseAlJuego()">Entrar al Juego</button>
+    </div>
+
+    <!-- Pantalla del Juego en Vivo (Oculta hasta registrarse) -->
+    <div id="pantalla-juego" class="card hidden">
+        <h2>¡Suerte, <span id="span-nombre"></span>!</h2>
+        <p>Cartón N°: <b id="span-carton">--</b></p>
+        
+        <div style="background: #f1f2f6; padding: 10px; border-radius: 8px;">
+            <p style="margin: 0; font-size: 14px; color: #57606f;">Última bolita cantada:</p>
+            <div id="ultimo-numero" class="numero-gigante">--</div>
+        </div>
+
+        <div id="caja-carton" style="margin-top: 20px; padding: 15px; border-radius: 8px;">
+            <p id="estado-carton">Esperando el inicio de la partida...</p>
+        </div>
+
+        <button class="bingo-btn" onclick="cantarBingo()">¡BINGO!</button>
+    </div>
+
+    <!-- Anuncio Global de Ganador -->
+    <div id="anuncio-ganador" class="card hidden" style="background-color: #ff4757; color: white;">
+        <h1>🏆 ¡HAY UN GANADOR! 🏆</h1>
+        <p id="texto-ganador" style="font-size: 18px;"></p>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Tus llaves oficiales de Firebase
+        const firebaseConfig = {
+          apiKey: "AIzaSyBtPASfLZiLiKhbBpDXUa7-SUUxzOgzVa4",
+          authDomain: "bingo-lineal-yune.firebaseapp.com",
+          projectId: "bingo-lineal-yune",
+          storageBucket: "bingo-lineal-yune.firebasestorage.app",
+          messagingSenderId: "302483068421",
+          appId: "1:302483068421:web:a73d14350ce947e83cae6c",
+          measurementId: "G-KVB5EW8CS3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let miNombre = "";
+        let miCarton = "";
+
+        window.unirseAlJuego = async function() {
+            miNombre = document.getElementById("nombre-jugador").value.trim();
+            miCarton = document.getElementById("numero-carton").value.trim();
+
+            if (!miNombre || !miCarton) {
+                alert("Por favor ingresa tu nombre y el número de cartón.");
+                return;
+            }
+
+            document.getElementById("pantalla-registro").classList.add("hidden");
+            document.getElementById("pantalla-juego").classList.remove("hidden");
+            document.getElementById("span-nombre").innerText = miNombre;
+            document.getElementById("span-carton").innerText = miCarton;
+
+            try {
+                await setDoc(doc(db, "jugadores", miNombre + "_" + miCarton), {
+                    nombre: miNombre,
+                    carton: miCarton,
+                    estado: "Conectado",
+                    tiempo: Date.now()
+                }, { merge: true });
+            } catch (e) {
+                console.error("Error al registrar jugador: ", e);
+            }
+
+            escucharPartidaEnVivo();
+        };
+
+        function escucharPartidaEnVivo() {
+            onSnapshot(doc(db, "partida", "estadoActual"), (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    document.getElementById("ultimo-numero").innerText = data.ultimoNumero || "--";
+                }
+            });
+
+            onSnapshot(doc(db, "partida", "ganador"), (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.nombre) {
+                        document.getElementById("pantalla-juego").classList.add("hidden");
+                        document.getElementById("anuncio-ganador").classList.remove("hidden");
+                        document.getElementById("texto-ganador").innerText = `¡${data.nombre} ganó con el cartón N° ${data.carton}!`;
+                    }
+                }
+            });
+        }
+
+        window.cantarBingo = async function() {
+            if (confirm("¿Estás segura de que tienes Bingo?")) {
+                try {
+                    await setDoc(doc(db, "partida", "ganador"), {
+                        nombre: miNombre,
+                        carton: miCarton,
+                        tiempo: Date.now()
+                    });
+                } catch (e) {
+                    console.error("Error al cantar bingo: ", e);
+                }
+            }
+        };
+    </script>
+</body>
+</html>
