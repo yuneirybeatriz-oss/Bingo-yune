@@ -65,9 +65,9 @@
 
             <!-- ALERTA DE GANADOR EN TIEMPO REAL -->
             <div id="admin-winner-alert" class="hidden bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-950 p-6 rounded-3xl font-extrabold text-center text-xl shadow-xl alert-bingo flex flex-col gap-2">
-                <div>🎉 ¡HAY UN BINGO CANTADO! 🎉</div>
-                <div id="admin-winner-text" class="text-base font-bold bg-white/20 py-2 px-4 rounded-xl">Jugadora X cantó Bingo con el cartón #00</div>
-                <button onclick="clearWinnerAlert()" class="mt-2 py-2 px-4 bg-slate-900 text-yellow-300 text-xs rounded-xl font-bold mx-auto w-fit shadow">Cerrar Alerta / Continuar Partida</button>
+                <div>🎉 ¡BINGO VALIDADO Y CANTADO! 🎉</div>
+                <div id="admin-winner-text" class="text-base font-bold bg-white/20 py-2 px-4 rounded-xl">Ganador...</div>
+                <button onclick="clearWinnerAlert()" class="mt-2 py-2 px-4 bg-slate-900 text-yellow-300 text-xs rounded-xl font-bold mx-auto w-fit shadow">Cerrar Alerta / Continuar</button>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -81,10 +81,11 @@
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                     <h3 class="font-bold text-pink-400">Figura en Juego</h3>
                     <select id="game-pattern-select" onchange="updateGamePattern()" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white font-semibold">
-                        <option value="line">Línea</option>
+                        <option value="line">Línea (Horizontal)</option>
                         <option value="letter_l">Letra L</option>
                         <option value="full_card">Cartón Lleno</option>
                     </select>
+                    <p class="text-xs text-slate-400 mt-2">Al cambiar la figura, el sistema la actualiza al instante para todas las jugadoras.</p>
                 </div>
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
                     <h3 class="font-bold text-yellow-300">Jugadoras Conectadas</h3>
@@ -108,15 +109,17 @@
                     <h2 class="text-2xl font-bold text-yellow-300">¡Hola, <span id="player-display-name">Jugadora</span>!</h2>
                     <p class="text-xs text-slate-400">Control ID: <span id="player-display-control">--</span></p>
                 </div>
-                <div class="flex gap-2">
-                    <button onclick="singBingo()" class="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-extrabold text-xs rounded-xl shadow-lg animate-bounce">📢 ¡CANTAR BINGO!</button>
+                <div class="flex gap-2 items-center">
+                    <div class="bg-pink-950/80 border border-pink-500 px-3 py-1.5 rounded-xl text-xs font-bold text-pink-300">
+                        Figura: <span id="player-pattern-label" class="text-yellow-300">Línea</span>
+                    </div>
                     <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 text-xs rounded-xl">Salir</button>
                 </div>
             </div>
 
-            <!-- AVISO VISIBLE PARA LA JUGADORA SI HAY BINGO CANTADO -->
+            <!-- AVISO DE GANADOR O ESTADO PARA LA JUGADORA -->
             <div id="player-winner-notification" class="hidden bg-yellow-400 text-slate-950 p-4 rounded-2xl font-extrabold text-center shadow-lg alert-bingo">
-                🎉 ¡ATENCIÓN: SE HA CANTADO BINGO EN LA SALA! 🎉
+                🎉 ¡BINGO! PARTIDA FINALIZADA 🎉
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -180,6 +183,19 @@
                 gamePattern = val.pattern || 'line';
                 marketCards = val.cards || {};
 
+                // Actualizar selector del admin si cambió desde otro lado
+                const patternSelect = document.getElementById('game-pattern-select');
+                if(patternSelect && patternSelect.value !== gamePattern) {
+                    patternSelect.value = gamePattern;
+                }
+
+                // Actualizar texto de la figura para la jugadora
+                const patternLabel = document.getElementById('player-pattern-label');
+                if(patternLabel) {
+                    let names = { 'line': 'Línea (Horizontal)', 'letter_l': 'Letra L', 'full_card': 'Cartón Lleno' };
+                    patternLabel.innerText = names[gamePattern] || 'Línea';
+                }
+
                 // Manejo de Alerta de Ganador
                 const winnerData = val.winner;
                 const adminAlert = document.getElementById('admin-winner-alert');
@@ -187,12 +203,13 @@
                 const playerNotification = document.getElementById('player-winner-notification');
 
                 if (winnerData && winnerData.name) {
+                    stopAutoDraw(); // Detener juego automático al haber un ganador
                     if (adminAlert && adminWinnerText) {
-                        adminWinnerText.innerText = `¡${winnerData.name} cantó Bingo con el cartón #${winnerData.card}!`;
+                        adminWinnerText.innerText = `¡${winnerData.name} ganó con el cartón #${winnerData.card} (${winnerData.patternName})!`;
                         adminAlert.classList.remove('hidden');
                     }
                     if (playerNotification) {
-                        playerNotification.innerText = `🎉 ¡${winnerData.name} ha cantado BINGO con el cartón #${winnerData.card}! 🎉`;
+                        playerNotification.innerText = `🎉 ¡${winnerData.name} ha ganado el BINGO con el cartón #${winnerData.card}! 🎉`;
                         playerNotification.classList.remove('hidden');
                     }
                 } else {
@@ -208,6 +225,8 @@
                         }
                     }
                     renderMyCards();
+                    // Verificar si alguno de mis cartones cumple la regla de bingo
+                    checkMyCardsForBingo();
                 }
                 updateUIFromState();
             });
@@ -221,7 +240,7 @@
             ['view-home', 'view-admin-login', 'view-player-register', 'view-admin-panel', 'view-player-room'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
             });
-            stopAutoDraw(); // Detener auto al salir de pantallas
+            stopAutoDraw();
         }
 
         function showAdminLogin() { hideAllViews(); document.getElementById('view-admin-login').classList.remove('hidden'); }
@@ -284,7 +303,6 @@
             db.ref('system').update({ drawnBalls, lastBall: randomBall });
         }
 
-        // CONTROL DE BOLSAS AUTOMÁTICO (CADA 5 SEGUNDOS)
         function toggleAutoDraw() {
             const btn = document.getElementById('auto-draw-btn');
             if(isAutoRunning) {
@@ -301,7 +319,7 @@
                         return;
                     }
                     drawBallManually();
-                }, 5000); // 5 segundos
+                }, 5000);
             }
         }
 
@@ -316,7 +334,7 @@
         }
 
         function resetGame() {
-            if(confirm("¿Reiniciar partida y limpiar cartones y ganadores?")) {
+            if(confirm("¿Reiniciar partida, limpiar cartones y ganadores?")) {
                 stopAutoDraw();
                 db.ref('system').update({ drawnBalls: [], lastBall: '--', cards: null, winner: null });
                 mySelectedCards = [];
@@ -325,28 +343,141 @@
         }
 
         function updateGamePattern() {
-            db.ref('system/pattern').set(document.getElementById('game-pattern-select').value);
-        }
-
-        // CANTAR BINGO POR PARTE DE LA JUGADORA
-        function singBingo() {
-            if(mySelectedCards.length === 0) {
-                alert("No tienes cartones activos para cantar Bingo.");
-                return;
-            }
-            let cardChoice = prompt(`¿Con qué número de cartón tuyo cantas Bingo? (Tus cartones: ${mySelectedCards.join(', ')})`, mySelectedCards[0]);
-            if(!cardChoice) return;
-            let cardNum = parseInt(cardChoice);
-            if(!mySelectedCards.includes(cardNum)) {
-                alert("Ese cartón no te pertenece.");
-                return;
-            }
-            db.ref('system/winner').set({ name: currentUser.name, card: cardNum });
-            alert("¡Bingo cantado con éxito! Se ha notificado a la administradora.");
+            const pattern = document.getElementById('game-pattern-select').value;
+            db.ref('system/pattern').set(pattern);
         }
 
         function clearWinnerAlert() {
             db.ref('system/winner').remove();
+        }
+
+        // GENERADOR MATEMÁTICO DE NÚMEROS DE CARTÓN (IDÉNTICO EN TODAS PARTES)
+        function getCardMatrix(cardId) {
+            let colRanges = [{min:1, max:15}, {min:16, max:30}, {min:31, max:45}, {min:46, max:60}, {min:61, max:75}];
+            let colsData = [];
+            for(let c = 0; c < 5; c++) {
+                let seed = cardId * (c + 7);
+                let colNums = [];
+                while(colNums.length < 5) {
+                    seed = (seed * 9301 + 49297) % 233280;
+                    let num = Math.floor((seed / 233280) * (colRanges[c].max - colRanges[c].min + 1)) + colRanges[c].min;
+                    if(!colNums.includes(num)) colNums.push(num);
+                }
+                colNums.sort((a, b) => a - b);
+                colsData.push(colNums);
+            }
+            // Organizar en matriz 5x5 [fila][columna]
+            let matrix = [];
+            for(let r = 0; r < 5; r++) {
+                let row = [];
+                for(let c = 0; c < 5; c++) {
+                    if(r === 2 && c === 2) {
+                        row.push('FREE'); // Centro libre
+                    } else {
+                        row.push(colsData[c][r]);
+                    }
+                }
+                matrix.push(row);
+            }
+            return matrix;
+        }
+
+        // VALIDACIÓN MATEMÁTICA DE BINGO SEGÚN LA FIGURA
+        function checkCardBingo(cardId, pattern, balls) {
+            let matrix = getCardMatrix(cardId);
+            let isMarked = (val) => val === 'FREE' || balls.includes(val);
+
+            if(pattern === 'full_card') {
+                // Todas las casillas marcadas
+                for(let r=0; r<5; r++) {
+                    for(let c=0; c<5; c++) {
+                        if(!isMarked(matrix[r][c])) return false;
+                    }
+                }
+                return true;
+            } else if(pattern === 'line') {
+                // Cualquier línea horizontal completa
+                for(let r=0; r<5; r++) {
+                    let rowWin = true;
+                    for(let c=0; c<5; c++) {
+                        if(!isMarked(matrix[r][c])) { rowWin = false; break; }
+                    }
+                    if(rowWin) return true;
+                }
+                return false;
+            } else if(pattern === 'letter_l') {
+                // Letra L: Columna izquierda completa (c=0) + Fila inferior completa (r=4)
+                let lWin = true;
+                // Revisar columna 0
+                for(let r=0; r<5; r++) {
+                    if(!isMarked(matrix[r][0])) lWin = false;
+                }
+                // Revisar fila 4 (excepto el cruce que ya se revisó en r=4, c=0)
+                for(let c=1; c<5; c++) {
+                    if(!isMarked(matrix[4][c])) lWin = false;
+                }
+                return lWin;
+            }
+            return false;
+        }
+
+        // VERIFICAR SI A UN CARTÓN LE FALTA 1 SOLA BOLA ("A PUNTO")
+        function getMissingCountForBingo(cardId, pattern, balls) {
+            let matrix = getCardMatrix(cardId);
+            let isMarked = (val) => val === 'FREE' || balls.includes(val);
+
+            if(pattern === 'full_card') {
+                let missing = 0;
+                for(let r=0; r<5; r++) {
+                    for(let c=0; c<5; c++) {
+                        if(!isMarked(matrix[r][c])) missing++;
+                    }
+                }
+                return missing;
+            } else if(pattern === 'line') {
+                let minMissing = 5;
+                for(let r=0; r<5; r++) {
+                    let rowMissing = 0;
+                    for(let c=0; c<5; c++) {
+                        if(!isMarked(matrix[r][c])) rowMissing++;
+                    }
+                    if(rowMissing < minMissing) minMissing = rowMissing;
+                }
+                return minMissing;
+            } else if(pattern === 'letter_l') {
+                let missing = 0;
+                for(let r=0; r<5; r++) {
+                    if(!isMarked(matrix[r][0])) missing++;
+                }
+                for(let c=1; c<5; c++) {
+                    if(!isMarked(matrix[4][c])) missing++;
+                }
+                return missing;
+            }
+            return 99;
+        }
+
+        // VALIDACIÓN AUTOMÁTICA QUE CORRE EN TIEMPO REAL
+        function checkMyCardsForBingo() {
+            if(!currentUser.name || mySelectedCards.length === 0) return;
+            
+            // Si ya hay un ganador registrado, no hacer nada
+            db.ref('system/winner').once('value', (snap) => {
+                if(snap.val()) return; // Ya hay ganador
+
+                for(let cardId of mySelectedCards) {
+                    if(checkCardBingo(cardId, gamePattern, drawnBalls)) {
+                        let patternNames = { 'line': 'Línea', 'letter_l': 'Letra L', 'full_card': 'Cartón Lleno' };
+                        // ¡BINGO AUTOMÁTICO DETECTADO!
+                        db.ref('system/winner').set({
+                            name: currentUser.name,
+                            card: cardId,
+                            patternName: patternNames[gamePattern] || 'Línea'
+                        });
+                        break;
+                    }
+                }
+            });
         }
 
         function initAdminBoard() {
@@ -460,12 +591,22 @@
                 return;
             }
             mySelectedCards.forEach(cardId => {
+                let missingCount = getMissingCountForBingo(cardId, gamePattern, drawnBalls);
+                let statusBadge = '';
+                if(missingCount === 1) {
+                    statusBadge = `<span class="bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px] font-extrabold animate-bounce">🔥 ¡A 1 NÚMERO!</span>`;
+                } else if(missingCount === 0) {
+                    statusBadge = `<span class="bg-yellow-400 text-slate-950 px-2 py-0.5 rounded-full text-[10px] font-extrabold">👑 ¡BINGO!</span>`;
+                } else {
+                    statusBadge = `<span class="text-pink-400 font-normal">Faltan ${missingCount}</span>`;
+                }
+
                 const cardDiv = document.createElement('div');
                 cardDiv.className = "bg-slate-900 border border-slate-700 p-4 rounded-2xl flex flex-col gap-3";
                 cardDiv.innerHTML = `
                     <div class="flex justify-between items-center text-xs font-bold text-yellow-300">
                         <span>Cartón #${cardId}</span>
-                        <span class="text-pink-400 font-normal">Bloqueado en Partida</span>
+                        ${statusBadge}
                     </div>
                     <div class="grid grid-cols-5 gap-1 text-center font-extrabold text-xs text-pink-400">
                         <div class="bg-slate-800 py-1 rounded">B</div><div class="bg-slate-800 py-1 rounded">I</div><div class="bg-slate-800 py-1 rounded">N</div><div class="bg-slate-800 py-1 rounded">G</div><div class="bg-slate-800 py-1 rounded">O</div>
@@ -473,38 +614,29 @@
                     <div class="grid grid-cols-5 gap-1" id="card-grid-${cardId}"></div>
                 `;
                 container.appendChild(cardDiv);
-                generateCardNumbers(cardId);
+                generateCardVisual(cardId);
             });
         }
 
-        function generateCardNumbers(cardId) {
+        function generateCardVisual(cardId) {
             const grid = document.getElementById(`card-grid-${cardId}`);
             if(!grid) return;
             grid.innerHTML = '';
-            let colRanges = [{min:1, max:15}, {min:16, max:30}, {min:31, max:45}, {min:46, max:60}, {min:61, max:75}];
-            let colsData = [];
-            for(let c = 0; c < 5; c++) {
-                let seed = cardId * (c + 7);
-                let colNums = [];
-                while(colNums.length < 5) {
-                    seed = (seed * 9301 + 49297) % 233280;
-                    let num = Math.floor((seed / 233280) * (colRanges[c].max - colRanges[c].min + 1)) + colRanges[c].min;
-                    if(!colNums.includes(num)) colNums.push(num);
-                }
-                colNums.sort((a, b) => a - b);
-                colsData.push(colNums);
-            }
+            let matrix = getCardMatrix(cardId);
+
             for(let r = 0; r < 5; r++) {
                 for(let c = 0; c < 5; c++) {
                     const cell = document.createElement('div');
                     cell.className = "h-9 bg-slate-800 border border-slate-700/60 rounded-lg flex items-center justify-center text-xs font-bold text-white";
-                    if(r === 2 && c === 2) {
+                    let val = matrix[r][c];
+                    if(val === 'FREE') {
                         cell.innerText = "⭐";
                         cell.className += " bg-pink-600/40 text-pink-300";
                     } else {
-                        let num = colsData[c][r];
-                        cell.innerText = num;
-                        if(drawnBalls.includes(num)) cell.classList.add('bg-green-600', 'text-white', 'border-green-400');
+                        cell.innerText = val;
+                        if(drawnBalls.includes(val)) {
+                            cell.classList.add('bg-green-600', 'text-white', 'border-green-400');
+                        }
                     }
                     grid.appendChild(cell);
                 }
