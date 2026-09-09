@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bingo Lineal Yune</title>
+    <!-- Google Fonts & Tailwind CSS para un diseño ultra colorido, moderno y de casino de lujo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: #0f172a; color: #f8fafc; }
+        .neon-glow { text-shadow: 0 0 10px rgba(236, 72, 153, 0.7), 0 0 20px rgba(236, 72, 153, 0.5); }
+        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5); }
+        @keyframes pulse-fast { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } }
+        .alert-pulse { animation: pulse-fast 0.8s infinite; }
+    </style>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between p-4">
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div id="app" class="w-full max-w-4xl mx-auto flex flex-col items-center flex-grow">
+        
+        <!-- ENCABEZADO -->
+        <header class="text-center my-6">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-400 to-yellow-400 neon-glow">
+                Bingo Lineal Yune 🎰✨
+            </h1>
+            <p class="text-slate-400 text-sm mt-1">El sistema oficial en tiempo real</p>
+        </header>
+
+        <!-- SECCIÓN 1: PANTALLA DE ACCESO INICIAL -->
+        <div id="view-home" class="w-full bg-slate-800/80 backdrop-blur border border-slate-700 p-6 md:p-8 rounded-3xl card-shadow flex flex-col items-center gap-6 max-w-md">
+            <h2 class="text-2xl font-bold text-yellow-300">¡Bienvenida a la Diversión!</h2>
+            <p class="text-slate-300 text-center text-sm">Selecciona cómo deseas ingresar el día de hoy:</p>
+            
+            <button onclick="showPlayerLogin()" class="w-full py-4 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 font-bold text-lg rounded-2xl card-shadow transition transform hover:-translate-y-0.5">
+                🎮 Entrar como Jugadora
+            </button>
+            
+            <button onclick="showAdminLogin()" class="w-full py-3 bg-slate-700 hover:bg-slate-600 text-slate-300 font-semibold text-sm rounded-2xl transition">
+                🔐 Acceso Administradora
+            </button>
+        </div>
+
+        <!-- SECCIÓN 2: LOGIN DE ADMINISTRADORA -->
+        <div id="view-admin-login" class="w-full bg-slate-800/80 backdrop-blur border border-slate-700 p-6 md:p-8 rounded-3xl card-shadow flex flex-col items-center gap-6 max-w-md hidden">
+            <h2 class="text-2xl font-bold text-pink-400">Panel de Administradora</h2>
+            <p class="text-slate-300 text-center text-sm">Introduce tu clave secreta para acceder al control:</p>
+            
+            <input type="password" id="admin-password-input" placeholder="Clave secreta" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-center text-xl text-white focus:outline-none focus:border-pink-500">
+            
+            <div class="flex gap-3 w-full">
+                <button onclick="backToHome()" class="w-1/2 py-3 bg-slate-700 hover:bg-slate-600 font-semibold rounded-xl transition">Volver</button>
+                <button onclick="verifyAdminPassword()" class="w-1/2 py-3 bg-pink-600 hover:bg-pink-500 font-bold rounded-xl transition">Ingresar</button>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 3: REGISTRO / BIENVENIDA DE JUGADORA -->
+        <div id="view-player-register" class="w-full bg-slate-800/80 backdrop-blur border border-slate-700 p-6 md:p-8 rounded-3xl card-shadow flex flex-col items-center gap-6 max-w-md hidden">
+            <h2 id="player-welcome-title" class="text-2xl font-bold text-yellow-300 text-center">Registro de Jugadora</h2>
+            <div id="welcome-back-msg" class="text-green-400 font-semibold text-center hidden"></div>
+            
+            <div class="w-full flex flex-col gap-4">
+                <div>
+                    <label class="text-xs text-slate-400 ml-1">Tu Nombre o Apodo:</label>
+                    <input type="text" id="player-name-input" placeholder="Ej. Yosi, Yera..." class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-purple-500 mt-1">
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 ml-1">Número de Control:</label>
+                    <input type="text" id="player-control-input" placeholder="Ej. 001" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-purple-500 mt-1">
+                </div>
+            </div>
+
+            <div class="flex gap-3 w-full">
+                <button onclick="backToHome()" class="w-1/2 py-3 bg-slate-700 hover:bg-slate-600 font-semibold rounded-xl transition">Volver</button>
+                <button onclick="registerPlayer()" class="w-1/2 py-3 bg-gradient-to-r from-purple-600 to-pink-600 font-bold rounded-xl transition">Entrar al Juego</button>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 4: ESTADO CERRADO (SISTEMA OFF) -->
+        <div id="view-system-off" class="w-full bg-slate-800/80 backdrop-blur border border-slate-700 p-10 rounded-3xl card-shadow flex flex-col items-center text-center gap-6 max-w-md hidden">
+            <div class="text-6xl">🔒</div>
+            <h2 class="text-3xl font-bold text-red-400">Sistema Cerrado</h2>
+            <p class="text-slate-300">En este momento el bingo se encuentra inactivo. Espera que la administradora abra la sala para comenzar la diversión.</p>
+            <button onclick="backToHome()" class="px-6 py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-sm transition">Actualizar / Salir</button>
+        </div>
+
+        <!-- SECCIÓN 5: PANEL DE ADMINISTRACIÓN (TORRE DE CONTROL) -->
+        <div id="view-admin-panel" class="w-full flex flex-col gap-6 hidden">
+            <div class="bg-slate-800 border border-slate-700 p-6 rounded-3xl card-shadow flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-pink-400">Torre de Control</h2>
+                    <p class="text-xs text-slate-400">Administración general de la partida</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span id="system-status-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30">SISTEMA CERRADO (OFF)</span>
+                    <button onclick="toggleSystemState()" id="toggle-sys-btn" class="px-4 py-2 bg-green-600 hover:bg-green-500 text-xs font-bold rounded-xl transition">Abrir Sala (ON)</button>
+                    <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-xs font-semibold rounded-xl transition">Salir</button>
+                </div>
+            </div>
+
+            <!-- Panel de Control de Juego y Bolillero -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Bolillero / Sorteo -->
+                <div class="bg-slate-800 border border-slate-700 p-6 rounded-3xl card-shadow flex flex-col items-center justify-center gap-4">
+                    <h3 class="font-bold text-yellow-300">Última Bola Cantada</h3>
+                    <div id="admin-current-ball" class="w-28 h-28 rounded-full bg-gradient-to-tr from-yellow-500 to-amber-300 text-slate-950 font-extrabold text-5xl flex items-center justify-center card-shadow">
+                        --
+                    </div>
+                    <div class="flex gap-2 w-full mt-2">
+                        <button onclick="drawBallManually()" class="flex-1 py-3 bg-purple-600 hover:bg-purple-500 font-bold rounded-xl text-sm transition">Sacar Bola</button>
+                        <button onclick="toggleAutoDraw()" id="auto-draw-btn" class="px-4 py-3 bg-slate-700 hover:bg-slate-600 font-bold rounded-xl text-sm transition">Auto (5s): OFF</button>
+                    </div>
+                    <button onclick="resetGame()" class="w-full py-2 bg-red-600/30 hover:bg-red-600/50 text-red-300 border border-red-500/30 text-xs font-bold rounded-xl transition">Reiniciar Partida</button>
+                </div>
+
+                <!-- Selección de Figura -->
+                <div class="bg-slate-800 border border-slate-700 p-6 rounded-3xl card-shadow flex flex-col gap-4">
+                    <h3 class="font-bold text-pink-400">Figura de la Ronda</h3>
+                    <select id="game-pattern-select" onchange="updateGamePattern()" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white font-semibold focus:outline-none focus:border-pink-500">
+                        <option value="line">Línea Horizontal / Vertical</option>
+                        <option value="letter_l">Letra L</option>
+                        <option value="full_card">Cartón Lleno</option>
+                    </select>
+                    <div class="text-xs text-slate-400 mt-2">
+                        <p class="font-semibold text-slate-300 mb-1">Monitoreo Rápido:</p>
+                        <p>• Jugadores en línea: <span id="admin-count-players" class="text-white font-bold">0</span></p>
+                        <p>• Cartones comprados: <span id="admin-count-cards" class="text-white font-bold">0</span></p>
+                    </div>
+                </div>
+
+                <!-- Monitoreo de Jugadores / Ganadores -->
+                <div class="bg-slate-800 border border-slate-700 p-6 rounded-3xl card-shadow flex flex-col gap-3">
+                    <h3 class="font-bold text-yellow-300">Sala y Ganadores</h3>
+                    <div id="admin-winner-alert" class="bg-red-500/20 border border-red-500 text-red-300 p-3 rounded-xl text-xs font-bold hidden">
+                        ¡BINGO CANTADO!
+                    </div>
+                    <div class="flex-grow overflow-y-auto max-h-36 bg-slate-900/60 p-3 rounded-xl border border-slate-700/50 text-xs" id="admin-players-list">
+                        <span class="text-slate-500">Esperando conexiones...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tablero 1 al 75 para Admin -->
+            <div class="bg-slate-800 border border-slate-700 p-6 rounded-3xl card-shadow">
+                <h3 class="font-bold text-yellow-300 mb-4">Tablero General (1 - 75)</h3>
+                <div id="admin-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1.5">
+                    <!-- Generado por JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 6: SALA DE JUGADORES -->
+        <div id="view-player-room" class="w-full flex flex-col gap-6 hidden">
+            <!-- Barra superior del jugador -->
+            <div class="bg-slate-800 border border-slate-700 p-4 md:p-6 rounded-3xl card-shadow flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-yellow-300">¡Hola, <span id="player-display-name">Jugadora</span>! ✨</h2>
+                    <p class="text-xs text-slate-400">Control ID: <span id="player-display-control">--</span> | Figura actual: <span id="player-display-pattern" class="text-pink-400 font-bold">Línea</span></p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="bg-slate-900 px-4 py-2 rounded-2xl border border-slate-700 flex items-center gap-3">
+                        <span class="text-xs text-slate-400">Última Bola:</span>
+                        <div id="player-current-ball" class="w-10 h-10 rounded-full bg-yellow-500 text-slate-950 font-extrabold text-xl flex items-center justify-center">--</div>
+                    </div>
+                    <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-xs font-semibold rounded-xl transition">Salir</button>
+                </div>
+            </div>
+
+            <!-- Alerta general de Ganador para Jugadores -->
+            <div id="player-global-winner-banner" class="w-full bg-gradient-to-r from-pink-600 via-purple-600 to-yellow-500 p-6 rounded-3xl card-shadow text-center hidden animate-pulse">
+                <h2 class="text-3xl font-extrabold text-white mb-2">🎉 ¡BINGO CANTADO! 🎉</h2>
+                <p id="player-winner-details" class="text-lg font-bold text-yellow-200">El jugador X ha ganado la partida.</p>
+            </div>
+
+            <!-- Sección de Selección y Compra de Cartones -->
+            <div class="bg-slate-800 border border-slate-700 p-6 rounded-3xl card-shadow flex flex-col gap-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (Total: 50 Disponibles)</h3>
+                    <button onclick="confirmSelectedCards()" class="px-5 py-2 bg-green-600 hover:bg-green-500 font-bold text-xs rounded-xl transition shadow">Confirmar Mis Cartones</button>
+                </div>
+                <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-48 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl border border-slate-700">
+                    <!-- Se llena con JS -->
+                </div>
+            </div>
+
+            <!-- Cartones Activos de la Jugadora -->
+            <div class="flex flex-col gap-4">
+                <h3 class="font-bold text-yellow-300 text-lg">Tus Cartones en Juego</h3>
+                <div id="player-my-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <span class="text-slate-500 text-sm">Aún no has seleccionado cartones. Elige arriba y confirma.</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- PIE DE PÁGINA -->
+    <footer class="text-center text-xs text-slate-500 py-6">
+        Bingo Lineal Yune &bull; Sintonizado en tiempo real con Firebase 🌟
+    </footer>
+
+    <!-- SCRIPT DE LÓGICA Y FIREBASE -->
+    <script>
+        // CONFIGURACIÓN FIREBASE (Ruta compartida bingo-lineal-yune)
+        const firebaseConfig = {
+            databaseURL: "https://bingo-lineal-yune-default-rtdb.firebaseio.com/"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // ESTADO GLOBAL DE LA APLICACIÓN
+        let currentUser = { name: '', control: '', isAdmin: false };
+        let autoDrawInterval = null;
+        let drawnBalls = [];
+        let systemState = false;
+        let gamePattern = 'line';
+        let marketCards = {}; // 1 al 50 con su dueño
+        let mySelectedCards = [];
+        let lastBallDrawn = null;
+        let winnerData = null;
+
+        // INICIALIZACIÓN Y ESCUCHA EN TIEMPO REAL
+        window.onload = function() {
+            initAdminBoard();
+            initCardsMarket();
+            listenFirebaseData();
+        };
+
+        function listenFirebaseData() {
+            db.ref('system').on('value', (snapshot) => {
+                const val = snapshot.val() || {};
+                systemState = val.state || false;
+                drawnBalls = val.drawnBalls || [];
+                lastBallDrawn = val.lastBall || '--';
+                gamePattern = val.pattern || 'line';
+                winnerData = val.winner || null;
+                marketCards = val.cards || {};
+
+                updateUIFromState();
+            });
+
+            db.ref('players').on('value', (snapshot) => {
+                const players = snapshot.val() || {};
+                updatePlayersListUI(players);
+            });
+        }
+
+        // CONTROL DE VISTAS
+        function hideAllViews() {
+            document.getElementById('view-home').classList.add('hidden');
+            document.getElementById('view-admin-login').classList.add('hidden');
+            document.getElementById('view-player-register').classList.add('hidden');
+            document.getElementById('view-system-off').classList.add('hidden');
+            document.getElementById('view-admin-panel').classList.add('hidden');
+            document.getElementById('view-player-room').classList.add('hidden');
+        }
+
+        function showAdminLogin() {
+            hideAllViews();
+            document.getElementById('view-admin-login').classList.remove('hidden');
+        }
+
+        function showPlayerLogin() {
+            hideAllViews();
+            document.getElementById('view-player-register').classList.remove('hidden');
+            // Verificar si ya estaba guardada en este navegador
+            const savedName = localStorage.getItem('yune_bingo_name');
+            const savedControl = localStorage.getItem('yune_bingo_control');
+            if(savedName) {
+                document.getElementById('player-name-input').value = savedName;
+                document.getElementById('player-control-input').value = savedControl || '';
+                document.getElementById('welcome-back-msg').innerText = `¡Qué bueno tenerte de vuelta, ${savedName}! ✨`;
+                document.getElementById('welcome-back-msg').classList.remove('hidden');
+            }
+        }
+
+        function backToHome() {
+            hideAllViews();
+            if(autoDrawInterval) clearInterval(autoDrawInterval);
+            document.getElementById('view-home').classList.remove('hidden');
+        }
+
+        // VERIFICAR ADMIN
+        function verifyAdminPassword() {
+            const pass = document.getElementById('admin-password-input').value;
+            if(pass === "1234" || pass === "Yune2026") { // Clave protegida
+                currentUser.isAdmin = true;
+                hideAllViews();
+                document.getElementById('view-admin-panel').classList.remove('hidden');
+            } else {
+                alert("Clave incorrecta. Intenta nuevamente.");
+            }
+        }
+
+        // REGISTRO DE JUGADORA
+        function registerPlayer() {
+            const name = document.getElementById('player-name-input').value.trim();
+            const control = document.getElementById('player-control-input').value.trim();
+            if(!name || !control) {
+                alert("Por favor completa tu nombre y número de control.");
+                return;
+            }
+            currentUser.name = name;
+            currentUser.control = control;
+            currentUser.isAdmin = false;
+
+            // Guardar localmente para bienvenida futura
+            localStorage.setItem('yune_bingo_name', name);
+            localStorage.setItem('yune_bingo_control', control);
+
+            // Registrar en Firebase
+            db.ref('players/' + control).set({
+                name: name,
+                control: control,
+                online: true,
+                lastActive: Date.now()
+            });
+
+            // Si el sistema está apagado, mostrar pantalla OFF, sino entrar a la sala
+            hideAllViews();
+            if(!systemState) {
+                document.getElementById('view-system-off').classList.remove('hidden');
+            } else {
+                document.getElementById('view-player-room').classList.remove('hidden');
+                document.getElementById('player-display-name').innerText = name;
+                document.getElementById('player-display-control').innerText = control;
+            }
+        }
+
+        // INTERRUPTOR GENERAL ON/OFF
+        function toggleSystemState() {
+            const newState = !systemState;
+            db.ref('system/state').set(newState);
+        }
+
+        /
