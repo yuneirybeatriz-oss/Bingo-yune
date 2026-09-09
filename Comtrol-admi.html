@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin - Bingo Lineal Yune</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f6f9; color: #333; text-align: center; padding: 15px; margin: 0; }
+        .card { background: white; max-width: 450px; margin: 0 auto 20px auto; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { font-size: 1.4rem; color: #2c3e50; margin-bottom: 5px; }
+        .subtitle { font-size: 0.9rem; color: #7f8c8d; margin-bottom: 15px; }
+        #bola-actual { font-size: 3.5rem; font-weight: bold; color: #e74c3c; background: #fdf2f2; border: 2px dashed #e74c3c; border-radius: 12px; padding: 15px; margin: 15px 0; }
+        button { width: 100%; padding: 14px; font-size: 1.1rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; color: white; }
+        .btn-sacar { background: #27ae60; }
+        .btn-sacar:active { background: #219653; }
+        .btn-reiniciar { background: #c0392b; }
+        .btn-reiniciar:active { background: #962d22; }
+        .section-title { font-size: 1.1rem; color: #34495e; margin-top: 15px; border-bottom: 2px solid #ecf0f1; padding-bottom: 5px; text-align: left; }
+        .input-group { display: flex; gap: 8px; margin-top: 10px; }
+        .input-group input { flex: 1; padding: 10px; font-size: 1rem; border: 1px solid #bdc3c7; border-radius: 6px; }
+        .input-group button { width: auto; padding: 10px 15px; margin-top: 0; background: #2980b9; }
+        .list-container { max-height: 150px; overflow-y: auto; margin-top: 10px; text-align: left; font-size: 0.95rem; background: #fafafa; padding: 8px; border-radius: 6px; border: 1px solid #e0e0e0; }
+        .list-item { padding: 6px 8px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>🎲 Panel Admin - Bingo Lineal Yune</h1>
+        <div class="subtitle">Control de partida y validación</div>
+        
+        <div id="bola-actual">--</div>
+        
+        <button class="btn-sacar" onclick="sacarBolita()">Sacar Siguiente Bolita</button>
+        <button class="btn-reiniciar" onclick="reiniciarJuego()">Reiniciar Juego</button>
+    </div>
+
+    <div class="card">
+        <div class="section-title">Control de Jugadoras y Cartones</div>
+        
+        <div class="input-group">
+            <input type="text" id="nombreJugadora" placeholder="Nombre de la jugadora">
+            <input type="text" id="numCarton" placeholder="N° Cartón" style="max-width: 90px;">
+            <button onclick="agregarJugadora()">Añadir</button>
+        </div>
+
+        <div class="list-container" id="listaJugadoras">
+            <div style="color: #999; text-align: center; padding: 10px;">No hay jugadoras registradas aún</div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            projectId: "bingo-lineal-yune"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.sacarBolita = async function() {
+            try {
+                const ref = doc(db, "partida", "estado");
+                const snap = await getDoc(ref);
+                let bolasSalidas = snap.exists() ? (snap.data().bolasSalidas || []) : [];
+                
+                if (bolasSalidas.length >= 75) {
+                    alert("¡Ya salieron todas las bolitas!");
+                    return;
+                }
+
+                let nuevaBola;
+                do {
+                    nuevaBola = Math.floor(Math.random() * 75) + 1;
+                } while (bolasSalidas.includes(nuevaBola));
+
+                bolasSalidas.push(nuevaBola);
+                await setDoc(ref, { bolaActual: nuevaBola, bolasSalidas: bolasSalidas }, { merge: true });
+            } catch (e) {
+                console.error("Error al sacar bolita: ", e);
+            }
+        };
+
+        window.reiniciarJuego = async function() {
+            if (confirm("¿Estás segura de reiniciar el juego?")) {
+                await setDoc(doc(db, "partida", "estado"), { bolaActual: "--", bolasSalidas: [] });
+            }
+        };
+
+        // Escuchar estado en vivo
+        onSnapshot(doc(db, "partida", "estado"), (docSnap) => {
+            if (docSnap.exists()) {
+                let data = docSnap.data();
+                document.getElementById("bola-actual").innerText = data.bolaActual || "--";
+            }
+        });
+
+        // Funcionalidad local para la lista de jugadoras y cartones en pantalla
+        window.agregarJugadora = function() {
+            let nombre = document.getElementById("nombreJugadora").value.trim();
+            let carton = document.getElementById("numCarton").value.trim();
+            
+            if(!nombre || !carton) {
+                alert("Por favor escribe el nombre y el número de cartón.");
+                return;
+            }
+
+            let lista = document.getElementById("listaJugadoras");
+            if(lista.innerHTML.includes("No hay jugadoras")) {
+                lista.innerHTML = "";
+            }
+
+            let div = document.createElement("div");
+            div.className = "list-item";
+            div.innerHTML = `<span><b>${nombre}</b> (Cartón: ${carton})</span> <button style="background:#e74c3c; width:auto; padding:4px 8px; font-size:0.8rem;" onclick="this.parentElement.remove()">Eliminar</button>`;
+            lista.appendChild(div);
+
+            document.getElementById("nombreJugadora").value = "";
+            document.getElementById("numCarton").value = "";
+        };
+    </script>
+</body>
+</html>
