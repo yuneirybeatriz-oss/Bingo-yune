@@ -130,6 +130,14 @@
                 </div>
             </div>
 
+            <!-- Panel de Control Detallado de Cartones por Jugador (Eri, Yera, etc.) -->
+            <div class="bg-slate-800 border border-slate-700 p-6 rounded-3xl card-shadow flex flex-col gap-4">
+                <h3 class="font-bold text-pink-400 text-lg">Control de Cartones por Jugadora</h3>
+                <div id="admin-cards-summary" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-48 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl border border-slate-700">
+                    <span class="text-slate-500 text-xs">Cargando distribución de cartones...</span>
+                </div>
+            </div>
+
             <!-- Tablero 1 al 75 para Admin -->
             <div class="bg-slate-800 border border-slate-700 p-6 rounded-3xl card-shadow">
                 <h3 class="font-bold text-yellow-300 mb-4">Tablero General (1 - 75)</h3>
@@ -154,10 +162,10 @@
                 </div>
             </div>
 
-            <!-- Sección de Selección y Compra de Cartones con los 50 disponibles -->
+            <!-- Sección de Selección y Compra de Cartones (Sin límite) -->
             <div class="bg-slate-800 border border-slate-700 p-6 rounded-3xl card-shadow flex flex-col gap-4">
                 <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones del 1 al 50 (Máx. 10)</h3>
+                    <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (Sin límite)</h3>
                     <button onclick="confirmSelectedCards()" class="px-5 py-2 bg-green-600 hover:bg-green-500 font-bold text-xs rounded-xl transition shadow">Confirmar Mis Cartones</button>
                 </div>
                 <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl border border-slate-700"></div>
@@ -380,7 +388,6 @@
             const market = document.getElementById('cards-market-grid');
             if(!market) return;
             market.innerHTML = '';
-            // Generar los 50 cartones oficiales completos
             for(let i=1; i<=50; i++) {
                 const cardBtn = document.createElement('button');
                 cardBtn.id = `market-card-${i}`;
@@ -402,10 +409,7 @@
             if(index > -1) {
                 mySelectedCards.splice(index, 1);
             } else {
-                if(mySelectedCards.length >= 10) {
-                    alert("Puedes seleccionar máximo 10 cartones por jugadora.");
-                    return;
-                }
+                // Sin límite de cartones: cualquier jugadora puede elegir los que quiera
                 mySelectedCards.push(cardNum);
             }
             updateMarketUI();
@@ -562,14 +566,51 @@
 
             const countCards = document.getElementById('admin-count-cards');
             if(countCards) {
+                // Cuenta real de cartones que tienen dueño registrado
                 let soldCount = Object.keys(marketCards || {}).length;
                 countCards.innerText = soldCount;
             }
+
+            // Actualizar resumen detallado por jugadora en la torre de control
+            updateAdminCardsSummary();
 
             const patternDisplay = document.getElementById('player-display-pattern');
             if(patternDisplay) {
                 patternDisplay.innerText = gamePattern === 'line' ? 'Línea' : (gamePattern === 'letter_l' ? 'Letra L' : 'Cartón Lleno');
             }
+        }
+
+        function updateAdminCardsSummary() {
+            const summaryContainer = document.getElementById('admin-cards-summary');
+            if(!summaryContainer) return;
+
+            // Agrupar cartones por nombre de jugadora
+            let playerMap = {};
+            for(let cardId in marketCards) {
+                let owner = marketCards[cardId];
+                if(owner) {
+                    if(!playerMap[owner]) playerMap[owner] = [];
+                    playerMap[owner].push(parseInt(cardId));
+                }
+            }
+
+            let keys = Object.keys(playerMap);
+            if(keys.length === 0) {
+                summaryContainer.innerHTML = '<span class="text-slate-500 text-xs">Aún no hay cartones comprados por ninguna jugadora.</span>';
+                return;
+            }
+
+            summaryContainer.innerHTML = '';
+            keys.forEach(playerName => {
+                let cardsList = playerMap[playerName].sort((a,b) => a - b).join(', #');
+                let div = document.createElement('div');
+                div.className = "bg-slate-900 border border-slate-700/60 p-3 rounded-xl flex flex-col gap-1";
+                div.innerHTML = `
+                    <span class="font-bold text-yellow-300 text-xs">👤 ${playerName}</span>
+                    <span class="text-slate-300 text-xs">Cartones (${playerMap[playerName].length}): <b class="text-pink-400">#${cardsList}</b></span>
+                `;
+                summaryContainer.appendChild(div);
+            });
         }
 
         function updatePlayersListUI(players) {
