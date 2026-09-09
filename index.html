@@ -10,6 +10,8 @@
         body { font-family: 'Poppins', sans-serif; background: #0f172a; color: #f8fafc; }
         .neon-glow { text-shadow: 0 0 10px rgba(236, 72, 153, 0.7), 0 0 20px rgba(236, 72, 153, 0.5); }
         .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5); }
+        @keyframes pulse-slow { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.85; transform: scale(1.02); } }
+        .alert-bingo { animation: pulse-slow 1.5s infinite; }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
@@ -26,7 +28,7 @@
         <!-- PANTALLA INICIAL -->
         <div id="view-home" class="w-full bg-slate-800/80 backdrop-blur border border-slate-700 p-6 md:p-8 rounded-3xl card-shadow flex flex-col items-center gap-6 max-w-md">
             <h2 class="text-2xl font-bold text-yellow-300">¡Bienvenida a la Diversión!</h2>
-            <button onclick="showPlayerLogin()" class="w-full py-4 bg-gradient-to-r from-pink-600 to-purple-600 font-bold text-lg rounded-2xl">🎮 Entrar como Jugadora</button>
+            <button onclick="showPlayerLogin()" class="w-full py-4 bg-gradient-to-r from-pink-600 to-purple-600 font-bold text-lg rounded-2xl shadow-lg">🎮 Entrar como Jugadora</button>
             <button onclick="showAdminLogin()" class="w-full py-3 bg-slate-700 text-slate-300 font-semibold text-sm rounded-2xl">🔐 Acceso Administradora</button>
         </div>
 
@@ -60,15 +62,24 @@
                 <h2 class="text-2xl font-bold text-pink-400">Torre de Control</h2>
                 <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 text-xs rounded-xl">Salir</button>
             </div>
+
+            <!-- ALERTA DE GANADOR EN TIEMPO REAL -->
+            <div id="admin-winner-alert" class="hidden bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-950 p-6 rounded-3xl font-extrabold text-center text-xl shadow-xl alert-bingo flex flex-col gap-2">
+                <div>🎉 ¡HAY UN BINGO CANTADO! 🎉</div>
+                <div id="admin-winner-text" class="text-base font-bold bg-white/20 py-2 px-4 rounded-xl">Jugadora X cantó Bingo con el cartón #00</div>
+                <button onclick="clearWinnerAlert()" class="mt-2 py-2 px-4 bg-slate-900 text-yellow-300 text-xs rounded-xl font-bold mx-auto w-fit shadow">Cerrar Alerta / Continuar Partida</button>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col items-center gap-4">
                     <h3 class="font-bold text-yellow-300">Última Bola</h3>
-                    <div id="admin-current-ball" class="w-28 h-28 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-5xl flex items-center justify-center">--</div>
-                    <button onclick="drawBallManually()" class="w-full py-3 bg-purple-600 font-bold rounded-xl text-sm">Sacar Bola</button>
-                    <button onclick="resetGame()" class="w-full py-2 bg-red-600/30 text-red-300 text-xs font-bold rounded-xl">Reiniciar</button>
+                    <div id="admin-current-ball" class="w-28 h-28 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-5xl flex items-center justify-center shadow-lg">--</div>
+                    <button onclick="drawBallManually()" class="w-full py-3 bg-purple-600 hover:bg-purple-500 font-bold rounded-xl text-sm shadow">Sacar Bola (Manual)</button>
+                    <button id="auto-draw-btn" onclick="toggleAutoDraw()" class="w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold rounded-xl shadow">▶ Iniciar Auto (Cada 5s)</button>
+                    <button onclick="resetGame()" class="w-full py-2 bg-red-600/30 text-red-300 text-xs font-bold rounded-xl">Reiniciar Partida</button>
                 </div>
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
-                    <h3 class="font-bold text-pink-400">Figura</h3>
+                    <h3 class="font-bold text-pink-400">Figura en Juego</h3>
                     <select id="game-pattern-select" onchange="updateGamePattern()" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white font-semibold">
                         <option value="line">Línea</option>
                         <option value="letter_l">Letra L</option>
@@ -76,7 +87,7 @@
                     </select>
                 </div>
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
-                    <h3 class="font-bold text-yellow-300">Jugadoras</h3>
+                    <h3 class="font-bold text-yellow-300">Jugadoras Conectadas</h3>
                     <div class="flex-grow overflow-y-auto max-h-36 bg-slate-900/60 p-3 rounded-xl text-xs" id="admin-players-list"><span class="text-slate-500">Esperando...</span></div>
                 </div>
             </div>
@@ -85,7 +96,7 @@
                 <div id="admin-cards-summary" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-56 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
             </div>
             <div class="bg-slate-800 p-6 rounded-3xl">
-                <h3 class="font-bold text-yellow-300 mb-4">Tablero (1-75)</h3>
+                <h3 class="font-bold text-yellow-300 mb-4">Tablero General (1-75)</h3>
                 <div id="admin-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1.5"></div>
             </div>
         </div>
@@ -97,10 +108,17 @@
                     <h2 class="text-2xl font-bold text-yellow-300">¡Hola, <span id="player-display-name">Jugadora</span>!</h2>
                     <p class="text-xs text-slate-400">Control ID: <span id="player-display-control">--</span></p>
                 </div>
-                <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 text-xs rounded-xl">Salir</button>
+                <div class="flex gap-2">
+                    <button onclick="singBingo()" class="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-extrabold text-xs rounded-xl shadow-lg animate-bounce">📢 ¡CANTAR BINGO!</button>
+                    <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 text-xs rounded-xl">Salir</button>
+                </div>
             </div>
 
-            <!-- SECCIÓN NUEVA: Última bola y Tablero general para la jugadora -->
+            <!-- AVISO VISIBLE PARA LA JUGADORA SI HAY BINGO CANTADO -->
+            <div id="player-winner-notification" class="hidden bg-yellow-400 text-slate-950 p-4 rounded-2xl font-extrabold text-center shadow-lg alert-bingo">
+                🎉 ¡ATENCIÓN: SE HA CANTADO BINGO EN LA SALA! 🎉
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col items-center justify-center gap-2">
                     <h3 class="font-bold text-yellow-300 text-sm">Última Bola Cantada</h3>
@@ -144,6 +162,8 @@
         let marketCards = {}; 
         let mySelectedCards = [];
         let lastBallDrawn = null;
+        let autoDrawInterval = null;
+        let isAutoRunning = false;
 
         window.onload = function() {
             initAdminBoard();
@@ -159,6 +179,26 @@
                 lastBallDrawn = val.lastBall || '--';
                 gamePattern = val.pattern || 'line';
                 marketCards = val.cards || {};
+
+                // Manejo de Alerta de Ganador
+                const winnerData = val.winner;
+                const adminAlert = document.getElementById('admin-winner-alert');
+                const adminWinnerText = document.getElementById('admin-winner-text');
+                const playerNotification = document.getElementById('player-winner-notification');
+
+                if (winnerData && winnerData.name) {
+                    if (adminAlert && adminWinnerText) {
+                        adminWinnerText.innerText = `¡${winnerData.name} cantó Bingo con el cartón #${winnerData.card}!`;
+                        adminAlert.classList.remove('hidden');
+                    }
+                    if (playerNotification) {
+                        playerNotification.innerText = `🎉 ¡${winnerData.name} ha cantado BINGO con el cartón #${winnerData.card}! 🎉`;
+                        playerNotification.classList.remove('hidden');
+                    }
+                } else {
+                    if (adminAlert) adminAlert.classList.add('hidden');
+                    if (playerNotification) playerNotification.classList.add('hidden');
+                }
 
                 if(currentUser.name) {
                     mySelectedCards = [];
@@ -181,6 +221,7 @@
             ['view-home', 'view-admin-login', 'view-player-register', 'view-admin-panel', 'view-player-room'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
             });
+            stopAutoDraw(); // Detener auto al salir de pantallas
         }
 
         function showAdminLogin() { hideAllViews(); document.getElementById('view-admin-login').classList.remove('hidden'); }
@@ -231,7 +272,11 @@
         }
 
         function drawBallManually() {
-            if(drawnBalls.length >= 75) { alert("¡Se cantaron las 75 bolas!"); return; }
+            if(drawnBalls.length >= 75) { 
+                alert("¡Se cantaron las 75 bolas!"); 
+                stopAutoDraw();
+                return; 
+            }
             let available = [];
             for(let i=1; i<=75; i++) { if(!drawnBalls.includes(i)) available.push(i); }
             const randomBall = available[Math.floor(Math.random() * available.length)];
@@ -239,9 +284,41 @@
             db.ref('system').update({ drawnBalls, lastBall: randomBall });
         }
 
+        // CONTROL DE BOLSAS AUTOMÁTICO (CADA 5 SEGUNDOS)
+        function toggleAutoDraw() {
+            const btn = document.getElementById('auto-draw-btn');
+            if(isAutoRunning) {
+                stopAutoDraw();
+            } else {
+                if(drawnBalls.length >= 75) { alert("El tablero ya está completo."); return; }
+                isAutoRunning = true;
+                btn.innerText = "⏸ Detener Auto";
+                btn.className = "w-full py-2.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-xl shadow";
+                autoDrawInterval = setInterval(() => {
+                    if(drawnBalls.length >= 75) {
+                        stopAutoDraw();
+                        alert("¡Se completaron las 75 bolas!");
+                        return;
+                    }
+                    drawBallManually();
+                }, 5000); // 5 segundos
+            }
+        }
+
+        function stopAutoDraw() {
+            if(autoDrawInterval) clearInterval(autoDrawInterval);
+            isAutoRunning = false;
+            const btn = document.getElementById('auto-draw-btn');
+            if(btn) {
+                btn.innerText = "▶ Iniciar Auto (Cada 5s)";
+                btn.className = "w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold rounded-xl shadow";
+            }
+        }
+
         function resetGame() {
-            if(confirm("¿Reiniciar partida y limpiar cartones?")) {
-                db.ref('system').update({ drawnBalls: [], lastBall: '--', cards: null });
+            if(confirm("¿Reiniciar partida y limpiar cartones y ganadores?")) {
+                stopAutoDraw();
+                db.ref('system').update({ drawnBalls: [], lastBall: '--', cards: null, winner: null });
                 mySelectedCards = [];
                 renderMyCards();
             }
@@ -249,6 +326,27 @@
 
         function updateGamePattern() {
             db.ref('system/pattern').set(document.getElementById('game-pattern-select').value);
+        }
+
+        // CANTAR BINGO POR PARTE DE LA JUGADORA
+        function singBingo() {
+            if(mySelectedCards.length === 0) {
+                alert("No tienes cartones activos para cantar Bingo.");
+                return;
+            }
+            let cardChoice = prompt(`¿Con qué número de cartón tuyo cantas Bingo? (Tus cartones: ${mySelectedCards.join(', ')})`, mySelectedCards[0]);
+            if(!cardChoice) return;
+            let cardNum = parseInt(cardChoice);
+            if(!mySelectedCards.includes(cardNum)) {
+                alert("Ese cartón no te pertenece.");
+                return;
+            }
+            db.ref('system/winner').set({ name: currentUser.name, card: cardNum });
+            alert("¡Bingo cantado con éxito! Se ha notificado a la administradora.");
+        }
+
+        function clearWinnerAlert() {
+            db.ref('system/winner').remove();
         }
 
         function initAdminBoard() {
@@ -264,7 +362,6 @@
             }
         }
 
-        // Inicializar el tablero en la vista de jugadora
         function initPlayerBoard() {
             const grid = document.getElementById('player-board-grid');
             if(!grid) return;
@@ -420,7 +517,6 @@
             if(cbAdmin) cbAdmin.innerText = lastBallDrawn;
             if(cbPlayer) cbPlayer.innerText = lastBallDrawn;
 
-            // Actualizar tablero de la administradora y de la jugadora
             for(let i=1; i<=75; i++) {
                 const adminCell = document.getElementById(`admin-ball-${i}`);
                 if(adminCell) {
@@ -437,8 +533,6 @@
                 }
             }
             updateMarketUI();
-            const countCards = document.getElementById('admin-count-cards');
-            if(countCards) countCards.innerText = Object.keys(marketCards || {}).length;
             updateAdminCardsSummary();
         }
 
@@ -471,11 +565,9 @@
 
         function updatePlayersListUI(players) {
             const list = document.getElementById('admin-players-list');
-            const countPlayers = document.getElementById('admin-count-players');
             if(!list) return;
             list.innerHTML = '';
             let keys = Object.keys(players);
-            if(countPlayers) countPlayers.innerText = keys.length;
             if(keys.length === 0) { list.innerHTML = '<span class="text-slate-500">Esperando...</span>'; return; }
             keys.forEach(key => {
                 const p = players[key];
