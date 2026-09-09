@@ -99,6 +99,19 @@
                 </div>
                 <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 text-xs rounded-xl">Salir</button>
             </div>
+
+            <!-- SECCIÓN NUEVA: Última bola y Tablero general para la jugadora -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-slate-800 p-6 rounded-3xl flex flex-col items-center justify-center gap-2">
+                    <h3 class="font-bold text-yellow-300 text-sm">Última Bola Cantada</h3>
+                    <div id="player-current-ball" class="w-24 h-24 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-4xl flex items-center justify-center shadow-lg">--</div>
+                </div>
+                <div class="bg-slate-800 p-6 rounded-3xl md:col-span-2 flex flex-col gap-2">
+                    <h3 class="font-bold text-pink-400 text-sm">Tablero General (1-75)</h3>
+                    <div id="player-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1"></div>
+                </div>
+            </div>
+
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <div>
@@ -134,6 +147,7 @@
 
         window.onload = function() {
             initAdminBoard();
+            initPlayerBoard();
             initCardsMarket();
             listenFirebaseData();
         };
@@ -245,6 +259,20 @@
                 const cell = document.createElement('div');
                 cell.id = `admin-ball-${i}`;
                 cell.className = "h-8 rounded-lg bg-slate-900 border border-slate-700 text-slate-400 font-bold text-xs flex items-center justify-center";
+                cell.innerText = i;
+                grid.appendChild(cell);
+            }
+        }
+
+        // Inicializar el tablero en la vista de jugadora
+        function initPlayerBoard() {
+            const grid = document.getElementById('player-board-grid');
+            if(!grid) return;
+            grid.innerHTML = '';
+            for(let i=1; i<=75; i++) {
+                const cell = document.createElement('div');
+                cell.id = `player-board-ball-${i}`;
+                cell.className = "h-7 rounded-lg bg-slate-900 border border-slate-700 text-slate-400 font-bold text-[11px] flex items-center justify-center";
                 cell.innerText = i;
                 grid.appendChild(cell);
             }
@@ -392,12 +420,20 @@
             if(cbAdmin) cbAdmin.innerText = lastBallDrawn;
             if(cbPlayer) cbPlayer.innerText = lastBallDrawn;
 
+            // Actualizar tablero de la administradora y de la jugadora
             for(let i=1; i<=75; i++) {
-                const cell = document.getElementById(`admin-ball-${i}`);
-                if(cell) {
-                    cell.className = drawnBalls.includes(i) ? 
+                const adminCell = document.getElementById(`admin-ball-${i}`);
+                if(adminCell) {
+                    adminCell.className = drawnBalls.includes(i) ? 
                         "h-8 rounded-lg bg-yellow-400 text-slate-950 font-extrabold text-xs flex items-center justify-center" : 
                         "h-8 rounded-lg bg-slate-900 border border-slate-700 text-slate-400 font-bold text-xs flex items-center justify-center";
+                }
+
+                const playerCell = document.getElementById(`player-board-ball-${i}`);
+                if(playerCell) {
+                    playerCell.className = drawnBalls.includes(i) ? 
+                        "h-7 rounded-lg bg-yellow-400 text-slate-950 font-extrabold text-[11px] flex items-center justify-center" : 
+                        "h-7 rounded-lg bg-slate-900 border border-slate-700 text-slate-400 font-bold text-[11px] flex items-center justify-center";
                 }
             }
             updateMarketUI();
