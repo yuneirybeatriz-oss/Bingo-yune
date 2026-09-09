@@ -11,8 +11,6 @@
         body { font-family: 'Poppins', sans-serif; background: #0f172a; color: #f8fafc; }
         .neon-glow { text-shadow: 0 0 10px rgba(236, 72, 153, 0.7), 0 0 20px rgba(236, 72, 153, 0.5); }
         .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5); }
-        @keyframes pulse-fast { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } }
-        .alert-pulse { animation: pulse-fast 0.8s infinite; }
     </style>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -80,24 +78,15 @@
             </div>
         </div>
 
-        <!-- SECCIÓN 4: ESTADO CERRADO (SISTEMA OFF) -->
-        <div id="view-system-off" class="w-full bg-slate-800/80 backdrop-blur border border-slate-700 p-10 rounded-3xl card-shadow flex flex-col items-center text-center gap-6 max-w-md hidden">
-            <div class="text-6xl">🔒</div>
-            <h2 class="text-3xl font-bold text-red-400">Sistema Cerrado</h2>
-            <p class="text-slate-300">En este momento el bingo se encuentra inactivo. Espera que la administradora abra la sala para comenzar la diversión.</p>
-            <button onclick="backToHome()" class="px-6 py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-sm transition">Actualizar / Salir</button>
-        </div>
-
-        <!-- SECCIÓN 5: PANEL DE ADMINISTRACIÓN (TORRE DE CONTROL) -->
+        <!-- SECCIÓN 4: PANEL DE ADMINISTRACIÓN (TORRE DE CONTROL) - SALA SIEMPRE ABIERTA -->
         <div id="view-admin-panel" class="w-full flex flex-col gap-6 hidden">
             <div class="bg-slate-800 border border-slate-700 p-6 rounded-3xl card-shadow flex flex-col md:flex-row justify-between items-center gap-4">
                 <div>
                     <h2 class="text-2xl font-bold text-pink-400">Torre de Control</h2>
-                    <p class="text-xs text-slate-400">Administración general de la partida</p>
+                    <p class="text-xs text-slate-400">Administración general de la partida (Sala Abierta)</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <span id="system-status-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30">SISTEMA CERRADO (OFF)</span>
-                    <button onclick="toggleSystemState()" id="toggle-sys-btn" class="px-4 py-2 bg-green-600 hover:bg-green-500 text-xs font-bold rounded-xl transition">Abrir Sala (ON)</button>
+                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-green-500/20 text-green-400 border border-green-500/30">SALA ACTIVA</span>
                     <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-xs font-semibold rounded-xl transition">Salir</button>
                 </div>
             </div>
@@ -135,9 +124,6 @@
                 <!-- Monitoreo de Jugadores / Ganadores -->
                 <div class="bg-slate-800 border border-slate-700 p-6 rounded-3xl card-shadow flex flex-col gap-3">
                     <h3 class="font-bold text-yellow-300">Sala y Ganadores</h3>
-                    <div id="admin-winner-alert" class="bg-red-500/20 border border-red-500 text-red-300 p-3 rounded-xl text-xs font-bold hidden">
-                        ¡BINGO CANTADO!
-                    </div>
                     <div class="flex-grow overflow-y-auto max-h-36 bg-slate-900/60 p-3 rounded-xl border border-slate-700/50 text-xs" id="admin-players-list">
                         <span class="text-slate-500">Esperando conexiones...</span>
                     </div>
@@ -153,7 +139,7 @@
             </div>
         </div>
 
-        <!-- SECCIÓN 6: SALA DE JUGADORES -->
+        <!-- SECCIÓN 5: SALA DE JUGADORES -->
         <div id="view-player-room" class="w-full flex flex-col gap-6 hidden">
             <!-- Barra superior del jugador -->
             <div class="bg-slate-800 border border-slate-700 p-4 md:p-6 rounded-3xl card-shadow flex flex-col md:flex-row justify-between items-center gap-4">
@@ -168,12 +154,6 @@
                     </div>
                     <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-xs font-semibold rounded-xl transition">Salir</button>
                 </div>
-            </div>
-
-            <!-- Alerta general de Ganador para Jugadores -->
-            <div id="player-global-winner-banner" class="w-full bg-gradient-to-r from-pink-600 via-purple-600 to-yellow-500 p-6 rounded-3xl card-shadow text-center hidden animate-pulse">
-                <h2 class="text-3xl font-extrabold text-white mb-2">🎉 ¡BINGO CANTADO! 🎉</h2>
-                <p id="player-winner-details" class="text-lg font-bold text-yellow-200">El jugador X ha ganado la partida.</p>
             </div>
 
             <!-- Sección de Selección y Compra de Cartones -->
@@ -202,9 +182,10 @@
     <footer class="text-center text-xs text-slate-500 py-6">
         Bingo Lineal Yune &bull; Sintonizado en tiempo real con Firebase 🌟
     </footer>
+
     <!-- SCRIPT DE LÓGICA Y FIREBASE -->
     <script>
-        // CONFIGURACIÓN FIREBASE (Ruta compartida bingo-lineal-yune)
+        // CONFIGURACIÓN FIREBASE
         const firebaseConfig = {
             databaseURL: "https://bingo-lineal-yune-default-rtdb.firebaseio.com/"
         };
@@ -215,12 +196,10 @@
         let currentUser = { name: '', control: '', isAdmin: false };
         let autoDrawInterval = null;
         let drawnBalls = [];
-        let systemState = false;
         let gamePattern = 'line';
-        let marketCards = {}; // 1 al 50 con su dueño
+        let marketCards = {}; 
         let mySelectedCards = [];
         let lastBallDrawn = null;
-        let winnerData = null;
 
         // INICIALIZACIÓN Y ESCUCHA EN TIEMPO REAL
         window.onload = function() {
@@ -232,12 +211,9 @@
         function listenFirebaseData() {
             db.ref('system').on('value', (snapshot) => {
                 const val = snapshot.val() || {};
-                // Aseguramos que systemState sea un booleano real
-                systemState = val.state === true; 
                 drawnBalls = val.drawnBalls || [];
                 lastBallDrawn = val.lastBall || '--';
                 gamePattern = val.pattern || 'line';
-                winnerData = val.winner || null;
                 marketCards = val.cards || {};
 
                 updateUIFromState();
@@ -254,7 +230,6 @@
             document.getElementById('view-home').classList.add('hidden');
             document.getElementById('view-admin-login').classList.add('hidden');
             document.getElementById('view-player-register').classList.add('hidden');
-            document.getElementById('view-system-off').classList.add('hidden');
             document.getElementById('view-admin-panel').classList.add('hidden');
             document.getElementById('view-player-room').classList.add('hidden');
         }
@@ -267,7 +242,6 @@
         function showPlayerLogin() {
             hideAllViews();
             document.getElementById('view-player-register').classList.remove('hidden');
-            // Verificar si ya estaba guardada en este navegador
             const savedName = localStorage.getItem('yune_bingo_name');
             const savedControl = localStorage.getItem('yune_bingo_control');
             if(savedName) {
@@ -287,7 +261,7 @@
         // VERIFICAR ADMIN
         function verifyAdminPassword() {
             const pass = document.getElementById('admin-password-input').value;
-            if(pass === "1234" || pass === "Yune2026") { // Clave protegida
+            if(pass === "1234" || pass === "Yune2026") {
                 currentUser.isAdmin = true;
                 hideAllViews();
                 document.getElementById('view-admin-panel').classList.remove('hidden');
@@ -296,7 +270,7 @@
             }
         }
 
-        // REGISTRO DE JUGADORA
+        // REGISTRO DE JUGADORA (INGRESO DIRECTO SIN BARRERAS)
         function registerPlayer() {
             const name = document.getElementById('player-name-input').value.trim();
             const control = document.getElementById('player-control-input').value.trim();
@@ -308,11 +282,9 @@
             currentUser.control = control;
             currentUser.isAdmin = false;
 
-            // Guardar localmente para bienvenida futura
             localStorage.setItem('yune_bingo_name', name);
             localStorage.setItem('yune_bingo_control', control);
 
-            // Registrar en Firebase
             db.ref('players/' + control).set({
                 name: name,
                 control: control,
@@ -320,26 +292,10 @@
                 lastActive: Date.now()
             });
 
-            // Si el sistema está apagado, mostrar pantalla OFF, sino entrar a la sala
             hideAllViews();
-            if(!systemState) {
-                document.getElementById('view-system-off').classList.remove('hidden');
-            } else {
-                document.getElementById('view-player-room').classList.remove('hidden');
-                document.getElementById('player-display-name').innerText = name;
-                document.getElementById('player-display-control').innerText = control;
-            }
-        }
-
-        // INTERRUPTOR GENERAL ON/OFF CORREGIDO
-        function toggleSystemState() {
-            const newState = !systemState;
-            db.ref('system').update({
-                state: newState
-            }).catch((error) => {
-                console.error("Error al cambiar el estado:", error);
-                alert("No se pudo actualizar el estado en Firebase.");
-            });
+            document.getElementById('view-player-room').classList.remove('hidden');
+            document.getElementById('player-display-name').innerText = name;
+            document.getElementById('player-display-control').innerText = control;
         }
 
         // SORTEO MANUAL DE BOLA
@@ -385,7 +341,6 @@
         function resetGame() {
             if(confirm("¿Estás segura de reiniciar la partida y limpiar las bolas?")) {
                 db.ref('system').update({
-                    state: false,
                     drawnBalls: [],
                     lastBall: '--',
                     winner: null
@@ -497,30 +452,11 @@
         }
 
         function updateUIFromState() {
-            const badge = document.getElementById('system-status-badge');
-            const toggleBtn = document.getElementById('toggle-sys-btn');
             const currentBallAdmin = document.getElementById('admin-current-ball');
             const currentBallPlayer = document.getElementById('player-current-ball');
 
-            if(systemState) {
-                badge.innerText = "SISTEMA ABIERTO (ON)";
-                badge.className = "px-3 py-1 rounded-full text-xs font-bold bg-green-500/20 text-green-400 border border-green-500/30";
-                toggleBtn.innerText = "Cerrar Sala (OFF)";
-                toggleBtn.className = "px-4 py-2 bg-red-600 hover:bg-red-500 text-xs font-bold rounded-xl transition";
-            } else {
-                badge.innerText = "SISTEMA CERRADO (OFF)";
-                badge.className = "px-3 py-1 rounded-full text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30";
-                toggleBtn.innerText = "Abrir Sala (ON)";
-                toggleBtn.className = "px-4 py-2 bg-green-600 hover:bg-green-500 text-xs font-bold rounded-xl transition";
-                
-                if(!currentUser.isAdmin && document.getElementById('view-player-room').classList.contains('hidden') == false) {
-                    hideAllViews();
-                    document.getElementById('view-system-off').classList.remove('hidden');
-                }
-            }
-
-            currentBallAdmin.innerText = lastBallDrawn;
-            currentBallPlayer.innerText = lastBallDrawn;
+            if(currentBallAdmin) currentBallAdmin.innerText = lastBallDrawn;
+            if(currentBallPlayer) currentBallPlayer.innerText = lastBallDrawn;
 
             for(let i=1; i<=75; i++) {
                 const cell = document.getElementById(`admin-ball-${i}`);
@@ -546,16 +482,19 @@
                 }
             }
 
-            document.getElementById('player-display-pattern').innerText = 
-                gamePattern === 'line' ? 'Línea' : (gamePattern === 'letter_l' ? 'Letra L' : 'Cartón Lleno');
+            const patternDisplay = document.getElementById('player-display-pattern');
+            if(patternDisplay) {
+                patternDisplay.innerText = gamePattern === 'line' ? 'Línea' : (gamePattern === 'letter_l' ? 'Letra L' : 'Cartón Lleno');
+            }
         }
 
         function updatePlayersListUI(players) {
             const list = document.getElementById('admin-players-list');
             const countPlayers = document.getElementById('admin-count-players');
+            if(!list) return;
             list.innerHTML = '';
             let keys = Object.keys(players);
-            countPlayers.innerText = keys.length;
+            if(countPlayers) countPlayers.innerText = keys.length;
 
             if(keys.length === 0) {
                 list.innerHTML = '<span class="text-slate-500">Esperando conexiones...</span>';
@@ -573,4 +512,3 @@
     </script>
 </body>
 </html>
-
