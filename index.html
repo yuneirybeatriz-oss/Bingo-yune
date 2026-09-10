@@ -146,8 +146,12 @@
                 </div>
             </div>
 
+            <!-- CONTROL Y PAGOS DE CARTONES -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
-                <h3 class="font-bold text-pink-400 text-lg">Control de Cartones (Liberar con ✕)</h3>
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-pink-400 text-lg">Control de Cartones (💰 Pagados / ✕ Liberar)</h3>
+                    <span class="text-xs text-slate-400">Marca ✔ cuando cancelen</span>
+                </div>
                 <div id="admin-cards-summary" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-56 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
             </div>
             <div class="bg-slate-800 p-6 rounded-3xl">
@@ -265,6 +269,7 @@
         let drawnBalls = [];
         let gamePattern = 'line';
         let marketCards = {}; 
+        let paidCards = {};
         let mySelectedCards = [];
         let lastBallDrawn = null;
         let autoDrawInterval = null;
@@ -291,6 +296,7 @@
                 lastBallDrawn = val.lastBall || '--';
                 gamePattern = val.pattern || 'line';
                 marketCards = val.cards || {};
+                paidCards = val.paidCards || {};
                 roomCodeSecret = val.roomCode || 'BINGO2026';
                 allSystemCardsCache = val.allCardsData || {};
 
@@ -751,7 +757,8 @@
                 db.ref('system').update({
                     drawnBalls: [],
                     lastBall: '--',
-                    winners: null
+                    winners: null,
+                    paidCards: null
                 });
             }
         }
@@ -807,13 +814,20 @@
             for(let i=1; i<=100; i++) {
                 let owner = marketCards[i];
                 if(owner) {
+                    let isPaid = paidCards[i] === true;
+                    let payBtnClass = isPaid ? "bg-green-600 text-white" : "bg-slate-800 text-slate-400 hover:bg-green-600/50 hover:text-white";
+                    let payBtnText = isPaid ? "💰 Pagado (✔)" : "💰 Marcar Pago";
+
                     html += `
                         <div class="bg-slate-900 p-3 rounded-2xl flex justify-between items-center border border-slate-700">
                             <div>
                                 <span class="font-bold text-yellow-300">Cartón #${i}</span>
                                 <div class="text-xs text-pink-400">Dueño: ${owner}</div>
                             </div>
-                            <button onclick="freeCardAdmin(${i})" class="w-8 h-8 bg-red-600/30 text-red-300 hover:bg-red-600 hover:text-white font-bold rounded-xl flex items-center justify-center transition">✕</button>
+                            <div class="flex items-center gap-2">
+                                <button onclick="toggleCardPayment(${i})" class="px-2.5 py-1.5 text-[10px] font-bold rounded-xl transition ${payBtnClass}">${payBtnText}</button>
+                                <button onclick="freeCardAdmin(${i})" class="w-8 h-8 bg-red-600/30 text-red-300 hover:bg-red-600 hover:text-white font-bold rounded-xl flex items-center justify-center transition">✕</button>
+                            </div>
                         </div>
                     `;
                 }
@@ -821,8 +835,14 @@
             sumDiv.innerHTML = html || `<span class="text-slate-500 text-xs col-span-2 text-center py-2">Todos los cartones están libres.</span>`;
         }
 
+        function toggleCardPayment(cardId) {
+            let currentStatus = paidCards[cardId] === true;
+            db.ref('system/paidCards/' + cardId).set(!currentStatus);
+        }
+
         function freeCardAdmin(cardId) {
             db.ref('system/cards/' + cardId).remove();
+            db.ref('system/paidCards/' + cardId).remove();
         }
 
         function checkAllCardsForWinner(newBall) {
