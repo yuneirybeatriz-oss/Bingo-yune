@@ -126,12 +126,12 @@
                     </select>
                     <div class="mt-2">
                         <label class="text-xs text-slate-400 block mb-1">🔑 Código de Acceso para Jugadoras:</label>
-                        <input type="text" id="admin-room-code" onchange="updateRoomCode()" placeholder="Ej: BINGO2026" class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-center">
+                        <input type="text" id="admin-room-code" onchange="updateRoomCode()" placeholder="Ej: June 2026" class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-center">
                     </div>
                 </div>
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
                     <h3 class="font-bold text-yellow-300">Jugadoras Conectadas</h3>
-                    <div class="flex-grow overflow-y-auto max-h-36 bg-slate-900/60 p-3 rounded-xl text-xs" id="admin-players-list"><span class="text-slate-500">Esperando...</span></div>
+                    <div class="flex-grow overflow-y-auto max-h-36 bg-slate-900/60 p-3 rounded-xl text-xs flex flex-col gap-2" id="admin-players-list"><span class="text-slate-500">Esperando...</span></div>
                 </div>
             </div>
 
@@ -220,12 +220,12 @@
                 <div id="player-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1"></div>
             </div>
 
-            <!-- SELECCIÓN DE CARTONES -->
+            <!-- SELECCIÓN DE CARTONES (SIN LÍMITE) -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <div>
                         <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (<span id="available-count">100</span> Disponibles)</h3>
-                        <p class="text-xs text-slate-400" id="market-subtitle">Toca para marcar o desmarcar. Confirma cuando estés lista.</p>
+                        <p class="text-xs text-slate-400" id="market-subtitle">Toca para marcar o desmarcar todos los que quieras (Sin Límite). Confirma al finalizar.</p>
                     </div>
                     <button id="confirm-cards-btn" onclick="confirmSelectedCards()" class="px-5 py-2.5 bg-green-600 hover:bg-green-500 font-bold text-xs rounded-xl shadow">Confirmar Mis Cartones</button>
                 </div>
@@ -249,7 +249,7 @@
         let lastBallDrawn = null;
         let autoDrawInterval = null;
         let isAutoRunning = false;
-        let roomCodeSecret = '1234';
+        let roomCodeSecret = 'June 2026';
         let hasSpokenMyBingo = false;
         let lastSpokenBall = null;
         let registeredPlayersList = {};
@@ -269,7 +269,7 @@
                 lastBallDrawn = val.lastBall || '--';
                 gamePattern = val.pattern || 'line';
                 marketCards = val.cards || {};
-                roomCodeSecret = val.roomCode || '1234';
+                roomCodeSecret = val.roomCode || 'June 2026';
                 allSystemCardsCache = val.allCardsData || {};
 
                 const patternSelect = document.getElementById('game-pattern-select');
@@ -369,7 +369,6 @@
             window.speechSynthesis.speak(utterance);
         }
 
-        // --- GENERADOR DE CARTONES TIPO BINGO TRADICIONAL (1-75) ---
         function generateCardNumbers(cardId) {
             let cols = {
                 B: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
@@ -401,7 +400,7 @@
             let gNums = pickCol(cols.G, 5);
             let oNums = pickCol(cols.O, 5);
 
-            nNums[2] = "★"; // Centro libre
+            nNums[2] = "★";
 
             let grid = [];
             for(let r=0; r<5; r++) {
@@ -410,12 +409,9 @@
             return grid;
         }
 
-        // --- EVALUADOR DE PATRONES Y AVANCE ---
         function checkCardProgress(cardGrid, drawnList) {
             let drawnSet = new Set(drawnList.map(String));
-            let totalNeeded = 0;
-            let matchedCount = 0;
-            let missingNumbers = [];
+            let patterns = [];
 
             let isMarked = (r, c) => {
                 let val = cardGrid[r][c];
@@ -435,16 +431,12 @@
                 return { matched: m, total: coords.length, missing };
             };
 
-            let patterns = [];
-
             if (gamePattern === 'line' || gamePattern === 'full_card') {
-                // Horizontales
                 for(let r=0; r<5; r++) {
                     let coords = [];
                     for(let c=0; c<5; c++) coords.push([r, c]);
                     patterns.push(checkCells(coords));
                 }
-                // Verticales
                 for(let c=0; c<5; c++) {
                     let coords = [];
                     for(let r=0; r<5; r++) coords.push([r, c]);
@@ -453,10 +445,8 @@
             }
 
             if (gamePattern === 'diagonal' || gamePattern === 'full_card') {
-                let diag1 = [[0,0],[1,1],[2,2],[3,3],[4,4]];
-                let diag2 = [[0,4],[1,3],[2,2],[3,1],[4,0]];
-                patterns.push(checkCells(diag1));
-                patterns.push(checkCells(diag2));
+                patterns.push(checkCells([[0,0],[1,1],[2,2],[3,3],[4,4]]));
+                patterns.push(checkCells([[0,4],[1,3],[2,2],[3,1],[4,0]]));
             }
 
             if (gamePattern === 'letter_l' || gamePattern === 'full_card') {
@@ -495,7 +485,6 @@
                 patterns = [checkCells(all)];
             }
 
-            // Encontrar el patrón con mayor avance (menos faltantes)
             let best = { matched: 0, total: 5, missing: [] };
             let maxRatio = -1;
 
@@ -512,7 +501,6 @@
             return { isBingo, percent, matched: best.matched, total: best.total, missing: best.missing };
         }
 
-        // --- INTERFAZ ADMINISTRADORA: RADAR DE CARTONES ---
         function updateAdminRadarUI() {
             let container = document.getElementById('admin-radar-container');
             if (!container) return;
@@ -532,7 +520,6 @@
                 return;
             }
 
-            // Ordenar por porcentaje de avance (mayor a menor)
             activeCardsList.sort((a, b) => b.prog.percent - a.prog.percent);
 
             let html = '';
@@ -563,7 +550,6 @@
             alert(`Detalle Cartón #${cardId}\nDueño: ${owner}\nAvance: ${prog.percent}% (${prog.matched}/${prog.total})\nNúmeros faltantes: ${missingText}`);
         }
 
-        // --- NAVEGACIÓN Y AUTENTICACIÓN ---
         function showPlayerLogin() {
             hideAllViews();
             document.getElementById('view-player-register').classList.remove('hidden');
@@ -594,7 +580,7 @@
 
         function verifyAdminPassword() {
             let pass = document.getElementById('admin-password-input').value;
-            if (pass === '123456' || pass === roomCodeSecret) {
+            if (pass === 'June 2026' || pass === roomCodeSecret) {
                 currentUser.isAdmin = true;
                 hideAllViews();
                 document.getElementById('view-admin-panel').classList.remove('hidden');
@@ -635,7 +621,6 @@
             loadMySelectedCardsFromMarket();
         }
 
-        // --- LÓGICA DE JUEGO ADMINISTRADORA ---
         function initAdminBoard() {
             let grid = document.getElementById('admin-board-grid');
             if(!grid) return;
@@ -774,9 +759,23 @@
             let html = '';
             keys.forEach(k => {
                 let p = registeredPlayersList[k];
-                html += `<div class="py-1 border-b border-slate-800 flex justify-between"><span>👤 ${p.name}</span><span class="text-slate-400">Ctrl: ${p.control}</span></div>`;
+                html += `
+                    <div class="py-1.5 border-b border-slate-800 flex justify-between items-center">
+                        <div>
+                            <span class="font-bold text-white">👤 ${p.name}</span>
+                            <div class="text-[10px] text-slate-400">Ctrl: ${p.control}</div>
+                        </div>
+                        <button onclick="kickPlayer('${p.control}')" class="px-2.5 py-1 bg-red-600/30 text-red-300 hover:bg-red-600 hover:text-white text-[10px] font-bold rounded-lg transition">Eliminar</button>
+                    </div>
+                `;
             });
             listDiv.innerHTML = html;
+        }
+
+        function kickPlayer(controlId) {
+            if(confirm(`¿Seguro que deseas eliminar al jugador con control ${controlId}?`)) {
+                db.ref('players/' + controlId).remove();
+            }
         }
 
         function updateAdminCardsSummary() {
@@ -833,7 +832,6 @@
             }
         }
 
-        // --- LÓGICA DE JUEGO JUGADORA ---
         function initPlayerBoard() {
             let grid = document.getElementById('player-board-grid');
             if(!grid) return;
@@ -917,15 +915,11 @@
 
         function toggleSelectMarketCard(cardId) {
             let owner = marketCards[cardId];
-            if(owner && owner !== currentUser.name) return; // Ya ocupado por otra
+            if(owner && owner !== currentUser.name) return;
 
             if(mySelectedCards.includes(cardId)) {
                 mySelectedCards = mySelectedCards.filter(id => id !== cardId);
             } else {
-                if(mySelectedCards.length >= 6) {
-                    alert('Puedes seleccionar máximo 6 cartones.');
-                    return;
-                }
                 mySelectedCards.push(cardId);
             }
             updateCardsMarketUI();
@@ -972,7 +966,6 @@
                 return;
             }
 
-            // Calcular avance para ordenar automáticamente (el más cercano primero)
             let cardsDataWithProgress = myActiveIds.map(cardId => {
                 let grid = generateCardNumbers(cardId);
                 let prog = checkCardProgress(grid, drawnBalls);
