@@ -4,946 +4,370 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bingo Lineal Yune</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS para un diseño moderno -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        body { font-family: 'Poppins', sans-serif; background: #0f172a; color: #f8fafc; }
-        .neon-glow { text-shadow: 0 0 10px rgba(236, 72, 153, 0.7), 0 0 20px rgba(236, 72, 153, 0.5); }
-        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5); }
-        @keyframes pulse-slow { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.9; transform: scale(1.02); } }
-        .alert-bingo { animation: pulse-slow 1.2s infinite; }
-        @keyframes flash-bg { 0%, 100% { background-color: rgba(234, 179, 8, 0.9); } 50% { background-color: rgba(219, 39, 119, 0.9); } }
-        .flash-winner { animation: flash-bg 1s infinite; }
-        
-        .bola-historial {
-            width: 38px;
-            height: 38px;
-            background-color: #fbbf24;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: 800;
-            font-size: 14px;
-            color: #0f172a;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            border: 2px solid #f59e0b;
+        @keyframes pulse-border {
+            0%, 100% { border-color: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.7); }
+            50% { border-color: #f59e0b; box-shadow: 0 0 5px rgba(245, 158, 11, 0.3); }
+        }
+        .carton-espera {
+            animation: pulse-border 1s infinite;
+        }
+        .winning-number {
+            background-color: #ef4444 !important;
+            color: white !important;
+            font-weight: bold;
+            border-radius: 9999px;
         }
     </style>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-between p-4">
-    <div id="app" class="w-full max-w-4xl mx-auto flex flex-col items-center flex-grow">
-        <header class="text-center my-6">
-            <h1 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-400 to-yellow-400 neon-glow">
-                Bingo Lineal Yune 🎰✨
-            </h1>
-            <p class="text-slate-400 text-sm mt-1">El sistema oficial en tiempo real</p>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans flex flex-col items-center justify-between p-4">
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div id="app" class="w-full max-w-5xl mx-auto flex flex-col gap-6">
+        
+        <!-- ENCABEZADO -->
+        <header class="text-center py-4 border-b border-slate-700">
+            <h1 class="text-3xl font-extrabold text-amber-400 tracking-wider">BINGO LINEAL YUNE</h1>
+            <p class="text-sm text-slate-400 mt-1">¡El juego oficial de la casa!</p>
         </header>
 
-        <!-- PANTALLA INICIAL -->
-        <div id="view-home" class="w-full bg-slate-800/80 backdrop-blur border border-slate-700 p-6 md:p-8 rounded-3xl card-shadow flex flex-col items-center gap-6 max-w-md">
-            <h2 class="text-2xl font-bold text-yellow-300">¡Bienvenida a la Diversión!</h2>
-            <button onclick="showPlayerLogin()" class="w-full py-4 bg-gradient-to-r from-pink-600 to-purple-600 font-bold text-lg rounded-2xl shadow-lg">🎮 Entrar como Jugadora</button>
-            <button onclick="showAdminLogin()" class="w-full py-3 bg-slate-700 text-slate-300 font-semibold text-sm rounded-2xl">🔐 Acceso Administradora</button>
-        </div>
-
-        <!-- LOGIN ADMIN -->
-        <div id="view-admin-login" class="w-full bg-slate-800/80 p-6 rounded-3xl card-shadow flex flex-col items-center gap-6 max-w-md hidden">
-            <h2 class="text-2xl font-bold text-pink-400">Panel de Administradora</h2>
-            <p class="text-xs text-slate-400 text-center">Ingresa tu clave secreta maestra.</p>
-            <input type="password" id="admin-password-input" placeholder="Clave secreta" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-center text-xl text-white">
-            <div class="flex gap-3 w-full">
-                <button onclick="backToHome()" class="w-1/2 py-3 bg-slate-700 rounded-xl font-semibold">Volver</button>
-                <button onclick="verifyAdminPassword()" class="w-1/2 py-3 bg-pink-600 rounded-xl font-bold">Ingresar</button>
+        <!-- PANTALLA DE INICIO / LOGIN -->
+        <div id="screen-login" class="bg-slate-800 p-8 rounded-2xl shadow-xl max-w-md mx-auto w-full text-center flex flex-col gap-4">
+            <h2 class="text-xl font-bold text-slate-200">Ingresa al Juego</h2>
+            <input type="text" id="input-username" placeholder="Tu Nombre o Alias" class="px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-amber-400">
+            
+            <div class="flex gap-4 mt-2">
+                <button onclick="loginAsPlayer()" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 rounded-xl transition cursor-pointer">Jugador</button>
+                <button onclick="loginAsAdmin()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition cursor-pointer">Administrador</button>
             </div>
         </div>
 
-        <!-- REGISTRO JUGADORA -->
-        <div id="view-player-register" class="w-full bg-slate-800/80 p-6 rounded-3xl card-shadow flex flex-col items-center gap-6 max-w-md hidden">
-            <h2 class="text-2xl font-bold text-yellow-300 text-center">Registro de Jugadora</h2>
-            <div id="welcome-back-msg" class="text-green-400 font-semibold text-center hidden"></div>
-            <div class="w-full flex flex-col gap-4">
-                <input type="text" id="player-name-input" placeholder="Tu Nombre o Apodo" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white">
-                <input type="text" id="player-control-input" placeholder="Número de Control" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white">
-                <input type="password" id="player-access-code-input" placeholder="🔑 Código de Acceso de Sala" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-center text-white tracking-widest font-bold">
-            </div>
-            <div class="flex gap-3 w-full">
-                <button onclick="backToHome()" class="w-1/2 py-3 bg-slate-700 rounded-xl font-semibold">Volver</button>
-                <button onclick="registerPlayer()" class="w-1/2 py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-bold">Entrar al Juego</button>
-            </div>
-        </div>
-
-        <!-- PANEL ADMIN -->
-        <div id="view-admin-panel" class="w-full flex flex-col gap-6 hidden">
-            <div class="bg-slate-800 p-6 rounded-3xl flex justify-between items-center">
-                <h2 class="text-2xl font-bold text-pink-400">Torre de Control</h2>
-                <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 text-xs rounded-xl">Salir</button>
-            </div>
-
-            <div id="admin-winner-alert" class="hidden bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-950 p-6 rounded-3xl font-extrabold text-center text-xl shadow-xl alert-bingo flex flex-col gap-3">
-                <div>🎉 ¡BINGO VALIDADO! 🎉</div>
-                <div id="admin-winner-text" class="text-base font-bold bg-white/20 py-2 px-4 rounded-xl">Ganador...</div>
-                <div class="bg-slate-900 text-white p-4 rounded-2xl max-w-xs mx-auto w-full flex flex-col gap-2">
-                    <span class="text-xs text-yellow-300 font-bold" id="admin-winner-card-title">Cartón Ganador</span>
-                    <div class="grid grid-cols-5 gap-1 text-[10px] text-pink-400 font-bold">
-                        <div class="bg-slate-800 py-1 rounded">B</div><div class="bg-slate-800 py-1 rounded">I</div><div class="bg-slate-800 py-1 rounded">N</div><div class="bg-slate-800 py-1 rounded">G</div><div class="bg-slate-800 py-1 rounded">O</div>
-                    </div>
-                    <div id="admin-winning-card-grid" class="grid grid-cols-5 gap-1"></div>
-                </div>
-                <button onclick="clearWinnerAlert()" class="mt-2 py-2 px-4 bg-slate-900 text-yellow-300 text-xs rounded-xl font-bold mx-auto w-fit shadow">Cerrar Alerta / Continuar</button>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-slate-800 p-6 rounded-3xl flex flex-col items-center gap-4">
-                    <h3 class="font-bold text-yellow-300">Última Bola</h3>
-                    <div id="admin-current-ball" class="w-28 h-28 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-5xl flex items-center justify-center shadow-lg">--</div>
-                    
-                    <div class="w-full flex flex-col items-center gap-1.5 mt-1">
-                        <span class="text-[11px] text-slate-400 font-semibold">Últimas 5 salidas:</span>
-                        <div id="admin-history-balls" class="flex gap-2 items-center justify-center min-h-[42px]">
-                            <span class="text-xs text-slate-500">--</span>
-                        </div>
-                    </div>
-
-                    <button onclick="drawBallManually()" class="w-full py-3 bg-purple-600 hover:bg-purple-500 font-bold rounded-xl text-sm shadow mt-2">Sacar Bola (Manual)</button>
-                    <button id="auto-draw-btn" onclick="toggleAutoDraw()" class="w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold rounded-xl shadow">▶ Iniciar Auto (Cada 3s)</button>
-                    <button onclick="resetGame()" class="w-full py-2 bg-red-600/30 text-red-300 text-xs font-bold rounded-xl">Reiniciar Partida</button>
-                </div>
-
-                <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
-                    <h3 class="font-bold text-pink-400">Figura en Juego</h3>
-                    <select id="game-pattern-select" onchange="updateGamePattern()" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white font-semibold">
-                        <option value="line">Línea (Horizontal o Vertical)</option>
-                        <option value="letter_l">Letra L</option>
-                        <option value="cross_x">La X (Cruz Grande)</option>
-                        <option value="four_corners">Cuatro Esquinas</option>
-                        <option value="diagonal">Diagonal</option>
-                        <option value="small_cross">Cruz Pequeña (Centro)</option>
-                        <option value="letter_o">Letra O (Marco Exterior)</option>
-                        <option value="full_card">Cartón Lleno (Apagón)</option>
-                    </select>
-                    <div class="mt-2">
-                        <label class="text-xs text-slate-400 block mb-1">🔑 Código de Acceso para Jugadoras:</label>
-                        <input type="text" id="admin-room-code" onchange="updateRoomCode()" placeholder="Ej: BINGO2026" class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-center">
-                    </div>
-                </div>
-                <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
-                    <h3 class="font-bold text-yellow-300">Jugadoras Conectadas</h3>
-                    <div class="flex-grow overflow-y-auto max-h-36 bg-slate-900/60 p-3 rounded-xl text-xs" id="admin-players-list"><span class="text-slate-500">Esperando...</span></div>
-                </div>
-            </div>
-            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
-                <h3 class="font-bold text-pink-400 text-lg">Control de Cartones (Liberar con ✕)</h3>
-                <div id="admin-cards-summary" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-56 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
-            </div>
-            <div class="bg-slate-800 p-6 rounded-3xl">
-                <h3 class="font-bold text-yellow-300 mb-4">Tablero General (1-75)</h3>
-                <div id="admin-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1.5"></div>
-            </div>
-        </div>
-
-        <!-- SALA JUGADORA -->
-        <div id="view-player-room" class="w-full flex flex-col gap-6 hidden">
-            <div class="bg-slate-800 p-6 rounded-3xl flex justify-between items-center">
+        <!-- PANEL DE JUGADOR -->
+        <div id="screen-player" class="hidden flex flex-col gap-6">
+            <div class="flex justify-between items-center bg-slate-800 p-4 rounded-xl">
                 <div>
-                    <h2 class="text-2xl font-bold text-yellow-300">¡Hola, <span id="player-display-name">Jugadora</span>!</h2>
-                    <p class="text-xs text-slate-400">Control ID: <span id="player-display-control">--</span></p>
+                    <h3 class="text-lg font-bold text-amber-400" id="player-welcome">Jugador</h3>
+                    <p class="text-xs text-slate-400">Estado: <span id="player-status" class="text-emerald-400">Conectado</span></p>
                 </div>
-                <div class="flex gap-2 items-center">
-                    <div class="bg-pink-950/80 border border-pink-500 px-3 py-1.5 rounded-xl text-xs font-bold text-pink-300">
-                        Figura: <span id="player-pattern-label" class="text-yellow-300">Línea</span>
-                    </div>
-                    <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 text-xs rounded-xl">Salir</button>
+                <div class="flex items-center gap-3">
+                    <div id="ball-display" class="w-12 h-12 bg-amber-500 text-slate-950 font-black text-xl rounded-full flex items-center justify-center shadow-lg">--</div>
+                    <button onclick="logout()" class="bg-rose-600 hover:bg-rose-700 text-white px-3 py-2 rounded-lg text-xs font-bold transition">Salir</button>
                 </div>
             </div>
 
-            <div id="player-winner-notification" class="hidden flash-winner text-slate-950 p-6 rounded-3xl font-extrabold text-center text-xl shadow-2xl alert-bingo flex flex-col gap-3">
-                <div id="player-winner-title" class="text-3xl text-yellow-300 drop-shadow">👑 ¡B I N G O ! 👑</div>
-                <div id="player-winner-details" class="text-base font-bold bg-black/40 text-white py-2 px-4 rounded-xl">¡Tu cartón hizo bingo!</div>
-                <div class="bg-slate-900 text-white p-4 rounded-2xl max-w-xs mx-auto w-full flex flex-col gap-2">
-                    <span class="text-xs text-yellow-300 font-bold" id="public-winner-card-title">Cartón Ganador</span>
-                    <div class="grid grid-cols-5 gap-1 text-[10px] text-pink-400 font-bold">
-                        <div class="bg-slate-800 py-1 rounded">B</div><div class="bg-slate-800 py-1 rounded">I</div><div class="bg-slate-800 py-1 rounded">N</div><div class="bg-slate-800 py-1 rounded">G</div><div class="bg-slate-800 py-1 rounded">O</div>
-                    </div>
-                    <div id="public-winning-card-grid" class="grid grid-cols-5 gap-1"></div>
+            <!-- Controles para pedir cartones -->
+            <div id="player-controls-container" class="bg-slate-800 p-4 rounded-xl flex items-center justify-between">
+                <div>
+                    <span class="text-sm block font-semibold">¿Cuántos cartones deseas?</span>
+                    <span class="text-xs text-slate-400" id="rango-activo-label">Rango activo de la casa: Del 1 al 50</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <input type="number" id="num-cartones" min="1" max="6" value="2" class="w-16 text-center bg-slate-900 border border-slate-700 rounded-lg py-1 text-white">
+                    <button id="btn-pedir-cartones" onclick="solicitarCartones()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-bold text-sm transition cursor-pointer">Pedir Cartones</button>
+                </div>
+            </div>
+
+            <!-- CONTENEDOR EN CUADRÍCULA DE CARTONES -->
+            <div id="player-cartones-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Los cartones se generan dinámicamente aquí en cuadrícula -->
+            </div>
+        </div>
+
+        <!-- PANEL DE ADMINISTRADOR -->
+        <div id="screen-admin" class="hidden flex flex-col gap-6">
+            <div class="flex justify-between items-center bg-slate-800 p-4 rounded-xl">
+                <h3 class="text-lg font-bold text-indigo-400">Panel de Control - Administrador</h3>
+                <button onclick="logout()" class="bg-rose-600 hover:bg-rose-700 text-white px-3 py-2 rounded-lg text-xs font-bold transition">Cerrar Sesión</button>
+            </div>
+
+            <!-- CONFIGURACIÓN DE RANGO DE CARTONES PARA LA PARTIDA -->
+            <div class="bg-slate-800 p-4 rounded-xl flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <h4 class="font-bold text-slate-200">Configurar Rango de Cartones en Juego</h4>
+                    <p class="text-xs text-slate-400">Elige hasta qué número de la baraja maestra (1 al 100) está habilitado hoy.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <select id="admin-rango-limite" class="bg-slate-900 border border-slate-700 text-white px-3 py-2 rounded-lg text-sm font-bold focus:outline-none focus:border-indigo-500">
+                        <option value="30">Del 1 al 30</option>
+                        <option value="50">Del 1 al 50</option>
+                        <option value="75">Del 1 al 75</option>
+                        <option value="100" selected>Del 1 al 100 (Todos)</option>
+                    </select>
+                    <button onclick="guardarRangoPartida()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition cursor-pointer">Establecer Rango</button>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-slate-800 p-6 rounded-3xl flex flex-col items-center justify-center gap-3">
-                    <h3 class="font-bold text-yellow-300 text-sm">Última Bola Cantada</h3>
-                    <div id="player-current-ball" class="w-24 h-24 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-4xl flex items-center justify-center shadow-lg">--</div>
-                    
-                    <div class="w-full flex flex-col items-center gap-1.5 mt-1">
-                        <span class="text-[11px] text-slate-400 font-semibold">Últimas 5 salidas:</span>
-                        <div id="player-history-balls" class="flex gap-2 items-center justify-center min-h-[38px]">
-                            <span class="text-xs text-slate-500">--</span>
-                        </div>
-                    </div>
+                <!-- Control de Bolitas -->
+                <div class="bg-slate-800 p-6 rounded-xl flex flex-col items-center justify-center gap-4 md:col-span-1">
+                    <div id="admin-current-ball" class="w-24 h-24 bg-amber-500 text-slate-950 font-black text-4xl rounded-full flex items-center justify-center shadow-xl border-4 border-amber-300">--</div>
+                    <button onclick="sacarBolita()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold py-3 rounded-xl shadow-lg transition cursor-pointer">¡Sacar Siguiente Bolita!</button>
+                    <button onclick="reiniciarPartida()" class="w-full bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs py-2 rounded-lg transition">Reiniciar Juego</button>
                 </div>
 
-                <div class="bg-slate-800 p-6 rounded-3xl md:col-span-2 flex flex-col gap-2">
-                    <h3 class="font-bold text-pink-400 text-sm">Tablero General (1-75)</h3>
-                    <div id="player-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1"></div>
+                <!-- Lista de Jugadores con Botón de Eliminar Fantasmas -->
+                <div class="bg-slate-800 p-6 rounded-xl md:col-span-2 flex flex-col gap-4">
+                    <h4 class="font-bold text-slate-300 border-b border-slate-700 pb-2">Jugadores Conectados en la Sala</h4>
+                    <div id="admin-players-list" class="flex flex-col gap-2 max-h-60 overflow-y-auto pr-2">
+                        <!-- Lista dinámica con botón de expulsar -->
+                        <p class="text-xs text-slate-500 italic">No hay jugadores conectados aún.</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (<span id="available-count">100</span> Disponibles)</h3>
-                        <p class="text-xs text-slate-400">Toca para marcar o desmarcar. Confirma cuando estés lista.</p>
-                    </div>
-                    <button onclick="confirmSelectedCards()" class="px-5 py-2.5 bg-green-600 hover:bg-green-500 font-bold text-xs rounded-xl shadow">Confirmar Mis Cartones</button>
-                </div>
-                <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
-            </div>
-
-            <div class="flex flex-col gap-4">
-                <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-yellow-300 text-lg">Tus Cartones en Juego (Ordenados por avance 🚀)</h3>
-                    <span class="text-xs text-slate-400">El más cercano sube automáticamente</span>
-                </div>
-                <div id="player-my-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <span class="text-slate-500 text-sm">Aún no has seleccionado cartones.</span>
+            <!-- Tablero general de control (1 al 75) -->
+            <div class="bg-slate-800 p-6 rounded-xl">
+                <h4 class="font-bold text-slate-300 mb-4 text-center">Tablero de Control General (Bolitas 1 - 75)</h4>
+                <div id="admin-master-board" class="grid grid-cols-15 gap-1 text-center">
+                    <!-- Generado por JS -->
                 </div>
             </div>
         </div>
+
     </div>
 
-    <footer class="text-center text-xs text-slate-500 py-6">Bingo Lineal Yune &bull; Tiempo Real 🌟</footer>
-
+    <!-- SCRIPT DE LOGICA DE BINGO -->
     <script>
-        const firebaseConfig = { databaseURL: "https://bingo-lineal-yune-default-rtdb.firebaseio.com/" };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        let currentUser = null;
+        let userRole = null;
+        let misCartones = [];
+        let bolasCantadas = [];
+        let partidaIniciada = false;
+        let rangoMaximoCartones = 100; // Por defecto los 100 cartones disponibles
+        
+        let jugadoresConectados = [
+            { id: 1, name: "Jugador Prueba 1", status: "Conectado" },
+            { id: 2, name: "Jugador Prueba 2", status: "Conectado" }
+        ];
+        let currentAdminBall = "--";
 
-        let currentUser = { name: '', control: '', isAdmin: false };
-        let drawnBalls = [];
-        let gamePattern = 'line';
-        let marketCards = {}; 
-        let mySelectedCards = [];
-        let lastBallDrawn = null;
-        let autoDrawInterval = null;
-        let isAutoRunning = false;
-        let roomCodeSecret = '1234';
-        let hasSpokenMyBingo = false;
-        let lastSpokenBall = null;
+        function loginAsPlayer() {
+            const name = document.getElementById('input-username').value.trim();
+            if(!name) return alert("Por favor ingresa un nombre.");
+            currentUser = name;
+            userRole = 'player';
+            document.getElementById('player-welcome').innerText = `Jugador: ${name}`;
+            document.getElementById('screen-login').classList.add('hidden');
+            document.getElementById('screen-player').classList.remove('hidden');
+            actualizarEstadoInterfazJugador();
+            generarCartonesIniciales(2);
+        }
 
-        window.onload = function() {
-            initAdminBoard();
-            initPlayerBoard();
-            initCardsMarket();
-            listenFirebaseData();
-        };
+        function loginAsAdmin() {
+            currentUser = "Administrador";
+            userRole = 'admin';
+            document.getElementById('screen-login').classList.add('hidden');
+            document.getElementById('screen-admin').classList.remove('hidden');
+            renderAdminMasterBoard();
+            renderAdminPlayers();
+        }
 
-        function listenFirebaseData() {
-            db.ref('system').on('value', (snapshot) => {
-                const val = snapshot.val() || {};
-                drawnBalls = val.drawnBalls || [];
-                lastBallDrawn = val.lastBall || '--';
-                gamePattern = val.pattern || 'line';
-                marketCards = val.cards || {};
-                roomCodeSecret = val.roomCode || '1234';
+        function logout() {
+            currentUser = null;
+            userRole = null;
+            document.getElementById('screen-player').classList.add('hidden');
+            document.getElementById('screen-admin').classList.add('hidden');
+            document.getElementById('screen-login').classList.remove('hidden');
+            document.getElementById('input-username').value = "";
+        }
 
-                const patternSelect = document.getElementById('game-pattern-select');
-                if(patternSelect && patternSelect.value !== gamePattern) {
-                    patternSelect.value = gamePattern;
-                }
-                const adminRoomInput = document.getElementById('admin-room-code');
-                if(adminRoomInput && adminRoomInput.value !== roomCodeSecret) {
-                    adminRoomInput.value = roomCodeSecret;
-                }
+        function guardarRangoPartida() {
+            if(partidaIniciada) {
+                return alert("No puedes cambiar el rango con la partida ya iniciada.");
+            }
+            rangoMaximoCartones = parseInt(document.getElementById('admin-rango-limite').value);
+            alert(`¡Rango actualizado con éxito! Solo se jugarán cartones del 1 al ${rangoMaximoCartones}.`);
+        }
 
-                const patternNames = { 
-                    'line': 'Línea (Horizontal/Vertical)', 
-                    'letter_l': 'Letra L', 
-                    'cross_x': 'La X (Cruz Grande)', 
-                    'four_corners': 'Cuatro Esquinas', 
-                    'diagonal': 'Diagonal', 
-                    'small_cross': 'Cruz Pequeña', 
-                    'letter_o': 'Letra O', 
-                    'full_card': 'Cartón Lleno' 
+        function actualizarEstadoInterfazJugador() {
+            document.getElementById('rango-activo-label').innerText = `Rango activo de la casa: Del 1 al ${rangoMaximoCartones}`;
+            if(partidaIniciada) {
+                document.getElementById('player-controls-container').classList.add('opacity-50', 'pointer-events-none');
+                document.getElementById('player-status').innerText = "Partida en curso (Bloqueado)";
+                document.getElementById('player-status').className = "text-amber-400 font-bold";
+            } else {
+                document.getElementById('player-controls-container').classList.remove('opacity-50', 'pointer-events-none');
+                document.getElementById('player-status').innerText = "Conectado";
+                document.getElementById('player-status').className = "text-emerald-400 font-bold";
+            }
+        }
+
+        function generarNumerosColumna(min, max, cantidad) {
+            let numeros = [];
+            while(numeros.length < cantidad) {
+                let r = Math.floor(Math.random() * (max - min + 1)) + min;
+                if(!numeros.includes(r)) numeros.push(r);
+            }
+            return numeros;
+        }
+
+        function crearCarton() {
+            let b = generarNumerosColumna(1, 15, 5);
+            let i = generarNumerosColumna(16, 30, 5);
+            let n = generarNumerosColumna(31, 45, 5);
+            n[2] = "FREE"; // Casilla central libre
+            let g = generarNumerosColumna(46, 60, 5);
+            let o = generarNumerosColumna(61, 75, 5);
+
+            let matriz = [];
+            for(let r = 0; r < 5; r++) {
+                matriz.push([b[r], i[r], n[r], g[r], o[r]]);
+            }
+            return matriz;
+        }
+
+        function solicitarCartones() {
+            if(partidaIniciada) {
+                return alert("¡La partida ya comenzó! No se pueden pedir más cartones.");
+            }
+            let cantidad = parseInt(document.getElementById('num-cartones').value) || 2;
+            misCartones = [];
+            for(let c = 0; c < cantidad; c++) {
+                let numCartonID = Math.floor(Math.random() * rangoMaximoCartones) + 1;
+                let cartonObj = {
+                    id: numCartonID,
+                    matriz: crearCarton()
                 };
-                const patternLabel = document.getElementById('player-pattern-label');
-                if(patternLabel) {
-                    patternLabel.innerText = patternNames[gamePattern] || 'Línea';
-                }
-
-                if (lastBallDrawn && lastBallDrawn !== '--' && lastBallDrawn !== lastSpokenBall) {
-                    lastSpokenBall = lastBallDrawn;
-                    speakBall(lastBallDrawn);
-                }
-
-                const winnerData = val.winner;
-                const adminAlert = document.getElementById('admin-winner-alert');
-                const adminWinnerText = document.getElementById('admin-winner-text');
-                const playerNotification = document.getElementById('player-winner-notification');
-                const playerWinnerDetails = document.getElementById('player-winner-details');
-                const playerWinnerTitle = document.getElementById('player-winner-title');
-
-                if (winnerData && winnerData.name) {
-                    stopAutoDraw();
-                    
-                    if (adminAlert && adminWinnerText) {
-                        adminWinnerText.innerText = `¡${winnerData.name} ganó con el cartón #${winnerData.card} (${winnerData.patternName})!`;
-                        document.getElementById('admin-winner-card-title').innerText = `Cartón #${winnerData.card} (${winnerData.patternName})`;
-                        renderMiniWinningCard('admin-winning-card-grid', winnerData.card);
-                        adminAlert.classList.remove('hidden');
-                    }
-
-                    if (playerNotification && playerWinnerDetails) {
-                        if (winnerData.name === currentUser.name) {
-                            playerWinnerTitle.innerText = "👑 ¡HAS CANTADO BINGO! 👑";
-                            playerWinnerDetails.innerText = `¡Felicidades ${currentUser.name}! Tu cartón #${winnerData.card} completó la figura de ${winnerData.patternName}.`;
-                            
-                            if (!hasSpokenMyBingo) {
-                                speakPlayerBingo();
-                                hasSpokenMyBingo = true;
-                            }
-                        } else {
-                            playerWinnerTitle.innerText = "👑 ¡B I N G O ! 👑";
-                            playerWinnerDetails.innerText = `¡${winnerData.name} hizo Bingo con el cartón #${winnerData.card} (${winnerData.patternName})!`;
-                        }
-                        
-                        document.getElementById('public-winner-card-title').innerText = `Cartón #${winnerData.card} de ${winnerData.name}`;
-                        renderMiniWinningCard('public-winning-card-grid', winnerData.card);
-                        playerNotification.classList.remove('hidden');
-                    }
-                } else {
-                    hasSpokenMyBingo = false;
-                    if (adminAlert) adminAlert.classList.add('hidden');
-                    if (playerNotification) playerNotification.classList.add('hidden');
-                }
-
-                if(currentUser.name) {
-                    mySelectedCards = [];
-                    for(let cardId in marketCards) {
-                        if(marketCards[cardId] === currentUser.name) {
-                            mySelectedCards.push(parseInt(cardId));
-                        }
-                    }
-                    renderMyCards();
-                    checkMyCardsForBingo();
-                }
-                updateUIFromState();
-            });
-
-            db.ref('players').on('value', (snapshot) => {
-                updatePlayersListUI(snapshot.val() || {});
-            });
-        }
-
-        function hideAllViews() {
-            ['view-home', 'view-admin-login', 'view-player-register', 'view-admin-panel', 'view-player-room'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
-            stopAutoDraw();
-        }
-
-        function showAdminLogin() { hideAllViews(); document.getElementById('view-admin-login').classList.remove('hidden'); }
-        function showPlayerLogin() { 
-            hideAllViews(); 
-            document.getElementById('view-player-register').classList.remove('hidden');
-            const savedName = localStorage.getItem('yune_bingo_name');
-            const savedControl = localStorage.getItem('yune_bingo_control');
-            if(savedName) {
-                document.getElementById('player-name-input').value = savedName;
-                document.getElementById('player-control-input').value = savedControl || '';
-                const msg = document.getElementById('welcome-back-msg');
-                msg.innerText = `¡Qué bueno tenerte de vuelta, ${savedName}! ✨`;
-                msg.classList.remove('hidden');
+                misCartones.push(cartonObj);
             }
-        }
-        function backToHome() { hideAllViews(); document.getElementById('view-home').classList.remove('hidden'); }
-
-        function verifyAdminPassword() {
-            const pass = document.getElementById('admin-password-input').value;
-            if(pass === "Yune2026") {
-                currentUser.isAdmin = true;
-                hideAllViews();
-                document.getElementById('view-admin-panel').classList.remove('hidden');
-            } else { 
-                alert("❌ Clave incorrecta. Acceso denegado."); 
-            }
+            renderCartonesJugador();
         }
 
-        function registerPlayer() {
-            const name = document.getElementById('player-name-input').value.trim();
-            const control = document.getElementById('player-control-input').value.trim();
-            const codeInput = document.getElementById('player-access-code-input').value.trim();
+        function renderCartonesJugador() {
+            const container = document.getElementById('player-cartones-container');
+            container.innerHTML = "";
 
-            if(!name || !control || !codeInput) { alert("Completa todos los campos, incluyendo el código de acceso."); return; }
-            if(codeInput !== roomCodeSecret) { alert("❌ Código de acceso incorrecto. Pídeselo a la administradora."); return; }
-
-            currentUser.name = name;
-            currentUser.control = control;
-            localStorage.setItem('yune_bingo_name', name);
-            localStorage.setItem('yune_bingo_control', control);
-
-            db.ref('players/' + control).set({ name, control, online: true });
-            hideAllViews();
-            document.getElementById('view-player-room').classList.remove('hidden');
-            document.getElementById('player-display-name').innerText = name;
-            document.getElementById('player-display-control').innerText = control;
-            
-            mySelectedCards = [];
-            for(let cardId in marketCards) {
-                if(marketCards[cardId] === name) mySelectedCards.push(parseInt(cardId));
-            }
-            renderMyCards();
-        }
-
-        function getBallLetter(num) {
-            if (num <= 15) return 'B';
-            if (num <= 30) return 'I';
-            if (num <= 45) return 'N';
-            if (num <= 60) return 'G';
-            return 'O';
-        }
-
-        function speakBall(ballNum) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                let letra = getBallLetter(ballNum);
-                let text = `${letra} ${ballNum}`;
-                let utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'es-ES';
-                utterance.rate = 1.15;
-                utterance.pitch = 1.25;
+            misCartones.forEach((item, index) => {
+                let cartonDiv = document.createElement('div');
+                cartonDiv.className = "bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md flex flex-col gap-2";
                 
-                const voces = window.speechSynthesis.getVoices();
-                const vozNatural = voces.find(v => v.lang.includes('es') && (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Helena')));
-                if (vozNatural) utterance.voice = vozNatural;
-
-                window.speechSynthesis.speak(utterance);
-            }
-        }
-
-        function speakPlayerBingo() {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                let text = "¡Has cantado bingo!";
-                let utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'es-ES';
-                utterance.rate = 1.15;
-                utterance.pitch = 1.3;
-                window.speechSynthesis.speak(utterance);
-            }
-        }
-
-        function drawBallManually() {
-            if(drawnBalls.length >= 75) { 
-                alert("¡Se cantaron las 75 bolas!"); 
-                stopAutoDraw();
-                return; 
-            }
-            let available = [];
-            for(let i=1; i<=75; i++) { if(!drawnBalls.includes(i)) available.push(i); }
-            const randomBall = available[Math.floor(Math.random() * available.length)];
-            drawnBalls.push(randomBall);
-            db.ref('system').update({ drawnBalls, lastBall: randomBall });
-        }
-
-        function toggleAutoDraw() {
-            const btn = document.getElementById('auto-draw-btn');
-            if(isAutoRunning) {
-                stopAutoDraw();
-            } else {
-                if(drawnBalls.length >= 75) { alert("El tablero ya está completo."); return; }
-                isAutoRunning = true;
-                btn.innerText = "⏸ Detener Auto";
-                btn.className = "w-full py-2.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-xl shadow";
-                autoDrawInterval = setInterval(() => {
-                    if(drawnBalls.length >= 75) {
-                        stopAutoDraw();
-                        alert("¡Se completaron las 75 bolas!");
-                        return;
-                    }
-                    drawBallManually();
-                }, 3000);
-            }
-        }
-
-        function stopAutoDraw() {
-            if(autoDrawInterval) clearInterval(autoDrawInterval);
-            isAutoRunning = false;
-            const btn = document.getElementById('auto-draw-btn');
-            if(btn) {
-                btn.innerText = "▶ Iniciar Auto (Cada 3s)";
-                btn.className = "w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold rounded-xl shadow";
-            }
-        }
-
-        function resetGame() {
-            if(confirm("¿Reiniciar partida, limpiar cartones y ganadores?")) {
-                stopAutoDraw();
-                db.ref('system').update({ drawnBalls: [], lastBall: '--', cards: null, winner: null });
-                mySelectedCards = [];
-                renderMyCards();
-            }
-        }
-
-        function updateGamePattern() {
-            const pattern = document.getElementById('game-pattern-select').value;
-            db.ref('system/pattern').set(pattern);
-        }
-
-        function updateRoomCode() {
-            const code = document.getElementById('admin-room-code').value.trim();
-            if(code) db.ref('system/roomCode').set(code);
-        }
-
-        function clearWinnerAlert() {
-            db.ref('system/winner').remove();
-        }
-
-        function getCardMatrix(cardId) {
-            let colRanges = [{min:1, max:15}, {min:16, max:30}, {min:31, max:45}, {min:46, max:60}, {min:61, max:75}];
-            let colsData = [];
-            for(let c = 0; c < 5; c++) {
-                let seed = cardId * (c + 7);
-                let colNums = [];
-                while(colNums.length < 5) {
-                    seed = (seed * 9301 + 49297) % 233280;
-                    let num = Math.floor((seed / 233280) * (colRanges[c].max - colRanges[c].min + 1)) + colRanges[c].min;
-                    if(!colNums.includes(num)) colNums.push(num);
+                let faltantes = contarNumerosFaltantes(item.matriz);
+                if(faltantes === 1) {
+                    cartonDiv.classList.add('carton-espera');
                 }
-                colNums.sort((a, b) => a - b);
-                colsData.push(colNums);
-            }
-            let matrix = [];
+
+                let html = `<div class="flex justify-between items-center text-xs font-bold text-amber-400">
+                    <span>Cartón Oficial #${item.id}</span>
+                    <span>${faltantes === 1 ? '🔥 ¡EN ESPERA DE BINGO!' : ''}</span>
+                </div>`;
+                
+                html += `<div class="grid grid-cols-5 gap-1 text-center text-xs font-semibold">`;
+                ['B', 'I', 'N', 'G', 'O'].forEach(letra => {
+                    html += `<div class="bg-amber-500 text-slate-950 py-1 rounded">${letra}</div>`;
+                });
+
+                for(let r = 0; r < 5; r++) {
+                    for(let col = 0; col < 5; col++) {
+                        let val = item.matriz[r][col];
+                        let isChecked = val === "FREE" || bolasCantadas.includes(val);
+                        let isPatternX = esPatronX(item.matriz, r, col) && isChecked;
+                        
+                        let cssClass = "bg-slate-900 py-2 rounded text-slate-300 flex items-center justify-center ";
+                        if(isPatternX) {
+                            cssClass += "winning-number ";
+                        } else if(isChecked) {
+                            cssClass += "bg-emerald-900 text-emerald-300 border border-emerald-600 ";
+                        }
+
+                        html += `<div class="${cssClass}">${val}</div>`;
+                    }
+                }
+                html += `</div>`;
+                cartonDiv.innerHTML = html;
+                container.appendChild(cartonDiv);
+            });
+        }
+
+        function esPatronX(carton, r, col) {
+            return (r === col) || (r + col === 4);
+        }
+
+        function contarNumerosFaltantes(carton) {
+            let countUnchecked = 0;
             for(let r = 0; r < 5; r++) {
-                let row = [];
-                for(let c = 0; c < 5; c++) {
-                    if(r === 2 && c === 2) {
-                        row.push('FREE');
-                    } else {
-                        row.push(colsData[c][r]);
-                    }
-                }
-                matrix.push(row);
-            }
-            return matrix;
-        }
-
-        function checkCardBingo(cardId, pattern, balls) {
-            let matrix = getCardMatrix(cardId);
-            let isMarked = (val) => val === 'FREE' || balls.includes(val);
-
-            if(pattern === 'full_card') {
-                for(let r=0; r<5; r++) {
-                    for(let c=0; c<5; c++) {
-                        if(!isMarked(matrix[r][c])) return false;
-                    }
-                }
-                return true;
-            } else if(pattern === 'line') {
-                for(let r=0; r<5; r++) {
-                    let rowWin = true;
-                    for(let c=0; c<5; c++) { if(!isMarked(matrix[r][c])) rowWin = false; }
-                    if(rowWin) return true;
-                }
-                for(let c=0; c<5; c++) {
-                    let colWin = true;
-                    for(let r=0; r<5; r++) { if(!isMarked(matrix[r][c])) colWin = false; }
-                    if(colWin) return true;
-                }
-                return false;
-            } else if(pattern === 'letter_l') {
-                let lWin = true;
-                for(let r=0; r<5; r++) { if(!isMarked(matrix[r][0])) lWin = false; }
-                for(let c=1; c<5; c++) { if(!isMarked(matrix[4][c])) lWin = false; }
-                return lWin;
-            } else if(pattern === 'cross_x') {
-                let diag1 = true, diag2 = true;
-                for(let i=0; i<5; i++) {
-                    if(!isMarked(matrix[i][i])) diag1 = false;
-                    if(!isMarked(matrix[i][4-i])) diag2 = false;
-                }
-                return diag1 && diag2;
-            } else if(pattern === 'four_corners') {
-                return isMarked(matrix[0][0]) && isMarked(matrix[0][4]) && isMarked(matrix[4][0]) && isMarked(matrix[4][4]);
-            } else if(pattern === 'diagonal') {
-                let diag1 = true, diag2 = true;
-                for(let i=0; i<5; i++) {
-                    if(!isMarked(matrix[i][i])) diag1 = false;
-                    if(!isMarked(matrix[i][4-i])) diag2 = false;
-                }
-                return diag1 || diag2;
-            } else if(pattern === 'small_cross') {
-                let row2 = true, col2 = true;
-                for(let i=0; i<5; i++) {
-                    if(!isMarked(matrix[2][i])) row2 = false;
-                    if(!isMarked(matrix[i][2])) col2 = false;
-                }
-                return row2 && col2;
-            } else if(pattern === 'letter_o') {
-                for(let i=0; i<5; i++) {
-                    if(!isMarked(matrix[0][i]) || !isMarked(matrix[4][i]) || !isMarked(matrix[i][0]) || !isMarked(matrix[i][4])) return false;
-                }
-                return true;
-            }
-            return false;
-        }
-
-        function getMissingCountForBingo(cardId, pattern, balls) {
-            let matrix = getCardMatrix(cardId);
-            let isMarked = (val) => val === 'FREE' || balls.includes(val);
-
-            if(pattern === 'full_card') {
-                let missing = 0;
-                for(let r=0; r<5; r++) { for(let c=0; c<5; c++) { if(!isMarked(matrix[r][c])) missing++; } }
-                return missing;
-            } else if(pattern === 'line') {
-                let minMissing = 5;
-                for(let r=0; r<5; r++) {
-                    let m = 0; for(let c=0; c<5; c++) { if(!isMarked(matrix[r][c])) m++; }
-                    if(m < minMissing) minMissing = m;
-                }
-                for(let c=0; c<5; c++) {
-                    let m = 0; for(let r=0; r<5; r++) { if(!isMarked(matrix[r][c])) m++; }
-                    if(m < minMissing) minMissing = m;
-                }
-                return minMissing;
-            } else if(pattern === 'four_corners') {
-                let missing = 0;
-                if(!isMarked(matrix[0][0])) missing++;
-                if(!isMarked(matrix[0][4])) missing++;
-                if(!isMarked(matrix[4][0])) missing++;
-                if(!isMarked(matrix[4][4])) missing++;
-                return missing;
-            } else {
-                let totalUnmarked = 0;
-                for(let r=0; r<5; r++) { for(let c=0; c<5; c++) { if(!isMarked(matrix[r][c])) totalUnmarked++; } }
-                return Math.min(totalUnmarked, 10);
-            }
-        }
-
-        function checkMyCardsForBingo() {
-            if(!currentUser.name || mySelectedCards.length === 0) return;
-            
-            db.ref('system/winner').once('value', (snap) => {
-                if(snap.val()) return;
-
-                for(let cardId of mySelectedCards) {
-                    if(checkCardBingo(cardId, gamePattern, drawnBalls)) {
-                        const patternNames = { 
-                            'line': 'Línea', 
-                            'letter_l': 'Letra L', 
-                            'cross_x': 'La X', 
-                            'four_corners': 'Cuatro Esquinas', 
-                            'diagonal': 'Diagonal', 
-                            'small_cross': 'Cruz Pequeña', 
-                            'letter_o': 'Letra O', 
-                            'full_card': 'Cartón Lleno' 
-                        };
-                        db.ref('system/winner').set({
-                            name: currentUser.name,
-                            card: cardId,
-                            patternName: patternNames[gamePattern] || 'Línea'
-                        });
-                        break;
-                    }
-                }
-            });
-        }
-
-        function initAdminBoard() {
-            const grid = document.getElementById('admin-board-grid');
-            if(!grid) return;
-            grid.innerHTML = '';
-            for(let i=1; i<=75; i++) {
-                const cell = document.createElement('div');
-                cell.id = `admin-ball-${i}`;
-                cell.className = "h-8 rounded-lg bg-slate-900 border border-slate-700 text-slate-400 font-bold text-xs flex items-center justify-center";
-                cell.innerText = i;
-                grid.appendChild(cell);
-            }
-        }
-
-        function initPlayerBoard() {
-            const grid = document.getElementById('player-board-grid');
-            if(!grid) return;
-            grid.innerHTML = '';
-            for(let i=1; i<=75; i++) {
-                const cell = document.createElement('div');
-                cell.id = `player-board-ball-${i}`;
-                cell.className = "h-7 rounded-lg bg-slate-900 border border-slate-700 text-slate-400 font-bold text-[11px] flex items-center justify-center";
-                cell.innerText = i;
-                grid.appendChild(cell);
-            }
-        }
-
-        function initCardsMarket() {
-            const market = document.getElementById('cards-market-grid');
-            if(!market) return;
-            market.innerHTML = '';
-            for(let i=1; i<=100; i++) {
-                const cardBtn = document.createElement('button');
-                cardBtn.id = `market-card-${i}`;
-                cardBtn.className = "p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-bold text-slate-300 flex flex-col items-center gap-1 transition";
-                cardBtn.innerHTML = `<span>Cartón #${i}</span><span id="owner-card-${i}" class="text-[10px] text-slate-500">Disponible</span>`;
-                cardBtn.onclick = () => toggleSelectCard(i);
-                market.appendChild(cardBtn);
-            }
-        }
-
-        function toggleSelectCard(cardNum) {
-            const currentOwner = marketCards[cardNum];
-            if(currentOwner && currentOwner !== currentUser.name) {
-                alert(`Este cartón ya fue comprado por ${currentOwner}.`);
-                return;
-            }
-            const index = mySelectedCards.indexOf(cardNum);
-            if(index > -1) {
-                mySelectedCards.splice(index, 1);
-            } else {
-                mySelectedCards.push(cardNum);
-            }
-            updateMarketUI();
-        }
-
-        function confirmSelectedCards() {
-            let updates = {};
-            for(let i=1; i<=100; i++) {
-                if(marketCards[i] === currentUser.name) updates[`cards/${i}`] = null;
-            }
-            mySelectedCards.forEach(num => { updates[`cards/${num}`] = currentUser.name; });
-            db.ref('system').update(updates);
-            alert("¡Cartones confirmados!");
-            renderMyCards();
-        }
-
-        function adminReleaseCard(cardNum) {
-            if(confirm(`¿Liberar Cartón #${cardNum}?`)) {
-                db.ref(`system/cards/${cardNum}`).remove();
-            }
-        }
-
-        function updateMarketUI() {
-            let takenCount = 0;
-            for(let i=1; i<=100; i++) {
-                if(marketCards[i]) takenCount++;
-                const btn = document.getElementById(`market-card-${i}`);
-                const ownerSpan = document.getElementById(`owner-card-${i}`);
-                if(!btn || !ownerSpan) continue;
-                const owner = marketCards[i];
-                const isSelected = mySelectedCards.includes(i);
-
-                if(owner) {
-                    ownerSpan.innerText = `Dueño: ${owner}`;
-                    if(owner === currentUser.name) {
-                        ownerSpan.className = "text-[10px] text-green-400 font-semibold";
-                        btn.className = "p-2 bg-green-950/40 border border-green-500 rounded-xl text-xs font-bold text-white flex flex-col items-center gap-1 shadow";
-                    } else {
-                        ownerSpan.className = "text-[10px] text-red-400 font-semibold";
-                        btn.className = "p-2 bg-slate-900 border border-slate-800 rounded-xl text-xs font-bold text-slate-600 flex flex-col items-center gap-1 cursor-not-allowed opacity-60";
-                    }
-                } else {
-                    if(isSelected) {
-                        ownerSpan.innerText = "Seleccionado";
-                        ownerSpan.className = "text-[10px] text-pink-400 font-semibold";
-                        btn.className = "p-2 bg-pink-600/20 border border-pink-500 rounded-xl text-xs font-bold text-white flex flex-col items-center gap-1 shadow";
-                    } else {
-                        ownerSpan.innerText = "Disponible";
-                        ownerSpan.className = "text-[10px] text-slate-500";
-                        btn.className = "p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-bold text-slate-300 flex flex-col items-center gap-1";
-                    }
-                }
-            }
-
-            const availableCountSpan = document.getElementById('available-count');
-            if(availableCountSpan) {
-                availableCountSpan.innerText = (100 - takenCount);
-            }
-        }
-
-        function renderMyCards() {
-            const container = document.getElementById('player-my-cards-container');
-            container.innerHTML = '';
-            if(mySelectedCards.length === 0) {
-                container.innerHTML = '<span class="text-slate-500 text-sm">Aún no has seleccionado cartones.</span>';
-                return;
-            }
-
-            let sortedCards = [...mySelectedCards].sort((a, b) => {
-                let missingA = getMissingCountForBingo(a, gamePattern, drawnBalls);
-                let missingB = getMissingCountForBingo(b, gamePattern, drawnBalls);
-                return missingA - missingB;
-            });
-
-            sortedCards.forEach(cardId => {
-                let missingCount = getMissingCountForBingo(cardId, gamePattern, drawnBalls);
-                let statusBadge = '';
-                let borderStyle = "border-slate-700";
-
-                if(missingCount === 0) {
-                    statusBadge = `<span class="bg-yellow-400 text-slate-950 px-2 py-0.5 rounded-full text-[10px] font-extrabold animate-bounce">👑 ¡BINGO!</span>`;
-                    borderStyle = "border-yellow-400 shadow-lg shadow-yellow-500/20 bg-slate-900/90";
-                } else if(missingCount === 1) {
-                    statusBadge = `<span class="bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px] font-extrabold animate-bounce">🔥 ¡A 1 NÚMERO!</span>`;
-                    borderStyle = "border-red-500 shadow-md shadow-red-500/20 bg-slate-900/90";
-                } else if(missingCount <= 2) {
-                    statusBadge = `<span class="bg-purple-600 text-white px-2 py-0.5 rounded-full text-[10px] font-bold">⚡ ¡Cerca!</span>`;
-                    borderStyle = "border-purple-500/80";
-                } else {
-                    statusBadge = `<span class="text-slate-400 text-[10px] font-normal">En juego</span>`;
-                }
-
-                const cardDiv = document.createElement('div');
-                cardDiv.className = `bg-slate-900 border ${borderStyle} p-4 rounded-2xl flex flex-col gap-3 transition-all`;
-                cardDiv.innerHTML = `
-                    <div class="flex justify-between items-center text-xs font-bold text-yellow-300">
-                        <span>Cartón #${cardId}</span>
-                        ${statusBadge}
-                    </div>
-                    <div class="grid grid-cols-5 gap-1 text-center font-extrabold text-xs text-pink-400">
-                        <div class="bg-slate-800 py-1 rounded">B</div><div class="bg-slate-800 py-1 rounded">I</div><div class="bg-slate-800 py-1 rounded">N</div><div class="bg-slate-800 py-1 rounded">G</div><div class="bg-slate-800 py-1 rounded">O</div>
-                    </div>
-                    <div class="grid grid-cols-5 gap-1" id="card-grid-${cardId}"></div>
-                `;
-                container.appendChild(cardDiv);
-                generateCardVisual(cardId, `card-grid-${cardId}`);
-            });
-        }
-
-        function generateCardVisual(cardId, containerId) {
-            const grid = document.getElementById(containerId);
-            if(!grid) return;
-            grid.innerHTML = '';
-            let matrix = getCardMatrix(cardId);
-
-            for(let r = 0; r < 5; r++) {
-                for(let c = 0; c < 5; c++) {
-                    const cell = document.createElement('div');
-                    cell.className = "h-9 bg-slate-800 border border-slate-700/60 rounded-lg flex items-center justify-center text-xs font-bold text-white";
-                    let val = matrix[r][c];
-                    if(val === 'FREE') {
-                        cell.innerText = "⭐";
-                        cell.className += " bg-pink-600/40 text-pink-300";
-                    } else {
-                        cell.innerText = val;
-                        if(drawnBalls.includes(val)) {
-                            cell.classList.add('bg-green-600', 'text-white', 'border-green-400');
+                for(let col = 0; col < 5; col++) {
+                    let val = carton[r][col];
+                    if(val !== "FREE" && !bolasCantadas.includes(val)) {
+                        if(esPatronX(carton, r, col)) {
+                            countUnchecked++;
                         }
                     }
-                    grid.appendChild(cell);
                 }
+            }
+            return countUnchecked;
+        }
+
+        // --- Funciones de Administrador ---
+        function renderAdminMasterBoard() {
+            const master = document.getElementById('admin-master-board');
+            master.innerHTML = "";
+            for(let i = 1; i <= 75; i++) {
+                let cell = document.createElement('div');
+                cell.className = "bg-slate-900 text-xs py-1 rounded text-slate-400 font-bold " + (bolasCantadas.includes(i) ? "bg-amber-500 text-slate-950" : "");
+                cell.innerText = i;
+                master.appendChild(cell);
             }
         }
 
-        function renderMiniWinningCard(containerId, cardId) {
-            const grid = document.getElementById(containerId);
-            if(!grid) return;
-            grid.innerHTML = '';
-            let matrix = getCardMatrix(cardId);
-
-            for(let r = 0; r < 5; r++) {
-                for(let c = 0; c < 5; c++) {
-                    const cell = document.createElement('div');
-                    cell.className = "h-7 bg-slate-800 border border-slate-700/60 rounded flex items-center justify-center text-[10px] font-bold text-white";
-                    let val = matrix[r][c];
-                    if(val === 'FREE') {
-                        cell.innerText = "⭐";
-                        cell.className += " bg-pink-600/40 text-pink-300";
-                    } else {
-                        cell.innerText = val;
-                        if(drawnBalls.includes(val)) {
-                            cell.classList.add('bg-green-600', 'text-white', 'border-green-400');
-                        }
-                    }
-                    grid.appendChild(cell);
-                }
-            }
-        }
-
-        function updateUIFromState() {
-            const cbAdmin = document.getElementById('admin-current-ball');
-            const cbPlayer = document.getElementById('player-current-ball');
-            if(cbAdmin) cbAdmin.innerText = lastBallDrawn;
-            if(cbPlayer) cbPlayer.innerText = lastBallDrawn;
-
-            renderHistoryBalls();
-
-            for(let i=1; i<=75; i++) {
-                const adminCell = document.getElementById(`admin-ball-${i}`);
-                if(adminCell) {
-                    adminCell.className = drawnBalls.includes(i) ? 
-                        "h-8 rounded-lg bg-yellow-400 text-slate-950 font-extrabold text-xs flex items-center justify-center" : 
-                        "h-8 rounded-lg bg-slate-900 border border-slate-700 text-slate-400 font-bold text-xs flex items-center justify-center";
-                }
-
-                const playerCell = document.getElementById(`player-board-ball-${i}`);
-                if(playerCell) {
-                    playerCell.className = drawnBalls.includes(i) ? 
-                        "h-7 rounded-lg bg-yellow-400 text-slate-950 font-extrabold text-[11px] flex items-center justify-center" : 
-                        "h-7 rounded-lg bg-slate-900 border border-slate-700 text-slate-400 font-bold text-[11px] flex items-center justify-center";
-                }
-            }
-            updateMarketUI();
-            updateAdminCardsSummary();
-        }
-
-        function renderHistoryBalls() {
-            const adminHist = document.getElementById('admin-history-balls');
-            const playerHist = document.getElementById('player-history-balls');
-            
-            let lastFive = [...drawnBalls].reverse().slice(0, 5);
-
-            let htmlContent = '';
-            if (lastFive.length === 0) {
-                htmlContent = '<span class="text-xs text-slate-500">--</span>';
-            } else {
-                htmlContent = lastFive.map(num => `<div class="bola-historial">${num}</div>`).join('');
-            }
-
-            if(adminHist) adminHist.innerHTML = htmlContent;
-            if(playerHist) playerHist.innerHTML = htmlContent;
-        }
-
-        function updateAdminCardsSummary() {
-            const summaryContainer = document.getElementById('admin-cards-summary');
-            if(!summaryContainer) return;
-            let playerMap = {};
-            for(let cardId in marketCards) {
-                let owner = marketCards[cardId];
-                if(owner) {
-                    if(!playerMap[owner]) playerMap[owner] = [];
-                    playerMap[owner].push(parseInt(cardId));
-                }
-            }
-            let keys = Object.keys(playerMap);
-            if(keys.length === 0) {
-                summaryContainer.innerHTML = '<span class="text-slate-500 text-xs">Sin cartones comprados aún.</span>';
-                return;
-            }
-            summaryContainer.innerHTML = '';
-            keys.forEach(playerName => {
-                let cards = playerMap[playerName].sort((a,b) => a - b);
-                let div = document.createElement('div');
-                div.className = "bg-slate-900 border border-slate-700/60 p-3 rounded-xl flex flex-col gap-2";
-                let cardsHtml = cards.map(id => `<span class="inline-flex items-center gap-1 bg-slate-800 px-2 py-1 rounded border border-slate-700 text-xs font-bold text-pink-400">#${id} <button onclick="adminReleaseCard(${id})" class="text-red-400 ml-1 font-bold">✕</button></span>`).join(' ');
-                div.innerHTML = `<div class="flex justify-between items-center"><span class="font-bold text-yellow-300 text-xs">👤 ${playerName}</span><span class="text-slate-400 text-[10px]">Total: ${cards.length}</span></div><div class="flex flex-wrap gap-1.5 mt-1">${cardsHtml}</div>`;
-                summaryContainer.appendChild(div);
-            });
-        }
-
-        function updatePlayersListUI(players) {
+        function renderAdminPlayers() {
             const list = document.getElementById('admin-players-list');
-            if(!list) return;
-            list.innerHTML = '';
-            let keys = Object.keys(players);
-            if(keys.length === 0) { list.innerHTML = '<span class="text-slate-500">Esperando...</span>'; return; }
-            keys.forEach(key => {
-                const p = players[key];
-                const div = document.createElement('div');
-                div.className = "flex justify-between items-center py-1 border-b border-slate-800 text-slate-300";
-                div.innerHTML = `<span>👤 ${p.name} (${p.control})</span> <span class="text-green-400 font-bold">OK</span>`;
-                list.appendChild(div);
+            list.innerHTML = "";
+            if(jugadoresConectados.length === 0) {
+                list.innerHTML = `<p class="text-xs text-slate-500 italic">No hay jugadores conectados.</p>`;
+                return;
+            }
+            jugadoresConectados.forEach(j => {
+                let row = document.createElement('div');
+                row.className = "flex justify-between items-center bg-slate-900 p-2 rounded-lg text-xs";
+                row.innerHTML = `
+                    <span>👤 ${j.name} (<span class="text-emerald-400">${j.status}</span>)</span>
+                    <button onclick="eliminarJugador(${j.id})" class="bg-rose-600 hover:bg-rose-700 text-white px-2 py-1 rounded font-bold transition cursor-pointer">Eliminar</button>
+                `;
+                list.appendChild(row);
             });
+        }
+
+        function eliminarJugador(id) {
+            jugadoresConectados = jugadoresConectados.filter(j => j.id !== id);
+            renderAdminPlayers();
+        }
+
+        function sacarBolita() {
+            if(!partidaIniciada) {
+                partidaIniciada = true; // Al sacar la primera bolita se blinda la partida
+                if(userRole === 'player') actualizarEstadoInterfazJugador();
+            }
+
+            let disponibles = [];
+            for(let i = 1; i <= 75; i++) {
+                if(!bolasCantadas.includes(i)) disponibles.push(i);
+            }
+            if(disponibles.length === 0) return alert("¡Ya salieron todas las bolitas!");
+            
+            let nuevaBola = disponibles[Math.floor(Math.random() * disponibles.length)];
+            bolasCantadas.push(nuevaBola);
+            currentAdminBall = nuevaBola;
+
+            document.getElementById('admin-current-ball').innerText = nuevaBola;
+            document.getElementById('ball-display').innerText = nuevaBola;
+            
+            renderAdminMasterBoard();
+            if(userRole === 'player') renderCartonesJugador();
+        }
+
+        function reiniciarPartida() {
+            bolasCantadas = [];
+            partidaIniciada = false;
+            currentAdminBall = "--";
+            document.getElementById('admin-current-ball').innerText = "--";
+            document.getElementById('ball-display').innerText = "--";
+            renderAdminMasterBoard();
+            if(userRole === 'player') {
+                actualizarEstadoInterfazJugador();
+                renderCartonesJugador();
+            }
         }
     </script>
 </body>
