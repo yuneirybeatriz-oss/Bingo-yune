@@ -126,7 +126,7 @@
                     </select>
                     <div class="mt-2">
                         <label class="text-xs text-slate-400 block mb-1">🔑 Código de Acceso para Jugadoras:</label>
-                        <input type="text" id="admin-room-code" onchange="updateRoomCode()" placeholder="Ej: June 2026" class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-center">
+                        <input type="text" id="admin-room-code" onchange="updateRoomCode()" placeholder="Ej: BINGO2026" class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-center">
                     </div>
                 </div>
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
@@ -186,6 +186,26 @@
                 </div>
             </div>
 
+            <!-- MODAL / VISTA PREVIA DE NÚMEROS DEL CARTÓN ANTES DE ELEGIR -->
+            <div id="preview-card-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+                <div class="bg-slate-800 border border-slate-700 p-6 rounded-3xl flex flex-col gap-4 max-w-xs w-full shadow-2xl">
+                    <div class="flex justify-between items-center">
+                        <h3 id="preview-card-title" class="font-bold text-yellow-300 text-lg">Cartón #--</h3>
+                        <button onclick="closePreviewModal()" class="w-8 h-8 bg-slate-700 text-slate-300 rounded-xl font-bold flex items-center justify-center">✕</button>
+                    </div>
+                    <p class="text-xs text-slate-400">Revisa los números que trae este cartón de la suerte:</p>
+                    <div class="grid grid-cols-5 gap-1 text-[10px] text-pink-400 font-bold text-center">
+                        <div class="bg-slate-900 py-1 rounded">B</div>
+                        <div class="bg-slate-900 py-1 rounded">I</div>
+                        <div class="bg-slate-900 py-1 rounded">N</div>
+                        <div class="bg-slate-900 py-1 rounded">G</div>
+                        <div class="bg-slate-900 py-1 rounded">O</div>
+                    </div>
+                    <div id="preview-card-grid" class="grid grid-cols-5 gap-1.5"></div>
+                    <button onclick="confirmPreviewSelection()" class="w-full py-2.5 bg-pink-600 hover:bg-pink-500 font-bold text-xs rounded-xl text-white shadow">Seleccionar / Quitar Cartón</button>
+                </div>
+            </div>
+
             <!-- ÚLTIMA BOLA CANTADA REUBICADA DIRECTAMENTE ARRIBA DE LOS CARTONES EN JUEGO -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 border-2 border-yellow-500/50 shadow-xl">
                 <div class="flex flex-col items-center md:items-start text-center md:text-left">
@@ -220,12 +240,12 @@
                 <div id="player-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1"></div>
             </div>
 
-            <!-- SELECCIÓN DE CARTONES (SIN LÍMITE) -->
+            <!-- SELECCIÓN DE CARTONES (CON VISTA PREVIA Y DESELECCIÓN LIBRE) -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <div>
                         <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (<span id="available-count">100</span> Disponibles)</h3>
-                        <p class="text-xs text-slate-400" id="market-subtitle">Toca para marcar o desmarcar todos los que quieras (Sin Límite). Confirma al finalizar.</p>
+                        <p class="text-xs text-slate-400">Toca un cartón para **ver sus números** o cambiar de opinión antes de confirmar.</p>
                     </div>
                     <button id="confirm-cards-btn" onclick="confirmSelectedCards()" class="px-5 py-2.5 bg-green-600 hover:bg-green-500 font-bold text-xs rounded-xl shadow">Confirmar Mis Cartones</button>
                 </div>
@@ -249,11 +269,13 @@
         let lastBallDrawn = null;
         let autoDrawInterval = null;
         let isAutoRunning = false;
-        let roomCodeSecret = 'June 2026';
+        let adminSecretKey = 'June 2026';
+        let roomCodeSecret = 'BINGO2026';
         let hasSpokenMyBingo = false;
         let lastSpokenBall = null;
         let registeredPlayersList = {};
         let allSystemCardsCache = {};
+        let viewingCardIdModal = null;
 
         window.onload = function() {
             initAdminBoard();
@@ -269,7 +291,7 @@
                 lastBallDrawn = val.lastBall || '--';
                 gamePattern = val.pattern || 'line';
                 marketCards = val.cards || {};
-                roomCodeSecret = val.roomCode || 'June 2026';
+                roomCodeSecret = val.roomCode || 'BINGO2026';
                 allSystemCardsCache = val.allCardsData || {};
 
                 const patternSelect = document.getElementById('game-pattern-select');
@@ -580,13 +602,13 @@
 
         function verifyAdminPassword() {
             let pass = document.getElementById('admin-password-input').value;
-            if (pass === 'June 2026' || pass === roomCodeSecret) {
+            if (pass === adminSecretKey) {
                 currentUser.isAdmin = true;
                 hideAllViews();
                 document.getElementById('view-admin-panel').classList.remove('hidden');
                 document.getElementById('admin-password-input').value = '';
             } else {
-                alert('Clave incorrecta');
+                alert('Clave de Administradora incorrecta');
             }
         }
 
@@ -878,7 +900,7 @@
             if(!grid) return;
             let html = '';
             for(let i=1; i<=100; i++) {
-                html += `<div id="market-card-${i}" onclick="toggleSelectMarketCard(${i})" class="bg-slate-900 border border-slate-700 p-2 rounded-xl text-center cursor-pointer hover:border-pink-500 transition font-bold text-xs">#${i}</div>`;
+                html += `<div id="market-card-${i}" onclick="openCardPreview(${i})" class="bg-slate-900 border border-slate-700 p-2 rounded-xl text-center cursor-pointer hover:border-pink-500 transition font-bold text-xs">#${i}</div>`;
             }
             grid.innerHTML = html;
         }
@@ -913,9 +935,38 @@
             if(countSpan) countSpan.innerText = availableCount;
         }
 
-        function toggleSelectMarketCard(cardId) {
+        function openCardPreview(cardId) {
             let owner = marketCards[cardId];
-            if(owner && owner !== currentUser.name) return;
+            if(owner && owner !== currentUser.name) {
+                alert(`El cartón #${cardId} ya está ocupado por ${owner}.`);
+                return;
+            }
+
+            viewingCardIdModal = cardId;
+            document.getElementById('preview-card-title').innerText = `Cartón #${cardId}`;
+            
+            let grid = generateCardNumbers(cardId);
+            let gridContainer = document.getElementById('preview-card-grid');
+            let html = '';
+            for(let r=0; r<5; r++) {
+                for(let c=0; c<5; c++) {
+                    let val = grid[r][c];
+                    let cellStyle = val === "★" ? "bg-yellow-400 text-slate-950 font-bold text-xs py-2 rounded text-center" : "bg-slate-900 text-slate-200 font-bold text-xs py-2 rounded text-center";
+                    html += `<div class="${cellStyle}">${val}</div>`;
+                }
+            }
+            gridContainer.innerHTML = html;
+            document.getElementById('preview-card-modal').classList.remove('hidden');
+        }
+
+        function closePreviewModal() {
+            document.getElementById('preview-card-modal').classList.add('hidden');
+            viewingCardIdModal = null;
+        }
+
+        function confirmPreviewSelection() {
+            if(!viewingCardIdModal) return;
+            let cardId = viewingCardIdModal;
 
             if(mySelectedCards.includes(cardId)) {
                 mySelectedCards = mySelectedCards.filter(id => id !== cardId);
@@ -923,6 +974,7 @@
                 mySelectedCards.push(cardId);
             }
             updateCardsMarketUI();
+            closePreviewModal();
         }
 
         function confirmSelectedCards() {
