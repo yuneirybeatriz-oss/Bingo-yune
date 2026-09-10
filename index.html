@@ -14,6 +14,22 @@
         .alert-bingo { animation: pulse-slow 1.2s infinite; }
         @keyframes flash-bg { 0%, 100% { background-color: rgba(234, 179, 8, 0.9); } 50% { background-color: rgba(219, 39, 119, 0.9); } }
         .flash-winner { animation: flash-bg 1s infinite; }
+        
+        /* Estilo para las últimas 5 bolas */
+        .bola-historial {
+            width: 38px;
+            height: 38px;
+            background-color: #fbbf24;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 800;
+            font-size: 14px;
+            color: #0f172a;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 2px solid #f59e0b;
+        }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
@@ -71,7 +87,6 @@
             <div id="admin-winner-alert" class="hidden bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-950 p-6 rounded-3xl font-extrabold text-center text-xl shadow-xl alert-bingo flex flex-col gap-3">
                 <div>🎉 ¡BINGO VALIDADO! 🎉</div>
                 <div id="admin-winner-text" class="text-base font-bold bg-white/20 py-2 px-4 rounded-xl">Ganador...</div>
-                <!-- Miniatura del cartón ganador para la admin -->
                 <div class="bg-slate-900 text-white p-4 rounded-2xl max-w-xs mx-auto w-full flex flex-col gap-2">
                     <span class="text-xs text-yellow-300 font-bold" id="admin-winner-card-title">Cartón Ganador</span>
                     <div class="grid grid-cols-5 gap-1 text-[10px] text-pink-400 font-bold">
@@ -83,13 +98,24 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- ÚLTIMA BOLA Y HISTORIAL DE 5 -->
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col items-center gap-4">
                     <h3 class="font-bold text-yellow-300">Última Bola</h3>
                     <div id="admin-current-ball" class="w-28 h-28 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-5xl flex items-center justify-center shadow-lg">--</div>
-                    <button onclick="drawBallManually()" class="w-full py-3 bg-purple-600 hover:bg-purple-500 font-bold rounded-xl text-sm shadow">Sacar Bola (Manual)</button>
-                    <button id="auto-draw-btn" onclick="toggleAutoDraw()" class="w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold rounded-xl shadow">▶ Iniciar Auto (Cada 5s)</button>
+                    
+                    <!-- Historial últimas 5 bolas (Admin) -->
+                    <div class="w-full flex flex-col items-center gap-1.5 mt-1">
+                        <span class="text-[11px] text-slate-400 font-semibold">Últimas 5 salidas:</span>
+                        <div id="admin-history-balls" class="flex gap-2 items-center justify-center min-h-[42px]">
+                            <span class="text-xs text-slate-500">--</span>
+                        </div>
+                    </div>
+
+                    <button onclick="drawBallManually()" class="w-full py-3 bg-purple-600 hover:bg-purple-500 font-bold rounded-xl text-sm shadow mt-2">Sacar Bola (Manual)</button>
+                    <button id="auto-draw-btn" onclick="toggleAutoDraw()" class="w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold rounded-xl shadow">▶ Iniciar Auto (Cada 6s)</button>
                     <button onclick="resetGame()" class="w-full py-2 bg-red-600/30 text-red-300 text-xs font-bold rounded-xl">Reiniciar Partida</button>
                 </div>
+
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                     <h3 class="font-bold text-pink-400">Figura en Juego</h3>
                     <select id="game-pattern-select" onchange="updateGamePattern()" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white font-semibold">
@@ -141,7 +167,6 @@
             <div id="player-winner-notification" class="hidden flash-winner text-slate-950 p-6 rounded-3xl font-extrabold text-center text-xl shadow-2xl alert-bingo flex flex-col gap-3">
                 <div id="player-winner-title" class="text-3xl text-yellow-300 drop-shadow">👑 ¡B I N G O ! 👑</div>
                 <div id="player-winner-details" class="text-base font-bold bg-black/40 text-white py-2 px-4 rounded-xl">¡Tu cartón hizo bingo!</div>
-                <!-- Vista del cartón ganador para todos en la sala -->
                 <div class="bg-slate-900 text-white p-4 rounded-2xl max-w-xs mx-auto w-full flex flex-col gap-2">
                     <span class="text-xs text-yellow-300 font-bold" id="public-winner-card-title">Cartón Ganador</span>
                     <div class="grid grid-cols-5 gap-1 text-[10px] text-pink-400 font-bold">
@@ -152,10 +177,19 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-slate-800 p-6 rounded-3xl flex flex-col items-center justify-center gap-2">
+                <!-- ÚLTIMA BOLA Y HISTORIAL DE 5 (Jugadora) -->
+                <div class="bg-slate-800 p-6 rounded-3xl flex flex-col items-center justify-center gap-3">
                     <h3 class="font-bold text-yellow-300 text-sm">Última Bola Cantada</h3>
                     <div id="player-current-ball" class="w-24 h-24 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-4xl flex items-center justify-center shadow-lg">--</div>
+                    
+                    <div class="w-full flex flex-col items-center gap-1.5 mt-1">
+                        <span class="text-[11px] text-slate-400 font-semibold">Últimas 5 salidas:</span>
+                        <div id="player-history-balls" class="flex gap-2 items-center justify-center min-h-[38px]">
+                            <span class="text-xs text-slate-500">--</span>
+                        </div>
+                    </div>
                 </div>
+
                 <div class="bg-slate-800 p-6 rounded-3xl md:col-span-2 flex flex-col gap-2">
                     <h3 class="font-bold text-pink-400 text-sm">Tablero General (1-75)</h3>
                     <div id="player-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1"></div>
@@ -202,6 +236,7 @@
         let isAutoRunning = false;
         let roomCodeSecret = '1234';
         let hasSpokenMyBingo = false;
+        let lastSpokenBall = null; // Para evitar repetir la voz del mismo número
 
         window.onload = function() {
             initAdminBoard();
@@ -243,6 +278,12 @@
                     patternLabel.innerText = patternNames[gamePattern] || 'Línea';
                 }
 
+                // Canto de voz para los números que van saliendo en tiempo real
+                if (lastBallDrawn && lastBallDrawn !== '--' && lastBallDrawn !== lastSpokenBall) {
+                    lastSpokenBall = lastBallDrawn;
+                    speakBall(lastBallDrawn);
+                }
+
                 const winnerData = val.winner;
                 const adminAlert = document.getElementById('admin-winner-alert');
                 const adminWinnerText = document.getElementById('admin-winner-text');
@@ -253,7 +294,6 @@
                 if (winnerData && winnerData.name) {
                     stopAutoDraw();
                     
-                    // Actualizar alerta de la administradora
                     if (adminAlert && adminWinnerText) {
                         adminWinnerText.innerText = `¡${winnerData.name} ganó con el cartón #${winnerData.card} (${winnerData.patternName})!`;
                         document.getElementById('admin-winner-card-title').innerText = `Cartón #${winnerData.card} (${winnerData.patternName})`;
@@ -261,13 +301,11 @@
                         adminAlert.classList.remove('hidden');
                     }
 
-                    // Actualizar alerta pública para las jugadoras
                     if (playerNotification && playerWinnerDetails) {
                         if (winnerData.name === currentUser.name) {
                             playerWinnerTitle.innerText = "👑 ¡HAS CANTADO BINGO! 👑";
                             playerWinnerDetails.innerText = `¡Felicidades ${currentUser.name}! Tu cartón #${winnerData.card} completó la figura de ${winnerData.patternName}.`;
                             
-                            // COMAND DE VOZ PARA LA JUGADORA QUE GANÓ
                             if (!hasSpokenMyBingo) {
                                 speakPlayerBingo();
                                 hasSpokenMyBingo = true;
@@ -365,22 +403,33 @@
             renderMyCards();
         }
 
+        // Voz animada para cantar los números
         function speakBall(ballNum) {
             if ('speechSynthesis' in window) {
-                let text = `Bola ${ballNum}`;
+                window.speechSynthesis.cancel();
+                let text = `Número ${ballNum}`;
                 let utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'es-ES';
-                utterance.rate = 1.0;
+                utterance.rate = 1.15; // Un poco más ágil
+                utterance.pitch = 1.25; // Más alegre y animada
+                
+                const voces = window.speechSynthesis.getVoices();
+                const vozNatural = voces.find(v => v.lang.includes('es') && (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Helena')));
+                if (vozNatural) utterance.voice = vozNatural;
+
                 window.speechSynthesis.speak(utterance);
             }
         }
 
+        // Voz para cuando la jugadora canta bingo
         function speakPlayerBingo() {
             if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
                 let text = "¡Has cantado bingo!";
                 let utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'es-ES';
-                utterance.rate = 1.0;
+                utterance.rate = 1.15;
+                utterance.pitch = 1.3;
                 window.speechSynthesis.speak(utterance);
             }
         }
@@ -396,7 +445,6 @@
             const randomBall = available[Math.floor(Math.random() * available.length)];
             drawnBalls.push(randomBall);
             db.ref('system').update({ drawnBalls, lastBall: randomBall });
-            speakBall(randomBall);
         }
 
         function toggleAutoDraw() {
@@ -424,7 +472,7 @@
             isAutoRunning = false;
             const btn = document.getElementById('auto-draw-btn');
             if(btn) {
-                btn.innerText = "▶ Iniciar Auto (Cada 5s)";
+                btn.innerText = "▶ Iniciar Auto (Cada 6s)";
                 btn.className = "w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold rounded-xl shadow";
             }
         }
@@ -694,7 +742,7 @@
                     }
                 } else {
                     if(isSelected) {
-                        ownerSpan.innerText = "Seleccionado (Toca para quitar)";
+                        ownerSpan.innerText = "Seleccionado";
                         ownerSpan.className = "text-[10px] text-pink-400 font-semibold";
                         btn.className = "p-2 bg-pink-600/20 border border-pink-500 rounded-xl text-xs font-bold text-white flex flex-col items-center gap-1 shadow";
                     } else {
@@ -811,6 +859,9 @@
             if(cbAdmin) cbAdmin.innerText = lastBallDrawn;
             if(cbPlayer) cbPlayer.innerText = lastBallDrawn;
 
+            // Renderizar las últimas 5 bolas en orden
+            renderHistoryBalls();
+
             for(let i=1; i<=75; i++) {
                 const adminCell = document.getElementById(`admin-ball-${i}`);
                 if(adminCell) {
@@ -828,6 +879,23 @@
             }
             updateMarketUI();
             updateAdminCardsSummary();
+        }
+
+        function renderHistoryBalls() {
+            const adminHist = document.getElementById('admin-history-balls');
+            const playerHist = document.getElementById('player-history-balls');
+            
+            let lastFive = [...drawnBalls].reverse().slice(0, 5);
+
+            let htmlContent = '';
+            if (lastFive.length === 0) {
+                htmlContent = '<span class="text-xs text-slate-500">--</span>';
+            } else {
+                htmlContent = lastFive.map(num => `<div class="bola-historial">${num}</div>`).join('');
+            }
+
+            if(adminHist) adminHist.innerHTML = htmlContent;
+            if(playerHist) playerHist.innerHTML = htmlContent;
         }
 
         function updateAdminCardsSummary() {
