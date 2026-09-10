@@ -209,8 +209,8 @@
                     <h3 class="font-bold text-yellow-300 text-lg">Tus Cartones en Juego (Ordenados por avance 🚀)</h3>
                     <span class="text-xs text-slate-400">El más cercano sube automáticamente</span>
                 </div>
-                <!-- AQUÍ ESTÁ EL CAMBIO EN CUADRÍCULA (2 columnas en PC, 1 en celular) -->
-                <div id="player-my-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- AQUÍ ESTÁ EL CAMBIO EXACTO: EN CUADRÍCULA DE DOS COLUMNAS -->
+                <div id="player-my-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <span class="text-slate-500 text-sm">Aún no has seleccionado cartones.</span>
                 </div>
             </div>
@@ -282,7 +282,7 @@
                     speakBall(lastBallDrawn);
                 }
 
-                const winnersData = val.winners || {}; // Soportando múltiples ganadores
+                const winnersData = val.winners || {}; 
                 const adminAlert = document.getElementById('admin-winner-alert');
                 const adminWinnerText = document.getElementById('admin-winner-text');
                 const playerNotification = document.getElementById('player-winner-notification');
@@ -293,7 +293,6 @@
                 if (winnerKeys.length > 0) {
                     stopAutoDraw();
                     
-                    // Armar texto para múltiples ganadores
                     let winnerTexts = [];
                     let firstWinner = winnersData[winnerKeys[0]];
 
@@ -662,7 +661,6 @@
                         'letter_o': 'Letra O', 
                         'full_card': 'Cartón Lleno' 
                     };
-                    // Usamos una llave única basada en el control/nombre y cartón para permitir múltiples ganadores simultáneos
                     let winnerKey = `${currentUser.control}_${cardId}`;
                     db.ref(`system/winners/${winnerKey}`).set({
                         name: currentUser.name,
