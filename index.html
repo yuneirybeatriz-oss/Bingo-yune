@@ -159,15 +159,18 @@
                 </div>
             </div>
 
-            <div id="player-winner-notification" class="hidden flash-winner text-slate-950 p-6 rounded-3xl font-extrabold text-center text-xl shadow-2xl alert-bingo flex flex-col gap-3">
-                <div id="player-winner-title" class="text-3xl text-yellow-300 drop-shadow">👑 ¡B I N G O ! 👑</div>
-                <div id="player-winner-details" class="text-base font-bold bg-black/40 text-white py-2 px-4 rounded-xl">¡Tu cartón hizo bingo!</div>
-                <div class="bg-slate-900 text-white p-4 rounded-2xl max-w-xs mx-auto w-full flex flex-col gap-2">
-                    <span class="text-xs text-yellow-300 font-bold" id="public-winner-card-title">Cartón Ganador</span>
-                    <div class="grid grid-cols-5 gap-1 text-[10px] text-pink-400 font-bold">
-                        <div class="bg-slate-800 py-1 rounded">B</div><div class="bg-slate-800 py-1 rounded">I</div><div class="bg-slate-800 py-1 rounded">N</div><div class="bg-slate-800 py-1 rounded">G</div><div class="bg-slate-800 py-1 rounded">O</div>
+            <!-- MODAL / CARTEL GIGANTE DE VICTORIA A PANTALLA COMPLETA -->
+            <div id="player-winner-notification" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+                <div class="flash-winner text-slate-950 p-6 md:p-8 rounded-3xl font-extrabold text-center shadow-2xl alert-bingo flex flex-col gap-4 max-w-lg w-full">
+                    <div id="player-winner-title" class="text-3xl md:text-4xl text-yellow-300 drop-shadow">👑 ¡B I N G O ! 👑</div>
+                    <div id="player-winner-details" class="text-base md:text-lg font-bold bg-black/40 text-white py-3 px-4 rounded-xl">¡Tu cartón hizo bingo!</div>
+                    <div class="bg-slate-900 text-white p-4 rounded-2xl max-w-xs mx-auto w-full flex flex-col gap-2">
+                        <span class="text-xs text-yellow-300 font-bold" id="public-winner-card-title">Cartón Ganador</span>
+                        <div class="grid grid-cols-5 gap-1 text-[10px] text-pink-400 font-bold">
+                            <div class="bg-slate-800 py-1 rounded">B</div><div class="bg-slate-800 py-1 rounded">I</div><div class="bg-slate-800 py-1 rounded">N</div><div class="bg-slate-800 py-1 rounded">G</div><div class="bg-slate-800 py-1 rounded">O</div>
+                        </div>
+                        <div id="public-winning-card-grid" class="grid grid-cols-5 gap-1"></div>
                     </div>
-                    <div id="public-winning-card-grid" class="grid grid-cols-5 gap-1"></div>
                 </div>
             </div>
 
@@ -279,27 +282,39 @@
                     speakBall(lastBallDrawn);
                 }
 
-                const winnerData = val.winner;
+                const winnersData = val.winners || {}; // Soportando múltiples ganadores
                 const adminAlert = document.getElementById('admin-winner-alert');
                 const adminWinnerText = document.getElementById('admin-winner-text');
                 const playerNotification = document.getElementById('player-winner-notification');
                 const playerWinnerDetails = document.getElementById('player-winner-details');
                 const playerWinnerTitle = document.getElementById('player-winner-title');
 
-                if (winnerData && winnerData.name) {
+                const winnerKeys = Object.keys(winnersData);
+                if (winnerKeys.length > 0) {
                     stopAutoDraw();
                     
+                    // Armar texto para múltiples ganadores
+                    let winnerTexts = [];
+                    let firstWinner = winnersData[winnerKeys[0]];
+
+                    winnerKeys.forEach(k => {
+                        let w = winnersData[k];
+                        winnerTexts.push(`${w.name} (Cartón #${w.card})`);
+                    });
+
                     if (adminAlert && adminWinnerText) {
-                        adminWinnerText.innerText = `¡${winnerData.name} ganó con el cartón #${winnerData.card} (${winnerData.patternName})!`;
-                        document.getElementById('admin-winner-card-title').innerText = `Cartón #${winnerData.card} (${winnerData.patternName}) - Ganador`;
-                        renderMiniWinningCard('admin-winning-card-grid', winnerData.card, gamePattern, drawnBalls);
+                        adminWinnerText.innerText = `¡Ganador(es): ${winnerTexts.join(' y ')}! (${firstWinner.patternName})`;
+                        document.getElementById('admin-winner-card-title').innerText = `Cartón #${firstWinner.card} (${firstWinner.patternName}) - Ganador`;
+                        renderMiniWinningCard('admin-winning-card-grid', firstWinner.card, gamePattern, drawnBalls);
                         adminAlert.classList.remove('hidden');
                     }
 
                     if (playerNotification && playerWinnerDetails) {
-                        if (winnerData.name === currentUser.name) {
+                        let isUserWinner = winnerKeys.some(k => winnersData[k].name === currentUser.name);
+
+                        if (isUserWinner) {
                             playerWinnerTitle.innerText = "👑 ¡HAS CANTADO BINGO! 👑";
-                            playerWinnerDetails.innerText = `¡Felicidades ${currentUser.name}! Tu cartón #${winnerData.card} completó la figura de ${winnerData.patternName}.`;
+                            playerWinnerDetails.innerText = `¡Felicidades ${currentUser.name}! Tu cartón completó la figura de ${firstWinner.patternName}.`;
                             
                             if (!hasSpokenMyBingo) {
                                 speakPlayerBingo();
@@ -307,11 +322,11 @@
                             }
                         } else {
                             playerWinnerTitle.innerText = "👑 ¡B I N G O ! 👑";
-                            playerWinnerDetails.innerText = `¡${winnerData.name} hizo Bingo con el cartón #${winnerData.card} (${winnerData.patternName})!`;
+                            playerWinnerDetails.innerText = `¡${winnerTexts.join(' y ')} hicieron Bingo (${firstWinner.patternName})!`;
                         }
                         
-                        document.getElementById('public-winner-card-title').innerText = `Cartón #${winnerData.card} de ${winnerData.name} - Ganador`;
-                        renderMiniWinningCard('public-winning-card-grid', winnerData.card, gamePattern, drawnBalls);
+                        document.getElementById('public-winner-card-title').innerText = `Cartón #${firstWinner.card} - Ganador`;
+                        renderMiniWinningCard('public-winning-card-grid', firstWinner.card, gamePattern, drawnBalls);
                         playerNotification.classList.remove('hidden');
                     }
                 } else {
@@ -322,7 +337,6 @@
 
                 if(currentUser.name) {
                     mySelectedCards = [];
-                    let stillIn = false;
                     for(let cardId in marketCards) {
                         if(marketCards[cardId] === currentUser.name) {
                             mySelectedCards.push(parseInt(cardId));
@@ -491,7 +505,7 @@
         function resetGame() {
             if(confirm("¿Reiniciar partida, limpiar cartones y ganadores?")) {
                 stopAutoDraw();
-                db.ref('system').update({ drawnBalls: [], lastBall: '--', cards: null, winner: null });
+                db.ref('system').update({ drawnBalls: [], lastBall: '--', cards: null, winners: null });
                 mySelectedCards = [];
                 renderMyCards();
             }
@@ -508,7 +522,7 @@
         }
 
         function clearWinnerAlert() {
-            db.ref('system/winner').remove();
+            db.ref('system/winners').remove();
         }
 
         function getCardMatrix(cardId) {
@@ -538,33 +552,6 @@
                 matrix.push(row);
             }
             return matrix;
-        }
-
-        function isCellInPattern(r, c, pattern) {
-            if(r === 2 && c === 2) return true; // FREE siempre cuenta
-            if(pattern === 'full_card') return true;
-            if(pattern === 'line') {
-                return (r === 0 || r === 1 || r === 2 || r === 3 || r === 4) && false; 
-            }
-            if(pattern === 'letter_l') {
-                return (c === 0 || r === 4);
-            }
-            if(pattern === 'cross_x') {
-                return (r === c || r === (4 - c));
-            }
-            if(pattern === 'four_corners') {
-                return (r === 0 || r === 4) && (c === 0 || c === 4);
-            }
-            if(pattern === 'diagonal') {
-                return (r === c || r === (4 - c));
-            }
-            if(pattern === 'small_cross') {
-                return (r === 2 || c === 2);
-            }
-            if(pattern === 'letter_o') {
-                return (r === 0 || r === 4 || c === 0 || c === 4);
-            }
-            return false;
         }
 
         function checkCardBingo(cardId, pattern, balls) {
@@ -662,31 +649,28 @@
 
         function checkMyCardsForBingo() {
             if(!currentUser.name || mySelectedCards.length === 0) return;
-            
-            db.ref('system/winner').once('value', (snap) => {
-                if(snap.val()) return;
 
-                for(let cardId of mySelectedCards) {
-                    if(checkCardBingo(cardId, gamePattern, drawnBalls)) {
-                        const patternNames = { 
-                            'line': 'Línea', 
-                            'letter_l': 'Letra L', 
-                            'cross_x': 'La X', 
-                            'four_corners': 'Cuatro Esquinas', 
-                            'diagonal': 'Diagonal', 
-                            'small_cross': 'Cruz Pequeña', 
-                            'letter_o': 'Letra O', 
-                            'full_card': 'Cartón Lleno' 
-                        };
-                        db.ref('system/winner').set({
-                            name: currentUser.name,
-                            card: cardId,
-                            patternName: patternNames[gamePattern] || 'Línea'
-                        });
-                        break;
-                    }
+            for(let cardId of mySelectedCards) {
+                if(checkCardBingo(cardId, gamePattern, drawnBalls)) {
+                    const patternNames = { 
+                        'line': 'Línea', 
+                        'letter_l': 'Letra L', 
+                        'cross_x': 'La X', 
+                        'four_corners': 'Cuatro Esquinas', 
+                        'diagonal': 'Diagonal', 
+                        'small_cross': 'Cruz Pequeña', 
+                        'letter_o': 'Letra O', 
+                        'full_card': 'Cartón Lleno' 
+                    };
+                    // Usamos una llave única basada en el control/nombre y cartón para permitir múltiples ganadores simultáneos
+                    let winnerKey = `${currentUser.control}_${cardId}`;
+                    db.ref(`system/winners/${winnerKey}`).set({
+                        name: currentUser.name,
+                        card: cardId,
+                        patternName: patternNames[gamePattern] || 'Línea'
+                    });
                 }
-            });
+            }
         }
 
         function initAdminBoard() {
