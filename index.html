@@ -206,6 +206,7 @@
                     <h3 class="font-bold text-yellow-300 text-lg">Tus Cartones en Juego (Ordenados por avance 🚀)</h3>
                     <span class="text-xs text-slate-400">El más cercano sube automáticamente</span>
                 </div>
+                <!-- AQUÍ ESTÁ EL CAMBIO EN CUADRÍCULA (2 columnas en PC, 1 en celular) -->
                 <div id="player-my-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <span class="text-slate-500 text-sm">Aún no has seleccionado cartones.</span>
                 </div>
@@ -543,7 +544,7 @@
             if(r === 2 && c === 2) return true; // FREE siempre cuenta
             if(pattern === 'full_card') return true;
             if(pattern === 'line') {
-                return (r === 0 || r === 1 || r === 2 || r === 3 || r === 4) && false; // Se evalúa por fila/columna completa abajo
+                return (r === 0 || r === 1 || r === 2 || r === 3 || r === 4) && false; 
             }
             if(pattern === 'letter_l') {
                 return (c === 0 || r === 4);
@@ -909,7 +910,6 @@
             grid.innerHTML = '';
             let matrix = getCardMatrix(cardId);
 
-            // Determinar si una línea horizontal o vertical completa se cumplió (para el caso de 'line')
             let winningRows = [];
             let winningCols = [];
             let isMarked = (val) => val === 'FREE' || balls.includes(val);
@@ -933,7 +933,6 @@
                     cell.className = "h-7 bg-slate-800 border border-slate-700/60 rounded flex items-center justify-center text-[10px] font-bold text-white";
                     let val = matrix[r][c];
 
-                    // Comprobar si esta celda forma parte de la figura ganadora
                     let partOfFigure = false;
                     if(pattern === 'full_card') partOfFigure = true;
                     else if(pattern === 'line') {
@@ -968,7 +967,6 @@
                         }
                     }
 
-                    // Resaltado rojo de figura ganadora exigido
                     if(partOfFigure) {
                         cell.style.border = "2px solid #ef4444";
                         cell.style.boxShadow = "0 0 6px rgba(239, 68, 68, 0.8)";
