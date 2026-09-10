@@ -61,11 +61,11 @@
             <div id="player-controls-container" class="bg-slate-800 p-4 rounded-xl flex items-center justify-between">
                 <div>
                     <span class="text-sm block font-semibold">¿Cuántos cartones deseas?</span>
-                    <span class="text-xs text-slate-400" id="rango-activo-label">Rango activo de la casa: Del 1 al 50</span>
+                    <span class="text-xs text-slate-400" id="rango-activo-label">Rango activo de la casa: Del 1 al 100</span>
                 </div>
                 <div class="flex items-center gap-3">
                     <input type="number" id="num-cartones" min="1" max="6" value="2" class="w-16 text-center bg-slate-900 border border-slate-700 rounded-lg py-1 text-white">
-                    <button id="btn-pedir-cartones" onclick="solicitarCartones()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-bold text-sm transition cursor-pointer">Pedir Cartones</button>
+                    <button onclick="solicitarCartones()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-bold text-sm transition cursor-pointer">Pedir Cartones</button>
                 </div>
             </div>
 
@@ -86,7 +86,7 @@
             <div class="bg-slate-800 p-4 rounded-xl flex flex-col md:flex-row justify-between items-center gap-4">
                 <div>
                     <h4 class="font-bold text-slate-200">Configurar Rango de Cartones en Juego</h4>
-                    <p class="text-xs text-slate-400">Elige hasta qué número de la baraja maestra (1 al 100) está habilitado hoy.</p>
+                    <p class="text-xs text-slate-400">Elige hasta qué número (del 1 al 100) está habilitado. Los que pasen de este límite quedarán fuera de juego (en rojo).</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <select id="admin-rango-limite" class="bg-slate-900 border border-slate-700 text-white px-3 py-2 rounded-lg text-sm font-bold focus:outline-none focus:border-indigo-500">
@@ -152,7 +152,6 @@
             document.getElementById('screen-login').classList.add('hidden');
             document.getElementById('screen-player').classList.remove('hidden');
             actualizarEstadoInterfazJugador();
-            generarCartonesIniciales(2);
         }
 
         function loginAsAdmin() {
@@ -178,15 +177,15 @@
                 return alert("No puedes cambiar el rango con la partida ya iniciada.");
             }
             rangoMaximoCartones = parseInt(document.getElementById('admin-rango-limite').value);
-            alert(`¡Rango actualizado con éxito! Solo se jugarán cartones del 1 al ${rangoMaximoCartones}.`);
+            alert(`¡Rango actualizado con éxito! Solo se jugarán cartones del 1 al ${rangoMaximoCartones}. Los demás están fuera de juego.`);
         }
 
         function actualizarEstadoInterfazJugador() {
             document.getElementById('rango-activo-label').innerText = `Rango activo de la casa: Del 1 al ${rangoMaximoCartones}`;
             if(partidaIniciada) {
                 document.getElementById('player-controls-container').classList.add('opacity-50', 'pointer-events-none');
-                document.getElementById('player-status').innerText = "Partida en curso (Bloqueado)";
-                document.getElementById('player-status').className = "text-amber-400 font-bold";
+                document.getElementById('player-status').innerText = "Partida en curso (Cartones bloqueados)";
+                document.getElementById('player-status').className = "text-rose-400 font-bold";
             } else {
                 document.getElementById('player-controls-container').classList.remove('opacity-50', 'pointer-events-none');
                 document.getElementById('player-status').innerText = "Conectado";
@@ -220,7 +219,7 @@
 
         function solicitarCartones() {
             if(partidaIniciada) {
-                return alert("¡La partida ya comenzó! No se pueden pedir más cartones.");
+                return alert("¡La partida ya comenzó! Los cartones disponibles se han bloqueado.");
             }
             let cantidad = parseInt(document.getElementById('num-cartones').value) || 2;
             misCartones = [];
@@ -241,30 +240,41 @@
 
             misCartones.forEach((item, index) => {
                 let cartonDiv = document.createElement('div');
-                cartonDiv.className = "bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md flex flex-col gap-2";
+                let fueraDeRangoOBloqueado = item.id > rangoMaximoCartones || partidaIniciada;
+
+                // Si el cartón supera el rango o la partida ya arrancó, se pone en rojo (no disponible / fuera de juego)
+                if(fueraDeRangoOBloqueado) {
+                    cartonDiv.className = "bg-rose-950/80 border-2 border-rose-600 p-4 rounded-xl shadow-md flex flex-col gap-2 opacity-90";
+                } else {
+                    cartonDiv.className = "bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md flex flex-col gap-2";
+                }
                 
                 let faltantes = contarNumerosFaltantes(item.matriz);
-                if(faltantes === 1) {
+                if(faltantes === 1 && !fueraDeRangoOBloqueado) {
                     cartonDiv.classList.add('carton-espera');
                 }
 
-                let html = `<div class="flex justify-between items-center text-xs font-bold text-amber-400">
-                    <span>Cartón Oficial #${item.id}</span>
-                    <span>${faltantes === 1 ? '🔥 ¡EN ESPERA DE BINGO!' : ''}</span>
+                let headerText = fueraDeRangoOBloqueado ? 
+                    `<span>Cartón Oficial #${item.id} (❌ FUERA DE JUEGO / BLOQUEADO)</span>` : 
+                    `<span>Cartón Oficial #${item.id}</span><span>${faltantes === 1 ? '🔥 ¡EN ESPERA DE BINGO!' : ''}</span>`;
+
+                let html = `<div class="flex justify-between items-center text-xs font-bold ${fueraDeRangoOBloqueado ? 'text-rose-300' : 'text-amber-400'}">
+                    ${headerText}
                 </div>`;
                 
                 html += `<div class="grid grid-cols-5 gap-1 text-center text-xs font-semibold">`;
                 ['B', 'I', 'N', 'G', 'O'].forEach(letra => {
-                    html += `<div class="bg-amber-500 text-slate-950 py-1 rounded">${letra}</div>`;
+                    html += `<div class="${fueraDeRangoOBloqueado ? 'bg-rose-800 text-white' : 'bg-amber-500 text-slate-950'} py-1 rounded">${letra}</div>`;
                 });
 
                 for(let r = 0; r < 5; r++) {
                     for(let col = 0; col < 5; col++) {
                         let val = item.matriz[r][col];
-                        let isChecked = val === "FREE" || bolasCantadas.includes(val);
-                        let isPatternX = esPatronX(item.matriz, r, col) && isChecked;
+                        let isChecked = !fueraDeRangoOBloqueado && (val === "FREE" || bolasCantadas.includes(val));
+                        let isPatternX = !fueraDeRangoOBloqueado && esPatronX(item.matriz, r, col) && isChecked;
                         
-                        let cssClass = "bg-slate-900 py-2 rounded text-slate-300 flex items-center justify-center ";
+                        let cssClass = fueraDeRangoOBloqueado ? "bg-rose-900/60 py-2 rounded text-rose-200 flex items-center justify-center " : "bg-slate-900 py-2 rounded text-slate-300 flex items-center justify-center ";
+                        
                         if(isPatternX) {
                             cssClass += "winning-number ";
                         } else if(isChecked) {
@@ -336,8 +346,11 @@
 
         function sacarBolita() {
             if(!partidaIniciada) {
-                partidaIniciada = true; // Al sacar la primera bolita se blinda la partida
-                if(userRole === 'player') actualizarEstadoInterfazJugador();
+                partidaIniciada = true; // Al sacar la primera bolita se blinda y se ponen rojos los cartones libres
+                if(userRole === 'player') {
+                    actualizarEstadoInterfazJugador();
+                    renderCartonesJugador();
+                }
             }
 
             let disponibles = [];
