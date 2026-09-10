@@ -10,8 +10,10 @@
         body { font-family: 'Poppins', sans-serif; background: #0f172a; color: #f8fafc; }
         .neon-glow { text-shadow: 0 0 10px rgba(236, 72, 153, 0.7), 0 0 20px rgba(236, 72, 153, 0.5); }
         .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5); }
-        @keyframes pulse-slow { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.85; transform: scale(1.02); } }
-        .alert-bingo { animation: pulse-slow 1.5s infinite; }
+        @keyframes pulse-slow { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.9; transform: scale(1.02); } }
+        .alert-bingo { animation: pulse-slow 1.2s infinite; }
+        @keyframes flash-bg { 0%, 100% { background-color: rgba(234, 179, 8, 0.9); } 50% { background-color: rgba(219, 39, 119, 0.9); } }
+        .flash-winner { animation: flash-bg 1s infinite; }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
@@ -35,7 +37,7 @@
         <!-- LOGIN ADMIN -->
         <div id="view-admin-login" class="w-full bg-slate-800/80 p-6 rounded-3xl card-shadow flex flex-col items-center gap-6 max-w-md hidden">
             <h2 class="text-2xl font-bold text-pink-400">Panel de Administradora</h2>
-            <p class="text-xs text-slate-400 text-center">Ingresa tu clave segura de acceso maestro.</p>
+            <p class="text-xs text-slate-400 text-center">Ingresa tu clave secreta maestra.</p>
             <input type="password" id="admin-password-input" placeholder="Clave secreta" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-center text-xl text-white">
             <div class="flex gap-3 w-full">
                 <button onclick="backToHome()" class="w-1/2 py-3 bg-slate-700 rounded-xl font-semibold">Volver</button>
@@ -66,9 +68,17 @@
             </div>
 
             <!-- REPORTE DE GANADOR PARA LA ADMIN -->
-            <div id="admin-winner-alert" class="hidden bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-950 p-6 rounded-3xl font-extrabold text-center text-xl shadow-xl alert-bingo flex flex-col gap-2">
+            <div id="admin-winner-alert" class="hidden bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-950 p-6 rounded-3xl font-extrabold text-center text-xl shadow-xl alert-bingo flex flex-col gap-3">
                 <div>🎉 ¡BINGO VALIDADO! 🎉</div>
                 <div id="admin-winner-text" class="text-base font-bold bg-white/20 py-2 px-4 rounded-xl">Ganador...</div>
+                <!-- Miniatura del cartón ganador para la admin -->
+                <div class="bg-slate-900 text-white p-4 rounded-2xl max-w-xs mx-auto w-full flex flex-col gap-2">
+                    <span class="text-xs text-yellow-300 font-bold" id="admin-winner-card-title">Cartón Ganador</span>
+                    <div class="grid grid-cols-5 gap-1 text-[10px] text-pink-400 font-bold">
+                        <div class="bg-slate-800 py-1 rounded">B</div><div class="bg-slate-800 py-1 rounded">I</div><div class="bg-slate-800 py-1 rounded">N</div><div class="bg-slate-800 py-1 rounded">G</div><div class="bg-slate-800 py-1 rounded">O</div>
+                    </div>
+                    <div id="admin-winning-card-grid" class="grid grid-cols-5 gap-1"></div>
+                </div>
                 <button onclick="clearWinnerAlert()" class="mt-2 py-2 px-4 bg-slate-900 text-yellow-300 text-xs rounded-xl font-bold mx-auto w-fit shadow">Cerrar Alerta / Continuar</button>
             </div>
 
@@ -128,9 +138,17 @@
             </div>
 
             <!-- FIESTA ÉPICA DE BINGO PARA LA JUGADORA -->
-            <div id="player-winner-notification" class="hidden bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 text-white p-6 rounded-3xl font-extrabold text-center text-2xl shadow-2xl alert-bingo flex flex-col gap-2">
-                <div>👑 ¡B I N G O ! ¡HAS GANADO! 👑</div>
-                <div id="player-winner-details" class="text-base font-semibold bg-black/30 py-2 px-4 rounded-xl">¡Tu cartón hizo bingo!</div>
+            <div id="player-winner-notification" class="hidden flash-winner text-slate-950 p-6 rounded-3xl font-extrabold text-center text-xl shadow-2xl alert-bingo flex flex-col gap-3">
+                <div id="player-winner-title" class="text-3xl text-yellow-300 drop-shadow">👑 ¡B I N G O ! 👑</div>
+                <div id="player-winner-details" class="text-base font-bold bg-black/40 text-white py-2 px-4 rounded-xl">¡Tu cartón hizo bingo!</div>
+                <!-- Vista del cartón ganador para todos en la sala -->
+                <div class="bg-slate-900 text-white p-4 rounded-2xl max-w-xs mx-auto w-full flex flex-col gap-2">
+                    <span class="text-xs text-yellow-300 font-bold" id="public-winner-card-title">Cartón Ganador</span>
+                    <div class="grid grid-cols-5 gap-1 text-[10px] text-pink-400 font-bold">
+                        <div class="bg-slate-800 py-1 rounded">B</div><div class="bg-slate-800 py-1 rounded">I</div><div class="bg-slate-800 py-1 rounded">N</div><div class="bg-slate-800 py-1 rounded">G</div><div class="bg-slate-800 py-1 rounded">O</div>
+                    </div>
+                    <div id="public-winning-card-grid" class="grid grid-cols-5 gap-1"></div>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -183,6 +201,7 @@
         let autoDrawInterval = null;
         let isAutoRunning = false;
         let roomCodeSecret = '1234';
+        let hasSpokenMyBingo = false;
 
         window.onload = function() {
             initAdminBoard();
@@ -229,18 +248,41 @@
                 const adminWinnerText = document.getElementById('admin-winner-text');
                 const playerNotification = document.getElementById('player-winner-notification');
                 const playerWinnerDetails = document.getElementById('player-winner-details');
+                const playerWinnerTitle = document.getElementById('player-winner-title');
 
                 if (winnerData && winnerData.name) {
                     stopAutoDraw();
+                    
+                    // Actualizar alerta de la administradora
                     if (adminAlert && adminWinnerText) {
                         adminWinnerText.innerText = `¡${winnerData.name} ganó con el cartón #${winnerData.card} (${winnerData.patternName})!`;
+                        document.getElementById('admin-winner-card-title').innerText = `Cartón #${winnerData.card} (${winnerData.patternName})`;
+                        renderMiniWinningCard('admin-winning-card-grid', winnerData.card);
                         adminAlert.classList.remove('hidden');
                     }
+
+                    // Actualizar alerta pública para las jugadoras
                     if (playerNotification && playerWinnerDetails) {
-                        playerWinnerDetails.innerText = `¡Felicidades ${winnerData.name}! Tu cartón #${winnerData.card} completó la figura de ${winnerData.patternName}.`;
+                        if (winnerData.name === currentUser.name) {
+                            playerWinnerTitle.innerText = "👑 ¡HAS CANTADO BINGO! 👑";
+                            playerWinnerDetails.innerText = `¡Felicidades ${currentUser.name}! Tu cartón #${winnerData.card} completó la figura de ${winnerData.patternName}.`;
+                            
+                            // COMAND DE VOZ PARA LA JUGADORA QUE GANÓ
+                            if (!hasSpokenMyBingo) {
+                                speakPlayerBingo();
+                                hasSpokenMyBingo = true;
+                            }
+                        } else {
+                            playerWinnerTitle.innerText = "👑 ¡B I N G O ! 👑";
+                            playerWinnerDetails.innerText = `¡${winnerData.name} hizo Bingo con el cartón #${winnerData.card} (${winnerData.patternName})!`;
+                        }
+                        
+                        document.getElementById('public-winner-card-title').innerText = `Cartón #${winnerData.card} de ${winnerData.name}`;
+                        renderMiniWinningCard('public-winning-card-grid', winnerData.card);
                         playerNotification.classList.remove('hidden');
                     }
                 } else {
+                    hasSpokenMyBingo = false;
                     if (adminAlert) adminAlert.classList.add('hidden');
                     if (playerNotification) playerNotification.classList.add('hidden');
                 }
@@ -288,7 +330,6 @@
 
         function verifyAdminPassword() {
             const pass = document.getElementById('admin-password-input').value;
-            // CLAVE SEGURA ACTUALIZADA: Únicamente Yune2026
             if(pass === "Yune2026") {
                 currentUser.isAdmin = true;
                 hideAllViews();
@@ -327,6 +368,16 @@
         function speakBall(ballNum) {
             if ('speechSynthesis' in window) {
                 let text = `Bola ${ballNum}`;
+                let utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'es-ES';
+                utterance.rate = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function speakPlayerBingo() {
+            if ('speechSynthesis' in window) {
+                let text = "¡Has cantado bingo!";
                 let utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'es-ES';
                 utterance.rate = 1.0;
@@ -700,12 +751,12 @@
                     <div class="grid grid-cols-5 gap-1" id="card-grid-${cardId}"></div>
                 `;
                 container.appendChild(cardDiv);
-                generateCardVisual(cardId);
+                generateCardVisual(cardId, `card-grid-${cardId}`);
             });
         }
 
-        function generateCardVisual(cardId) {
-            const grid = document.getElementById(`card-grid-${cardId}`);
+        function generateCardVisual(cardId, containerId) {
+            const grid = document.getElementById(containerId);
             if(!grid) return;
             grid.innerHTML = '';
             let matrix = getCardMatrix(cardId);
@@ -714,6 +765,31 @@
                 for(let c = 0; c < 5; c++) {
                     const cell = document.createElement('div');
                     cell.className = "h-9 bg-slate-800 border border-slate-700/60 rounded-lg flex items-center justify-center text-xs font-bold text-white";
+                    let val = matrix[r][c];
+                    if(val === 'FREE') {
+                        cell.innerText = "⭐";
+                        cell.className += " bg-pink-600/40 text-pink-300";
+                    } else {
+                        cell.innerText = val;
+                        if(drawnBalls.includes(val)) {
+                            cell.classList.add('bg-green-600', 'text-white', 'border-green-400');
+                        }
+                    }
+                    grid.appendChild(cell);
+                }
+            }
+        }
+
+        function renderMiniWinningCard(containerId, cardId) {
+            const grid = document.getElementById(containerId);
+            if(!grid) return;
+            grid.innerHTML = '';
+            let matrix = getCardMatrix(cardId);
+
+            for(let r = 0; r < 5; r++) {
+                for(let c = 0; c < 5; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = "h-7 bg-slate-800 border border-slate-700/60 rounded flex items-center justify-center text-[10px] font-bold text-white";
                     let val = matrix[r][c];
                     if(val === 'FREE') {
                         cell.innerText = "⭐";
