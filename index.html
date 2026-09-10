@@ -209,9 +209,9 @@
                     <h3 class="font-bold text-yellow-300 text-lg">Tus Cartones en Juego (Ordenados por avance 🚀)</h3>
                     <span class="text-xs text-slate-400">El más cercano sube automáticamente</span>
                 </div>
-                <!-- AQUÍ ESTÁ EL CAMBIO EXACTO: EN CUADRÍCULA DE DOS COLUMNAS -->
-                <div id="player-my-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <span class="text-slate-500 text-sm">Aún no has seleccionado cartones.</span>
+                <!-- AQUÍ ESTÁ CORREGIDO ESTRICTAMENTE A 2 COLUMNAS FIJAS -->
+                <div id="player-my-cards-container" class="grid grid-cols-2 gap-3">
+                    <span class="text-slate-500 text-sm col-span-2">Aún no has seleccionado cartones.</span>
                 </div>
             </div>
         </div>
@@ -816,7 +816,7 @@
             const container = document.getElementById('player-my-cards-container');
             container.innerHTML = '';
             if(mySelectedCards.length === 0) {
-                container.innerHTML = '<span class="text-slate-500 text-sm">Aún no has seleccionado cartones.</span>';
+                container.innerHTML = '<span class="text-slate-500 text-sm col-span-2">Aún no has seleccionado cartones.</span>';
                 return;
             }
 
@@ -845,7 +845,7 @@
                 }
 
                 const cardDiv = document.createElement('div');
-                cardDiv.className = `bg-slate-900 border ${borderStyle} p-4 rounded-2xl flex flex-col gap-3 transition-all`;
+                cardDiv.className = `bg-slate-900 border ${borderStyle} p-3 sm:p-4 rounded-2xl flex flex-col gap-3 transition-all`;
                 cardDiv.innerHTML = `
                     <div class="flex justify-between items-center text-xs font-bold text-yellow-300">
                         <span>Cartón #${cardId}</span>
@@ -870,7 +870,7 @@
             for(let r = 0; r < 5; r++) {
                 for(let c = 0; c < 5; c++) {
                     const cell = document.createElement('div');
-                    cell.className = "h-9 bg-slate-800 border border-slate-700/60 rounded-lg flex items-center justify-center text-xs font-bold text-white";
+                    cell.className = "h-8 sm:h-9 bg-slate-800 border border-slate-700/60 rounded-lg flex items-center justify-center text-xs font-bold text-white";
                     let val = matrix[r][c];
                     if(val === 'FREE') {
                         cell.innerText = "⭐";
