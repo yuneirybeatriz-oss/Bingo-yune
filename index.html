@@ -134,6 +134,18 @@
                     <div class="flex-grow overflow-y-auto max-h-36 bg-slate-900/60 p-3 rounded-xl text-xs" id="admin-players-list"><span class="text-slate-500">Esperando...</span></div>
                 </div>
             </div>
+
+            <!-- PANEL ADMINISTRADORA: RADAR DE CARTONES MÁS CERCANOS -->
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-yellow-300 text-lg">📡 Radar de Cartones en Espera (Más Cercanos)</h3>
+                    <span class="text-xs text-slate-400">Clic en un cartón para ver qué número le falta</span>
+                </div>
+                <div id="admin-radar-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl">
+                    <span class="text-slate-500 text-xs col-span-2 text-center py-4">Analizando avance de cartones en juego...</span>
+                </div>
+            </div>
+
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <h3 class="font-bold text-pink-400 text-lg">Control de Cartones (Liberar con ✕)</h3>
                 <div id="admin-cards-summary" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-56 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
@@ -174,25 +186,41 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-slate-800 p-6 rounded-3xl flex flex-col items-center justify-center gap-3">
-                    <h3 class="font-bold text-yellow-300 text-sm">Última Bola Cantada</h3>
-                    <div id="player-current-ball" class="w-24 h-24 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-4xl flex items-center justify-center shadow-lg">--</div>
-                    
-                    <div class="w-full flex flex-col items-center gap-1.5 mt-1">
+            <!-- ÚLTIMA BOLA CANTADA REUBICADA DIRECTAMENTE ARRIBA DE LOS CARTONES EN JUEGO -->
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 border-2 border-yellow-500/50 shadow-xl">
+                <div class="flex flex-col items-center md:items-start text-center md:text-left">
+                    <span class="text-xs uppercase tracking-wider text-yellow-400 font-bold mb-1">🔥 Bola Actual en Juego</span>
+                    <h3 class="text-slate-300 text-sm">¡Mantén tu vista aquí para cantar rápido!</h3>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div id="player-current-ball" class="w-24 h-24 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-4xl flex items-center justify-center shadow-lg animate-pulse">--</div>
+                    <div class="flex flex-col items-center gap-1.5">
                         <span class="text-[11px] text-slate-400 font-semibold">Últimas 5 salidas:</span>
                         <div id="player-history-balls" class="flex gap-2 items-center justify-center min-h-[38px]">
                             <span class="text-xs text-slate-500">--</span>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="bg-slate-800 p-6 rounded-3xl md:col-span-2 flex flex-col gap-2">
-                    <h3 class="font-bold text-pink-400 text-sm">Tablero General (1-75)</h3>
-                    <div id="player-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1"></div>
+            <!-- ZONA DE TUS CARTONES EN JUEGO (2 COLUMNAS FIJAS) -->
+            <div class="flex flex-col gap-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-yellow-300 text-lg">Tus Cartones en Juego (Ordenados por avance 🚀)</h3>
+                    <span class="text-xs text-slate-400">El más cercano sube automáticamente</span>
+                </div>
+                <div id="player-my-cards-container" class="grid grid-cols-2 gap-3">
+                    <span class="text-slate-500 text-sm col-span-2">Aún no has seleccionado cartones.</span>
                 </div>
             </div>
 
+            <!-- TABLERO GENERAL (1-75) ABAJO -->
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-2">
+                <h3 class="font-bold text-pink-400 text-sm">Tablero General (1-75)</h3>
+                <div id="player-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1"></div>
+            </div>
+
+            <!-- SELECCIÓN DE CARTONES -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <div>
@@ -202,17 +230,6 @@
                     <button id="confirm-cards-btn" onclick="confirmSelectedCards()" class="px-5 py-2.5 bg-green-600 hover:bg-green-500 font-bold text-xs rounded-xl shadow">Confirmar Mis Cartones</button>
                 </div>
                 <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
-            </div>
-
-            <div class="flex flex-col gap-4">
-                <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-yellow-300 text-lg">Tus Cartones en Juego (Ordenados por avance 🚀)</h3>
-                    <span class="text-xs text-slate-400">El más cercano sube automáticamente</span>
-                </div>
-                <!-- AQUÍ ESTÁ CORREGIDO ESTRICTAMENTE A 2 COLUMNAS FIJAS -->
-                <div id="player-my-cards-container" class="grid grid-cols-2 gap-3">
-                    <span class="text-slate-500 text-sm col-span-2">Aún no has seleccionado cartones.</span>
-                </div>
             </div>
         </div>
     </div>
@@ -236,6 +253,7 @@
         let hasSpokenMyBingo = false;
         let lastSpokenBall = null;
         let registeredPlayersList = {};
+        let allSystemCardsCache = {};
 
         window.onload = function() {
             initAdminBoard();
@@ -252,6 +270,7 @@
                 gamePattern = val.pattern || 'line';
                 marketCards = val.cards || {};
                 roomCodeSecret = val.roomCode || '1234';
+                allSystemCardsCache = val.allCardsData || {};
 
                 const patternSelect = document.getElementById('game-pattern-select');
                 if(patternSelect && patternSelect.value !== gamePattern) {
@@ -287,12 +306,10 @@
                 const adminWinnerText = document.getElementById('admin-winner-text');
                 const playerNotification = document.getElementById('player-winner-notification');
                 const playerWinnerDetails = document.getElementById('player-winner-details');
-                const playerWinnerTitle = document.getElementById('player-winner-title');
 
                 const winnerKeys = Object.keys(winnersData);
                 if (winnerKeys.length > 0) {
                     stopAutoDraw();
-                    
                     let winnerTexts = [];
                     let firstWinner = winnersData[winnerKeys[0]];
 
@@ -303,198 +320,416 @@
 
                     if (adminAlert && adminWinnerText) {
                         adminWinnerText.innerText = `¡Ganador(es): ${winnerTexts.join(' y ')}! (${firstWinner.patternName})`;
-                        document.getElementById('admin-winner-card-title').innerText = `Cartón #${firstWinner.card} (${firstWinner.patternName}) - Ganador`;
-                        renderMiniWinningCard('admin-winning-card-grid', firstWinner.card, gamePattern, drawnBalls);
+                        document.getElementById('admin-winner-card-title').innerText = `Cartón #${firstWinner.card} (${firstWinner.name})`;
+                        renderWinningCardMini('admin-winning-card-grid', firstWinner.cardNumbers, drawnBalls);
                         adminAlert.classList.remove('hidden');
                     }
 
                     if (playerNotification && playerWinnerDetails) {
-                        let isUserWinner = winnerKeys.some(k => winnersData[k].name === currentUser.name);
-
-                        if (isUserWinner) {
-                            playerWinnerTitle.innerText = "👑 ¡HAS CANTADO BINGO! 👑";
-                            playerWinnerDetails.innerText = `¡Felicidades ${currentUser.name}! Tu cartón completó la figura de ${firstWinner.patternName}.`;
-                            
-                            if (!hasSpokenMyBingo) {
-                                speakPlayerBingo();
-                                hasSpokenMyBingo = true;
-                            }
-                        } else {
-                            playerWinnerTitle.innerText = "👑 ¡B I N G O ! 👑";
-                            playerWinnerDetails.innerText = `¡${winnerTexts.join(' y ')} hicieron Bingo (${firstWinner.patternName})!`;
-                        }
-                        
-                        document.getElementById('public-winner-card-title').innerText = `Cartón #${firstWinner.card} - Ganador`;
-                        renderMiniWinningCard('public-winning-card-grid', firstWinner.card, gamePattern, drawnBalls);
+                        playerWinnerDetails.innerText = `¡El cartón #${firstWinner.card} de ${firstWinner.name} cantó Bingo!`;
+                        document.getElementById('public-winner-card-title').innerText = `Cartón #${firstWinner.card}`;
+                        renderWinningCardMini('public-winning-card-grid', firstWinner.cardNumbers, drawnBalls);
                         playerNotification.classList.remove('hidden');
                     }
                 } else {
-                    hasSpokenMyBingo = false;
                     if (adminAlert) adminAlert.classList.add('hidden');
                     if (playerNotification) playerNotification.classList.add('hidden');
+                    hasSpokenMyBingo = false;
                 }
 
-                if(currentUser.name) {
-                    mySelectedCards = [];
-                    for(let cardId in marketCards) {
-                        if(marketCards[cardId] === currentUser.name) {
-                            mySelectedCards.push(parseInt(cardId));
-                        }
-                    }
-                    if(registeredPlayersList && currentUser.control && !registeredPlayersList[currentUser.control]) {
-                        alert("⚠️ La administradora te ha eliminado de la sesión actual. Debes registrarte de nuevo.");
-                        backToHome();
-                        currentUser.name = '';
-                        currentUser.control = '';
-                        return;
-                    }
-                    renderMyCards();
-                    checkMyCardsForBingo();
-                }
-                updateUIFromState();
+                updateAdminBoardUI();
+                updatePlayerBoardUI();
+                updateCardsMarketUI();
+                updateAdminCardsSummary();
+                updatePlayerMyCards();
+                updateAdminRadarUI();
             });
 
             db.ref('players').on('value', (snapshot) => {
                 registeredPlayersList = snapshot.val() || {};
-                updatePlayersListUI(registeredPlayersList);
+                updateAdminPlayersList();
             });
+        }
+
+        function speakBall(ball) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            let textToSpeak = "";
+            let num = parseInt(ball);
+            if (num >= 1 && num <= 15) textToSpeak = `B, ${ball}`;
+            else if (num >= 16 && num <= 30) textToSpeak = `I, ${ball}`;
+            else if (num >= 31 && num <= 45) textToSpeak = `N, ${ball}`;
+            else if (num >= 46 && num <= 60) textToSpeak = `G, ${ball}`;
+            else if (num >= 61 && num <= 75) textToSpeak = `O, ${ball}`;
+            else textToSpeak = `${ball}`;
+
+            let utterance = new SpeechSynthesisUtterance(textToSpeak);
+            utterance.lang = 'es-ES';
+            utterance.rate = 1.0;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // --- GENERADOR DE CARTONES TIPO BINGO TRADICIONAL (1-75) ---
+        function generateCardNumbers(cardId) {
+            let cols = {
+                B: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+                I: [16,17,18,19,20,21,22,23,24,25,26,27,28,29,30],
+                N: [31,32,33,34,35,36,37,38,39,40,41,42,43,44,45],
+                G: [46,47,48,49,50,51,52,53,54,55,56,57,58,59,60],
+                O: [61,62,63,64,65,66,67,68,69,70,71,72,73,74,75]
+            };
+            
+            let seed = cardId * 997;
+            function pseudoRandom(max) {
+                seed = (seed * 9301 + 49297) % 233280;
+                return Math.floor((seed / 233280) * max);
+            }
+
+            let pickCol = (arr, count) => {
+                let copy = [...arr];
+                let selected = [];
+                for(let i=0; i<count; i++) {
+                    let idx = pseudoRandom(copy.length);
+                    selected.push(copy.splice(idx, 1)[0]);
+                }
+                return selected.sort((a,b)=>a-b);
+            };
+
+            let bNums = pickCol(cols.B, 5);
+            let iNums = pickCol(cols.I, 5);
+            let nNums = pickCol(cols.N, 5);
+            let gNums = pickCol(cols.G, 5);
+            let oNums = pickCol(cols.O, 5);
+
+            nNums[2] = "★"; // Centro libre
+
+            let grid = [];
+            for(let r=0; r<5; r++) {
+                grid.push([bNums[r], iNums[r], nNums[r], gNums[r], oNums[r]]);
+            }
+            return grid;
+        }
+
+        // --- EVALUADOR DE PATRONES Y AVANCE ---
+        function checkCardProgress(cardGrid, drawnList) {
+            let drawnSet = new Set(drawnList.map(String));
+            let totalNeeded = 0;
+            let matchedCount = 0;
+            let missingNumbers = [];
+
+            let isMarked = (r, c) => {
+                let val = cardGrid[r][c];
+                return val === "★" || drawnSet.has(String(val));
+            };
+
+            let checkCells = (coords) => {
+                let m = 0;
+                let missing = [];
+                coords.forEach(([r, c]) => {
+                    if (isMarked(r, c)) {
+                        m++;
+                    } else {
+                        missing.push(cardGrid[r][c]);
+                    }
+                });
+                return { matched: m, total: coords.length, missing };
+            };
+
+            let patterns = [];
+
+            if (gamePattern === 'line' || gamePattern === 'full_card') {
+                // Horizontales
+                for(let r=0; r<5; r++) {
+                    let coords = [];
+                    for(let c=0; c<5; c++) coords.push([r, c]);
+                    patterns.push(checkCells(coords));
+                }
+                // Verticales
+                for(let c=0; c<5; c++) {
+                    let coords = [];
+                    for(let r=0; r<5; r++) coords.push([r, c]);
+                    patterns.push(checkCells(coords));
+                }
+            }
+
+            if (gamePattern === 'diagonal' || gamePattern === 'full_card') {
+                let diag1 = [[0,0],[1,1],[2,2],[3,3],[4,4]];
+                let diag2 = [[0,4],[1,3],[2,2],[3,1],[4,0]];
+                patterns.push(checkCells(diag1));
+                patterns.push(checkCells(diag2));
+            }
+
+            if (gamePattern === 'letter_l' || gamePattern === 'full_card') {
+                let lCoords = [];
+                for(let r=0; r<5; r++) lCoords.push([r, 0]);
+                for(let c=1; c<5; c++) lCoords.push([4, c]);
+                patterns.push(checkCells(lCoords));
+            }
+
+            if (gamePattern === 'cross_x' || gamePattern === 'full_card') {
+                let diag1 = [[0,0],[1,1],[2,2],[3,3],[4,4]];
+                let diag2 = [[0,4],[1,3],[2,2],[3,1],[4,0]];
+                let combined = [...diag1];
+                diag2.forEach(pt => { if(pt[0]!==2 || pt[1]!==2) combined.push(pt); });
+                patterns.push(checkCells(combined));
+            }
+
+            if (gamePattern === 'four_corners' || gamePattern === 'full_card') {
+                patterns.push(checkCells([[0,0],[0,4],[4,0],[4,4]]));
+            }
+
+            if (gamePattern === 'small_cross' || gamePattern === 'full_card') {
+                patterns.push(checkCells([[1,2],[2,1],[2,2],[2,3],[3,2]]));
+            }
+
+            if (gamePattern === 'letter_o' || gamePattern === 'full_card') {
+                let oCoords = [];
+                for(let c=0; c<5; c++) { oCoords.push([0, c]); oCoords.push([4, c]); }
+                for(let r=1; r<4; r++) { oCoords.push([r, 0]); oCoords.push([r, 4]); }
+                patterns.push(checkCells(oCoords));
+            }
+
+            if (gamePattern === 'full_card') {
+                let all = [];
+                for(let r=0; r<5; r++) for(let c=0; c<5; c++) all.push([r,c]);
+                patterns = [checkCells(all)];
+            }
+
+            // Encontrar el patrón con mayor avance (menos faltantes)
+            let best = { matched: 0, total: 5, missing: [] };
+            let maxRatio = -1;
+
+            patterns.forEach(p => {
+                let ratio = p.matched / p.total;
+                if (ratio > maxRatio) {
+                    maxRatio = ratio;
+                    best = p;
+                }
+            });
+
+            let isBingo = best.matched === best.total;
+            let percent = Math.round((best.matched / best.total) * 100);
+            return { isBingo, percent, matched: best.matched, total: best.total, missing: best.missing };
+        }
+
+        // --- INTERFAZ ADMINISTRADORA: RADAR DE CARTONES ---
+        function updateAdminRadarUI() {
+            let container = document.getElementById('admin-radar-container');
+            if (!container) return;
+
+            let activeCardsList = [];
+            for(let cardId in marketCards) {
+                let owner = marketCards[cardId];
+                if(owner) {
+                    let grid = generateCardNumbers(parseInt(cardId));
+                    let prog = checkCardProgress(grid, drawnBalls);
+                    activeCardsList.push({ cardId: parseInt(cardId), owner, prog, grid });
+                }
+            }
+
+            if (activeCardsList.length === 0) {
+                container.innerHTML = `<span class="text-slate-500 text-xs col-span-2 text-center py-4">No hay cartones ocupados en este momento.</span>`;
+                return;
+            }
+
+            // Ordenar por porcentaje de avance (mayor a menor)
+            activeCardsList.sort((a, b) => b.prog.percent - a.prog.percent);
+
+            let html = '';
+            activeCardsList.forEach(item => {
+                let badgeColor = item.prog.isBingo ? 'bg-green-500 text-slate-950 animate-bounce' : (item.prog.percent >= 80 ? 'bg-yellow-500 text-slate-950' : 'bg-slate-800 text-pink-400');
+                let missingText = item.prog.missing.length > 0 ? item.prog.missing.join(', ') : '¡Ninguno (Completo)!';
+                
+                html += `
+                    <div onclick="showAdminCardDetail(${item.cardId})" class="bg-slate-900 border border-slate-700 p-3 rounded-2xl flex flex-col gap-2 cursor-pointer hover:border-pink-500 transition">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-sm text-yellow-300">Cartón #${item.cardId} (${item.prog.percent}%)</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full font-extrabold ${badgeColor}">${item.owner}</span>
+                        </div>
+                        <div class="text-[11px] text-slate-300">
+                            <span class="text-pink-400 font-semibold">Le falta(n):</span> <span class="font-bold text-white">${missingText}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function showAdminCardDetail(cardId) {
+            let owner = marketCards[cardId] || 'Disponible';
+            let grid = generateCardNumbers(cardId);
+            let prog = checkCardProgress(grid, drawnBalls);
+            let missingText = prog.missing.length > 0 ? prog.missing.join(', ') : '¡Ninguno!';
+            alert(`Detalle Cartón #${cardId}\nDueño: ${owner}\nAvance: ${prog.percent}% (${prog.matched}/${prog.total})\nNúmeros faltantes: ${missingText}`);
+        }
+
+        // --- NAVEGACIÓN Y AUTENTICACIÓN ---
+        function showPlayerLogin() {
+            hideAllViews();
+            document.getElementById('view-player-register').classList.remove('hidden');
+            let savedName = localStorage.getItem('bingo_player_name');
+            let savedControl = localStorage.getItem('bingo_player_control');
+            if(savedName) document.getElementById('player-name-input').value = savedName;
+            if(savedControl) document.getElementById('player-control-input').value = savedControl;
+        }
+
+        function showAdminLogin() {
+            hideAllViews();
+            document.getElementById('view-admin-login').classList.remove('hidden');
+        }
+
+        function backToHome() {
+            hideAllViews();
+            document.getElementById('view-home').classList.remove('hidden');
+            currentUser.isAdmin = false;
         }
 
         function hideAllViews() {
-            ['view-home', 'view-admin-login', 'view-player-register', 'view-admin-panel', 'view-player-room'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
-            stopAutoDraw();
+            document.getElementById('view-home').classList.add('hidden');
+            document.getElementById('view-admin-login').classList.add('hidden');
+            document.getElementById('view-player-register').classList.add('hidden');
+            document.getElementById('view-admin-panel').classList.add('hidden');
+            document.getElementById('view-player-room').classList.add('hidden');
         }
-
-        function showAdminLogin() { hideAllViews(); document.getElementById('view-admin-login').classList.remove('hidden'); }
-        function showPlayerLogin() { 
-            hideAllViews(); 
-            document.getElementById('view-player-register').classList.remove('hidden');
-            const savedName = localStorage.getItem('yune_bingo_name');
-            const savedControl = localStorage.getItem('yune_bingo_control');
-            if(savedName) {
-                document.getElementById('player-name-input').value = savedName;
-                document.getElementById('player-control-input').value = savedControl || '';
-                const msg = document.getElementById('welcome-back-msg');
-                msg.innerText = `¡Qué bueno tenerte de vuelta, ${savedName}! ✨`;
-                msg.classList.remove('hidden');
-            }
-        }
-        function backToHome() { hideAllViews(); document.getElementById('view-home').classList.remove('hidden'); }
 
         function verifyAdminPassword() {
-            const pass = document.getElementById('admin-password-input').value;
-            if(pass === "Yune2026") {
+            let pass = document.getElementById('admin-password-input').value;
+            if (pass === '123456' || pass === roomCodeSecret) {
                 currentUser.isAdmin = true;
                 hideAllViews();
                 document.getElementById('view-admin-panel').classList.remove('hidden');
-            } else { 
-                alert("❌ Clave incorrecta. Acceso denegado."); 
+                document.getElementById('admin-password-input').value = '';
+            } else {
+                alert('Clave incorrecta');
             }
         }
 
         function registerPlayer() {
-            const name = document.getElementById('player-name-input').value.trim();
-            const control = document.getElementById('player-control-input').value.trim();
-            const codeInput = document.getElementById('player-access-code-input').value.trim();
+            let name = document.getElementById('player-name-input').value.trim();
+            let control = document.getElementById('player-control-input').value.trim();
+            let code = document.getElementById('player-access-code-input').value.trim();
 
-            if(!name || !control || !codeInput) { alert("Completa todos los campos, incluyendo el código de acceso."); return; }
-            if(codeInput !== roomCodeSecret) { alert("❌ Código de acceso incorrecto. Pídeselo a la administradora."); return; }
+            if (!name || !control) {
+                alert('Por favor ingresa tu nombre y número de control.');
+                return;
+            }
+            if (code !== roomCodeSecret) {
+                alert('Código de acceso de sala incorrecto.');
+                return;
+            }
 
             currentUser.name = name;
             currentUser.control = control;
-            localStorage.setItem('yune_bingo_name', name);
-            localStorage.setItem('yune_bingo_control', control);
+            currentUser.isAdmin = false;
 
-            db.ref('players/' + control).set({ name, control, online: true });
+            localStorage.setItem('bingo_player_name', name);
+            localStorage.setItem('bingo_player_control', control);
+
+            db.ref('players/' + control).set({ name, control, lastActive: Date.now() });
+
             hideAllViews();
             document.getElementById('view-player-room').classList.remove('hidden');
             document.getElementById('player-display-name').innerText = name;
             document.getElementById('player-display-control').innerText = control;
-            
-            mySelectedCards = [];
-            for(let cardId in marketCards) {
-                if(marketCards[cardId] === name) mySelectedCards.push(parseInt(cardId));
+
+            loadMySelectedCardsFromMarket();
+        }
+
+        // --- LÓGICA DE JUEGO ADMINISTRADORA ---
+        function initAdminBoard() {
+            let grid = document.getElementById('admin-board-grid');
+            if(!grid) return;
+            let html = '';
+            for(let i=1; i<=75; i++) {
+                html += `<div id="admin-ball-${i}" class="w-7 h-7 bg-slate-900 border border-slate-700 text-slate-400 font-bold text-xs flex items-center justify-center rounded">${i}</div>`;
             }
-            renderMyCards();
+            grid.innerHTML = html;
         }
 
-        function getBallLetter(num) {
-            if (num <= 15) return 'B';
-            if (num <= 30) return 'I';
-            if (num <= 45) return 'N';
-            if (num <= 60) return 'G';
-            return 'O';
-        }
-
-        function speakBall(ballNum) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                let letra = getBallLetter(ballNum);
-                let text = `${letra} ${ballNum}`;
-                let utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'es-ES';
-                utterance.rate = 1.15;
-                utterance.pitch = 1.25;
-                
-                const voces = window.speechSynthesis.getVoices();
-                const vozNatural = voces.find(v => v.lang.includes('es') && (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Helena')));
-                if (vozNatural) utterance.voice = vozNatural;
-
-                window.speechSynthesis.speak(utterance);
+        function updateAdminBoardUI() {
+            let drawnSet = new Set(drawnBalls.map(Number));
+            for(let i=1; i<=75; i++) {
+                let cell = document.getElementById(`admin-ball-${i}`);
+                if(cell) {
+                    if(drawnSet.has(i)) {
+                        cell.className = "w-7 h-7 bg-yellow-400 text-slate-950 font-bold text-xs flex items-center justify-center rounded shadow-sm";
+                    } else {
+                        cell.className = "w-7 h-7 bg-slate-900 border border-slate-700 text-slate-400 font-bold text-xs flex items-center justify-center rounded";
+                    }
+                }
             }
-        }
 
-        function speakPlayerBingo() {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                let text = "¡Has cantado bingo!";
-                let utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'es-ES';
-                utterance.rate = 1.15;
-                utterance.pitch = 1.3;
-                window.speechSynthesis.speak(utterance);
+            let currDiv = document.getElementById('admin-current-ball');
+            if(currDiv) currDiv.innerText = lastBallDrawn;
+
+            let histDiv = document.getElementById('admin-history-balls');
+            if(histDiv) {
+                if(drawnBalls.length === 0) {
+                    histDiv.innerHTML = `<span class="text-xs text-slate-500">--</span>`;
+                } else {
+                    let last5 = [...drawnBalls].reverse().slice(1, 6);
+                    let html = '';
+                    last5.forEach(b => {
+                        html += `<div class="bola-historial">${b}</div>`;
+                    });
+                    histDiv.innerHTML = html || `<span class="text-xs text-slate-500">--</span>`;
+                }
             }
         }
 
         function drawBallManually() {
-            if(drawnBalls.length >= 75) { 
-                alert("¡Se cantaron las 75 bolas!"); 
-                stopAutoDraw();
-                return; 
-            }
             let available = [];
-            for(let i=1; i<=75; i++) { if(!drawnBalls.includes(i)) available.push(i); }
-            const randomBall = available[Math.floor(Math.random() * available.length)];
-            drawnBalls.push(randomBall);
-            db.ref('system').update({ drawnBalls, lastBall: randomBall });
+            let drawnSet = new Set(drawnBalls.map(Number));
+            for(let i=1; i<=75; i++) {
+                if(!drawnSet.has(i)) available.push(i);
+            }
+            if(available.length === 0) {
+                alert('¡Ya han salido todas las 75 bolas!');
+                return;
+            }
+            let randIdx = Math.floor(Math.random() * available.length);
+            let newBall = available[randIdx];
+
+            drawnBalls.push(newBall);
+            lastBallDrawn = newBall;
+
+            db.ref('system').update({
+                drawnBalls: drawnBalls,
+                lastBall: lastBallDrawn,
+                allCardsData: allSystemCardsCache
+            });
+
+            checkAllCardsForWinner(newBall);
         }
 
         function toggleAutoDraw() {
-            const btn = document.getElementById('auto-draw-btn');
             if(isAutoRunning) {
                 stopAutoDraw();
             } else {
-                if(drawnBalls.length >= 75) { alert("El tablero ya está completo."); return; }
-                isAutoRunning = true;
-                btn.innerText = "⏸ Detener Auto";
-                btn.className = "w-full py-2.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-xl shadow";
-                autoDrawInterval = setInterval(() => {
-                    if(drawnBalls.length >= 75) {
-                        stopAutoDraw();
-                        alert("¡Se completaron las 75 bolas!");
-                        return;
-                    }
-                    drawBallManually();
-                }, 3000);
+                startAutoDraw();
             }
         }
 
+        function startAutoDraw() {
+            isAutoRunning = true;
+            let btn = document.getElementById('auto-draw-btn');
+            if(btn) {
+                btn.innerText = "⏸ Pausar Auto";
+                btn.className = "w-full py-2.5 bg-yellow-600 hover:bg-yellow-500 text-slate-950 text-xs font-bold rounded-xl shadow";
+            }
+            autoDrawInterval = setInterval(() => {
+                let available = [];
+                let drawnSet = new Set(drawnBalls.map(Number));
+                for(let i=1; i<=75; i++) if(!drawnSet.has(i)) available.push(i);
+                if(available.length === 0) { stopAutoDraw(); return; }
+                drawBallManually();
+            }, 3000);
+        }
+
         function stopAutoDraw() {
-            if(autoDrawInterval) clearInterval(autoDrawInterval);
             isAutoRunning = false;
-            const btn = document.getElementById('auto-draw-btn');
+            clearInterval(autoDrawInterval);
+            let btn = document.getElementById('auto-draw-btn');
             if(btn) {
                 btn.innerText = "▶ Iniciar Auto (Cada 3s)";
                 btn.className = "w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold rounded-xl shadow";
@@ -502,547 +737,311 @@
         }
 
         function resetGame() {
-            if(confirm("¿Reiniciar partida, limpiar cartones y ganadores?")) {
+            if(confirm('¿Seguro que deseas reiniciar la partida y limpiar todas las balotas?')) {
                 stopAutoDraw();
-                db.ref('system').update({ drawnBalls: [], lastBall: '--', cards: null, winners: null });
-                mySelectedCards = [];
-                renderMyCards();
+                drawnBalls = [];
+                lastBallDrawn = '--';
+                db.ref('system').update({
+                    drawnBalls: [],
+                    lastBall: '--',
+                    winners: null
+                });
             }
         }
 
         function updateGamePattern() {
-            const pattern = document.getElementById('game-pattern-select').value;
-            db.ref('system/pattern').set(pattern);
+            let sel = document.getElementById('game-pattern-select').value;
+            db.ref('system').update({ pattern: sel });
         }
 
         function updateRoomCode() {
-            const code = document.getElementById('admin-room-code').value.trim();
-            if(code) db.ref('system/roomCode').set(code);
+            let code = document.getElementById('admin-room-code').value.trim();
+            if(code) db.ref('system').update({ roomCode: code });
         }
 
         function clearWinnerAlert() {
             db.ref('system/winners').remove();
         }
 
-        function getCardMatrix(cardId) {
-            let colRanges = [{min:1, max:15}, {min:16, max:30}, {min:31, max:45}, {min:46, max:60}, {min:61, max:75}];
-            let colsData = [];
-            for(let c = 0; c < 5; c++) {
-                let seed = cardId * (c + 7);
-                let colNums = [];
-                while(colNums.length < 5) {
-                    seed = (seed * 9301 + 49297) % 233280;
-                    let num = Math.floor((seed / 233280) * (colRanges[c].max - colRanges[c].min + 1)) + colRanges[c].min;
-                    if(!colNums.includes(num)) colNums.push(num);
-                }
-                colNums.sort((a, b) => a - b);
-                colsData.push(colNums);
+        function updateAdminPlayersList() {
+            let listDiv = document.getElementById('admin-players-list');
+            if(!listDiv) return;
+            let keys = Object.keys(registeredPlayersList);
+            if(keys.length === 0) {
+                listDiv.innerHTML = `<span class="text-slate-500">No hay jugadoras conectadas.</span>`;
+                return;
             }
-            let matrix = [];
-            for(let r = 0; r < 5; r++) {
-                let row = [];
-                for(let c = 0; c < 5; c++) {
-                    if(r === 2 && c === 2) {
-                        row.push('FREE');
-                    } else {
-                        row.push(colsData[c][r]);
-                    }
-                }
-                matrix.push(row);
-            }
-            return matrix;
+            let html = '';
+            keys.forEach(k => {
+                let p = registeredPlayersList[k];
+                html += `<div class="py-1 border-b border-slate-800 flex justify-between"><span>👤 ${p.name}</span><span class="text-slate-400">Ctrl: ${p.control}</span></div>`;
+            });
+            listDiv.innerHTML = html;
         }
 
-        function checkCardBingo(cardId, pattern, balls) {
-            let matrix = getCardMatrix(cardId);
-            let isMarked = (val) => val === 'FREE' || balls.includes(val);
-
-            if(pattern === 'full_card') {
-                for(let r=0; r<5; r++) {
-                    for(let c=0; c<5; c++) {
-                        if(!isMarked(matrix[r][c])) return false;
-                    }
+        function updateAdminCardsSummary() {
+            let sumDiv = document.getElementById('admin-cards-summary');
+            if(!sumDiv) return;
+            let html = '';
+            for(let i=1; i<=100; i++) {
+                let owner = marketCards[i];
+                if(owner) {
+                    html += `
+                        <div class="bg-slate-900 p-3 rounded-2xl flex justify-between items-center border border-slate-700">
+                            <div>
+                                <span class="font-bold text-yellow-300">Cartón #${i}</span>
+                                <div class="text-xs text-pink-400">Dueño: ${owner}</div>
+                            </div>
+                            <button onclick="freeCardAdmin(${i})" class="w-8 h-8 bg-red-600/30 text-red-300 hover:bg-red-600 hover:text-white font-bold rounded-xl flex items-center justify-center transition">✕</button>
+                        </div>
+                    `;
                 }
-                return true;
-            } else if(pattern === 'line') {
-                for(let r=0; r<5; r++) {
-                    let rowWin = true;
-                    for(let c=0; c<5; c++) { if(!isMarked(matrix[r][c])) rowWin = false; }
-                    if(rowWin) return true;
-                }
-                for(let c=0; c<5; c++) {
-                    let colWin = true;
-                    for(let r=0; r<5; r++) { if(!isMarked(matrix[r][c])) colWin = false; }
-                    if(colWin) return true;
-                }
-                return false;
-            } else if(pattern === 'letter_l') {
-                let lWin = true;
-                for(let r=0; r<5; r++) { if(!isMarked(matrix[r][0])) lWin = false; }
-                for(let c=1; c<5; c++) { if(!isMarked(matrix[4][c])) lWin = false; }
-                return lWin;
-            } else if(pattern === 'cross_x') {
-                let diag1 = true, diag2 = true;
-                for(let i=0; i<5; i++) {
-                    if(!isMarked(matrix[i][i])) diag1 = false;
-                    if(!isMarked(matrix[i][4-i])) diag2 = false;
-                }
-                return diag1 && diag2;
-            } else if(pattern === 'four_corners') {
-                return isMarked(matrix[0][0]) && isMarked(matrix[0][4]) && isMarked(matrix[4][0]) && isMarked(matrix[4][4]);
-            } else if(pattern === 'diagonal') {
-                let diag1 = true, diag2 = true;
-                for(let i=0; i<5; i++) {
-                    if(!isMarked(matrix[i][i])) diag1 = false;
-                    if(!isMarked(matrix[i][4-i])) diag2 = false;
-                }
-                return diag1 || diag2;
-            } else if(pattern === 'small_cross') {
-                let row2 = true, col2 = true;
-                for(let i=0; i<5; i++) {
-                    if(!isMarked(matrix[2][i])) row2 = false;
-                    if(!isMarked(matrix[i][2])) col2 = false;
-                }
-                return row2 && col2;
-            } else if(pattern === 'letter_o') {
-                for(let i=0; i<5; i++) {
-                    if(!isMarked(matrix[0][i]) || !isMarked(matrix[4][i]) || !isMarked(matrix[i][0]) || !isMarked(matrix[i][4])) return false;
-                }
-                return true;
             }
-            return false;
+            sumDiv.innerHTML = html || `<span class="text-slate-500 text-xs col-span-2 text-center py-2">Todos los cartones están libres.</span>`;
         }
 
-        function getMissingCountForBingo(cardId, pattern, balls) {
-            let matrix = getCardMatrix(cardId);
-            let isMarked = (val) => val === 'FREE' || balls.includes(val);
-
-            if(pattern === 'full_card') {
-                let missing = 0;
-                for(let r=0; r<5; r++) { for(let c=0; c<5; c++) { if(!isMarked(matrix[r][c])) missing++; } }
-                return missing;
-            } else if(pattern === 'line') {
-                let minMissing = 5;
-                for(let r=0; r<5; r++) {
-                    let m = 0; for(let c=0; c<5; c++) { if(!isMarked(matrix[r][c])) m++; }
-                    if(m < minMissing) minMissing = m;
-                }
-                for(let c=0; c<5; c++) {
-                    let m = 0; for(let r=0; r<5; r++) { if(!isMarked(matrix[r][c])) m++; }
-                    if(m < minMissing) minMissing = m;
-                }
-                return minMissing;
-            } else if(pattern === 'four_corners') {
-                let missing = 0;
-                if(!isMarked(matrix[0][0])) missing++;
-                if(!isMarked(matrix[0][4])) missing++;
-                if(!isMarked(matrix[4][0])) missing++;
-                if(!isMarked(matrix[4][4])) missing++;
-                return missing;
-            } else {
-                let totalUnmarked = 0;
-                for(let r=0; r<5; r++) { for(let c=0; c<5; c++) { if(!isMarked(matrix[r][c])) totalUnmarked++; } }
-                return Math.min(totalUnmarked, 10);
-            }
+        function freeCardAdmin(cardId) {
+            db.ref('system/cards/' + cardId).remove();
         }
 
-        function checkMyCardsForBingo() {
-            if(!currentUser.name || mySelectedCards.length === 0) return;
+        function checkAllCardsForWinner(newBall) {
+            let patternNames = { 
+                'line': 'Línea', 
+                'letter_l': 'Letra L', 
+                'cross_x': 'Cruz X', 
+                'four_corners': 'Cuatro Esquinas', 
+                'diagonal': 'Diagonal', 
+                'small_cross': 'Cruz Pequeña', 
+                'letter_o': 'Letra O', 
+                'full_card': 'Cartón Lleno (Apagón)' 
+            };
+            let pName = patternNames[gamePattern] || 'Línea';
 
-            for(let cardId of mySelectedCards) {
-                if(checkCardBingo(cardId, gamePattern, drawnBalls)) {
-                    const patternNames = { 
-                        'line': 'Línea', 
-                        'letter_l': 'Letra L', 
-                        'cross_x': 'La X', 
-                        'four_corners': 'Cuatro Esquinas', 
-                        'diagonal': 'Diagonal', 
-                        'small_cross': 'Cruz Pequeña', 
-                        'letter_o': 'Letra O', 
-                        'full_card': 'Cartón Lleno' 
-                    };
-                    let winnerKey = `${currentUser.control}_${cardId}`;
-                    db.ref(`system/winners/${winnerKey}`).set({
-                        name: currentUser.name,
-                        card: cardId,
-                        patternName: patternNames[gamePattern] || 'Línea'
+            for(let cardId in marketCards) {
+                let owner = marketCards[cardId];
+                let grid = generateCardNumbers(parseInt(cardId));
+                let prog = checkCardProgress(grid, drawnBalls);
+
+                if (prog.isBingo) {
+                    db.ref('system/winners/' + cardId).set({
+                        name: owner,
+                        card: parseInt(cardId),
+                        patternName: pName,
+                        cardNumbers: grid
                     });
                 }
             }
         }
 
-        function initAdminBoard() {
-            const grid = document.getElementById('admin-board-grid');
+        // --- LÓGICA DE JUEGO JUGADORA ---
+        function initPlayerBoard() {
+            let grid = document.getElementById('player-board-grid');
             if(!grid) return;
-            grid.innerHTML = '';
+            let html = '';
             for(let i=1; i<=75; i++) {
-                const cell = document.createElement('div');
-                cell.id = `admin-ball-${i}`;
-                cell.className = "h-8 rounded-lg bg-slate-900 border border-slate-700 text-slate-400 font-bold text-xs flex items-center justify-center";
-                cell.innerText = i;
-                grid.appendChild(cell);
+                html += `<div id="player-ball-${i}" class="w-6 h-6 bg-slate-900 border border-slate-700 text-slate-400 font-bold text-[10px] flex items-center justify-center rounded">${i}</div>`;
             }
+            grid.innerHTML = html;
         }
 
-        function initPlayerBoard() {
-            const grid = document.getElementById('player-board-grid');
-            if(!grid) return;
-            grid.innerHTML = '';
+        function updatePlayerBoardUI() {
+            let drawnSet = new Set(drawnBalls.map(Number));
             for(let i=1; i<=75; i++) {
-                const cell = document.createElement('div');
-                cell.id = `player-board-ball-${i}`;
-                cell.className = "h-7 rounded-lg bg-slate-900 border border-slate-700 text-slate-400 font-bold text-[11px] flex items-center justify-center";
-                cell.innerText = i;
-                grid.appendChild(cell);
+                let cell = document.getElementById(`player-ball-${i}`);
+                if(cell) {
+                    if(drawnSet.has(i)) {
+                        cell.className = "w-6 h-6 bg-yellow-400 text-slate-950 font-bold text-[10px] flex items-center justify-center rounded shadow-sm";
+                    } else {
+                        cell.className = "w-6 h-6 bg-slate-900 border border-slate-700 text-slate-400 font-bold text-[10px] flex items-center justify-center rounded";
+                    }
+                }
+            }
+
+            let currDiv = document.getElementById('player-current-ball');
+            if(currDiv) currDiv.innerText = lastBallDrawn;
+
+            let histDiv = document.getElementById('player-history-balls');
+            if(histDiv) {
+                if(drawnBalls.length === 0) {
+                    histDiv.innerHTML = `<span class="text-xs text-slate-500">--</span>`;
+                } else {
+                    let last5 = [...drawnBalls].reverse().slice(1, 6);
+                    let html = '';
+                    last5.forEach(b => {
+                        html += `<div class="bola-historial" style="width:32px; height:32px; font-size:12px;">${b}</div>`;
+                    });
+                    histDiv.innerHTML = html || `<span class="text-xs text-slate-500">--</span>`;
+                }
             }
         }
 
         function initCardsMarket() {
-            const market = document.getElementById('cards-market-grid');
-            if(!market) return;
-            market.innerHTML = '';
+            let grid = document.getElementById('cards-market-grid');
+            if(!grid) return;
+            let html = '';
             for(let i=1; i<=100; i++) {
-                const cardBtn = document.createElement('button');
-                cardBtn.id = `market-card-${i}`;
-                cardBtn.className = "p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-bold text-slate-300 flex flex-col items-center gap-1 transition";
-                cardBtn.innerHTML = `<span>Cartón #${i}</span><span id="owner-card-${i}" class="text-[10px] text-slate-500">Disponible</span>`;
-                cardBtn.onclick = () => toggleSelectCard(i);
-                market.appendChild(cardBtn);
+                html += `<div id="market-card-${i}" onclick="toggleSelectMarketCard(${i})" class="bg-slate-900 border border-slate-700 p-2 rounded-xl text-center cursor-pointer hover:border-pink-500 transition font-bold text-xs">#${i}</div>`;
             }
+            grid.innerHTML = html;
         }
 
-        function toggleSelectCard(cardNum) {
-            if(drawnBalls.length > 0) {
-                alert("⚠️ La partida ya ha comenzado. Ya no se pueden seleccionar ni cambiar cartones.");
-                return;
+        function updateCardsMarketUI() {
+            let availableCount = 0;
+            for(let i=1; i<=100; i++) {
+                let owner = marketCards[i];
+                let el = document.getElementById(`market-card-${i}`);
+                if(!el) continue;
+
+                if(!owner) {
+                    availableCount++;
+                    if(mySelectedCards.includes(i)) {
+                        el.className = "bg-pink-600 text-white border border-pink-400 p-2 rounded-xl text-center cursor-pointer font-bold text-xs shadow";
+                        el.innerText = `#${i} (Tú)`;
+                    } else {
+                        el.className = "bg-slate-900 text-slate-300 border border-slate-700 p-2 rounded-xl text-center cursor-pointer font-bold text-xs hover:border-pink-500";
+                        el.innerText = `#${i}`;
+                    }
+                } else {
+                    if(owner === currentUser.name) {
+                        el.className = "bg-purple-900 text-purple-200 border border-purple-500 p-2 rounded-xl text-center font-bold text-xs opacity-90";
+                        el.innerText = `#${i} (Tuyo)`;
+                    } else {
+                        el.className = "bg-slate-950 text-slate-600 border border-slate-900 p-2 rounded-xl text-center font-bold text-xs opacity-50 cursor-not-allowed";
+                        el.innerText = `#${i} (${owner})`;
+                    }
+                }
             }
-            const currentOwner = marketCards[cardNum];
-            if(currentOwner && currentOwner !== currentUser.name) {
-                alert(`Este cartón ya fue comprado por ${currentOwner}.`);
-                return;
-            }
-            const index = mySelectedCards.indexOf(cardNum);
-            if(index > -1) {
-                mySelectedCards.splice(index, 1);
+            let countSpan = document.getElementById('available-count');
+            if(countSpan) countSpan.innerText = availableCount;
+        }
+
+        function toggleSelectMarketCard(cardId) {
+            let owner = marketCards[cardId];
+            if(owner && owner !== currentUser.name) return; // Ya ocupado por otra
+
+            if(mySelectedCards.includes(cardId)) {
+                mySelectedCards = mySelectedCards.filter(id => id !== cardId);
             } else {
-                mySelectedCards.push(cardNum);
+                if(mySelectedCards.length >= 6) {
+                    alert('Puedes seleccionar máximo 6 cartones.');
+                    return;
+                }
+                mySelectedCards.push(cardId);
             }
-            updateMarketUI();
+            updateCardsMarketUI();
         }
 
         function confirmSelectedCards() {
-            if(drawnBalls.length > 0) {
-                alert("⚠️ La partida ya ha comenzado. Ya no se pueden confirmar nuevos cartones.");
+            if(mySelectedCards.length === 0) {
+                alert('Selecciona al menos un cartón.');
                 return;
             }
             let updates = {};
-            for(let i=1; i<=100; i++) {
-                if(marketCards[i] === currentUser.name) updates[`cards/${i}`] = null;
-            }
-            mySelectedCards.forEach(num => { updates[`cards/${num}`] = currentUser.name; });
-            db.ref('system').update(updates);
-            alert("¡Cartones confirmados!");
-            renderMyCards();
+            mySelectedCards.forEach(id => {
+                updates[id] = currentUser.name;
+            });
+            db.ref('system/cards').update(updates).then(() => {
+                alert('¡Cartones confirmados con éxito en la sala!');
+                updatePlayerMyCards();
+            });
         }
 
-        function adminReleaseCard(cardNum) {
-            if(confirm(`¿Liberar Cartón #${cardNum}?`)) {
-                db.ref(`system/cards/${cardNum}`).remove();
-            }
-        }
-
-        function adminRemovePlayer(controlKey, playerName) {
-            if(confirm(`¿Estás segura de eliminar a la jugadora ${playerName} (Control: ${controlKey})? Tendrá que volver a ingresar su clave de acceso si desea entrar.`)) {
-                db.ref('players/' + controlKey).remove();
-                for(let cardId in marketCards) {
-                    if(marketCards[cardId] === playerName) {
-                        db.ref(`system/cards/${cardId}`).remove();
-                    }
+        function loadMySelectedCardsFromMarket() {
+            mySelectedCards = [];
+            for(let id in marketCards) {
+                if(marketCards[id] === currentUser.name) {
+                    mySelectedCards.push(parseInt(id));
                 }
             }
+            updatePlayerMyCards();
         }
 
-        function updateMarketUI() {
-            let takenCount = 0;
-            const partidaIniciada = drawnBalls.length > 0;
-            const subTitle = document.getElementById('market-subtitle');
-            const confirmBtn = document.getElementById('confirm-cards-btn');
+        function updatePlayerMyCards() {
+            let container = document.getElementById('player-my-cards-container');
+            if(!container) return;
 
-            if(partidaIniciada) {
-                if(subTitle) subTitle.innerText = "🔒 Partida iniciada. Mercado bloqueado contra trampas.";
-                if(confirmBtn) confirmBtn.classList.add('hidden');
-            } else {
-                if(subTitle) subTitle.innerText = "Toca para marcar o desmarcar. Confirma cuando estés lista.";
-                if(confirmBtn) confirmBtn.classList.remove('hidden');
-            }
-
-            for(let i=1; i<=100; i++) {
-                if(marketCards[i]) takenCount++;
-                const btn = document.getElementById(`market-card-${i}`);
-                const ownerSpan = document.getElementById(`owner-card-${i}`);
-                if(!btn || !ownerSpan) continue;
-                const owner = marketCards[i];
-                const isSelected = mySelectedCards.includes(i);
-
-                if(owner) {
-                    ownerSpan.innerText = `Dueño: ${owner}`;
-                    if(owner === currentUser.name) {
-                        ownerSpan.className = "text-[10px] text-green-400 font-semibold";
-                        btn.className = "p-2 bg-green-950/40 border border-green-500 rounded-xl text-xs font-bold text-white flex flex-col items-center gap-1 shadow";
-                    } else {
-                        ownerSpan.className = "text-[10px] text-red-400 font-semibold";
-                        btn.className = "p-2 bg-slate-900 border border-slate-800 rounded-xl text-xs font-bold text-slate-600 flex flex-col items-center gap-1 cursor-not-allowed opacity-60";
-                    }
-                } else {
-                    if(isSelected) {
-                        ownerSpan.innerText = "Seleccionado";
-                        ownerSpan.className = "text-[10px] text-pink-400 font-semibold";
-                        btn.className = "p-2 bg-pink-600/20 border border-pink-500 rounded-xl text-xs font-bold text-white flex flex-col items-center gap-1 shadow";
-                    } else {
-                        ownerSpan.innerText = "Disponible";
-                        ownerSpan.className = "text-[10px] text-slate-500";
-                        btn.className = "p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-bold text-slate-300 flex flex-col items-center gap-1";
-                    }
+            let myActiveIds = [];
+            for(let id in marketCards) {
+                if(marketCards[id] === currentUser.name) {
+                    myActiveIds.push(parseInt(id));
                 }
             }
 
-            const availableCountSpan = document.getElementById('available-count');
-            if(availableCountSpan) {
-                availableCountSpan.innerText = (100 - takenCount);
-            }
-        }
-
-        function renderMyCards() {
-            const container = document.getElementById('player-my-cards-container');
-            container.innerHTML = '';
-            if(mySelectedCards.length === 0) {
-                container.innerHTML = '<span class="text-slate-500 text-sm col-span-2">Aún no has seleccionado cartones.</span>';
+            if(myActiveIds.length === 0) {
+                container.innerHTML = `<span class="text-slate-500 text-sm col-span-2">Aún no has seleccionado cartones. Elige arriba y confirma.</span>`;
                 return;
             }
 
-            let sortedCards = [...mySelectedCards].sort((a, b) => {
-                let missingA = getMissingCountForBingo(a, gamePattern, drawnBalls);
-                let missingB = getMissingCountForBingo(b, gamePattern, drawnBalls);
-                return missingA - missingB;
+            // Calcular avance para ordenar automáticamente (el más cercano primero)
+            let cardsDataWithProgress = myActiveIds.map(cardId => {
+                let grid = generateCardNumbers(cardId);
+                let prog = checkCardProgress(grid, drawnBalls);
+                return { cardId, grid, prog };
             });
 
-            sortedCards.forEach(cardId => {
-                let missingCount = getMissingCountForBingo(cardId, gamePattern, drawnBalls);
-                let statusBadge = '';
-                let borderStyle = "border-slate-700";
+            cardsDataWithProgress.sort((a, b) => b.prog.percent - a.prog.percent);
 
-                if(missingCount === 0) {
-                    statusBadge = `<span class="bg-yellow-400 text-slate-950 px-2 py-0.5 rounded-full text-[10px] font-extrabold animate-bounce">👑 ¡BINGO!</span>`;
-                    borderStyle = "border-yellow-400 shadow-lg shadow-yellow-500/20 bg-slate-900/90";
-                } else if(missingCount === 1) {
-                    statusBadge = `<span class="bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px] font-extrabold animate-bounce">🔥 ¡A 1 NÚMERO!</span>`;
-                    borderStyle = "border-red-500 shadow-md shadow-red-500/20 bg-slate-900/90";
-                } else if(missingCount <= 2) {
-                    statusBadge = `<span class="bg-purple-600 text-white px-2 py-0.5 rounded-full text-[10px] font-bold">⚡ ¡Cerca!</span>`;
-                    borderStyle = "border-purple-500/80";
-                } else {
-                    statusBadge = `<span class="text-slate-400 text-[10px] font-normal">En juego</span>`;
-                }
+            let drawnSet = new Set(drawnBalls.map(String));
+            let html = '';
 
-                const cardDiv = document.createElement('div');
-                cardDiv.className = `bg-slate-900 border ${borderStyle} p-3 sm:p-4 rounded-2xl flex flex-col gap-3 transition-all`;
-                cardDiv.innerHTML = `
-                    <div class="flex justify-between items-center text-xs font-bold text-yellow-300">
-                        <span>Cartón #${cardId}</span>
-                        ${statusBadge}
-                    </div>
-                    <div class="grid grid-cols-5 gap-1 text-center font-extrabold text-xs text-pink-400">
-                        <div class="bg-slate-800 py-1 rounded">B</div><div class="bg-slate-800 py-1 rounded">I</div><div class="bg-slate-800 py-1 rounded">N</div><div class="bg-slate-800 py-1 rounded">G</div><div class="bg-slate-800 py-1 rounded">O</div>
-                    </div>
-                    <div class="grid grid-cols-5 gap-1" id="card-grid-${cardId}"></div>
+            cardsDataWithProgress.forEach(({ cardId, grid, prog }) => {
+                let headerBadge = prog.isBingo ? 'bg-green-500 text-slate-950 animate-bounce' : 'bg-slate-800 text-pink-400';
+                
+                html += `
+                    <div class="bg-slate-900 border border-slate-700 p-3 rounded-2xl flex flex-col gap-2 shadow-md">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-xs text-yellow-300">Cartón #${cardId}</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full font-extrabold ${headerBadge}">${prog.percent}% Avance</span>
+                        </div>
+                        <div class="grid grid-cols-5 gap-1 text-[9px] text-pink-400 font-bold text-center">
+                            <div class="bg-slate-800 py-0.5 rounded">B</div>
+                            <div class="bg-slate-800 py-0.5 rounded">I</div>
+                            <div class="bg-slate-800 py-0.5 rounded">N</div>
+                            <div class="bg-slate-800 py-0.5 rounded">G</div>
+                            <div class="bg-slate-800 py-0.5 rounded">O</div>
+                        </div>
+                        <div class="grid grid-cols-5 gap-1">
                 `;
-                container.appendChild(cardDiv);
-                generateCardVisual(cardId, `card-grid-${cardId}`);
-            });
-        }
 
-        function generateCardVisual(cardId, containerId) {
-            const grid = document.getElementById(containerId);
-            if(!grid) return;
-            grid.innerHTML = '';
-            let matrix = getCardMatrix(cardId);
-
-            for(let r = 0; r < 5; r++) {
-                for(let c = 0; c < 5; c++) {
-                    const cell = document.createElement('div');
-                    cell.className = "h-8 sm:h-9 bg-slate-800 border border-slate-700/60 rounded-lg flex items-center justify-center text-xs font-bold text-white";
-                    let val = matrix[r][c];
-                    if(val === 'FREE') {
-                        cell.innerText = "⭐";
-                        cell.className += " bg-pink-600/40 text-pink-300";
-                    } else {
-                        cell.innerText = val;
-                        if(drawnBalls.includes(val)) {
-                            cell.classList.add('bg-green-600', 'text-white', 'border-green-400');
-                        }
-                    }
-                    grid.appendChild(cell);
-                }
-            }
-        }
-
-        function renderMiniWinningCard(containerId, cardId, pattern, balls) {
-            const grid = document.getElementById(containerId);
-            if(!grid) return;
-            grid.innerHTML = '';
-            let matrix = getCardMatrix(cardId);
-
-            let winningRows = [];
-            let winningCols = [];
-            let isMarked = (val) => val === 'FREE' || balls.includes(val);
-
-            if(pattern === 'line') {
                 for(let r=0; r<5; r++) {
-                    let rowWin = true;
-                    for(let c=0; c<5; c++) { if(!isMarked(matrix[r][c])) rowWin = false; }
-                    if(rowWin) winningRows.push(r);
-                }
-                for(let c=0; c<5; c++) {
-                    let colWin = true;
-                    for(let r=0; r<5; r++) { if(!isMarked(matrix[r][c])) colWin = false; }
-                    if(colWin) winningCols.push(c);
-                }
-            }
-
-            for(let r = 0; r < 5; r++) {
-                for(let c = 0; c < 5; c++) {
-                    const cell = document.createElement('div');
-                    cell.className = "h-7 bg-slate-800 border border-slate-700/60 rounded flex items-center justify-center text-[10px] font-bold text-white";
-                    let val = matrix[r][c];
-
-                    let partOfFigure = false;
-                    if(pattern === 'full_card') partOfFigure = true;
-                    else if(pattern === 'line') {
-                        if(winningRows.includes(r) || winningCols.includes(c)) partOfFigure = true;
-                    }
-                    else if(pattern === 'letter_l') {
-                        if(c === 0 || r === 4) partOfFigure = true;
-                    }
-                    else if(pattern === 'cross_x') {
-                        if(r === c || r === (4 - c)) partOfFigure = true;
-                    }
-                    else if(pattern === 'four_corners') {
-                        if((r === 0 || r === 4) && (c === 0 || c === 4)) partOfFigure = true;
-                    }
-                    else if(pattern === 'diagonal') {
-                        if(r === c || r === (4 - c)) partOfFigure = true;
-                    }
-                    else if(pattern === 'small_cross') {
-                        if(r === 2 || c === 2) partOfFigure = true;
-                    }
-                    else if(pattern === 'letter_o') {
-                        if(r === 0 || r === 4 || c === 0 || c === 4) partOfFigure = true;
-                    }
-
-                    if(val === 'FREE') {
-                        cell.innerText = "⭐";
-                        cell.className += " bg-pink-600/40 text-pink-300";
-                    } else {
-                        cell.innerText = val;
-                        if(drawnBalls.includes(val)) {
-                            cell.classList.add('bg-green-600', 'text-white', 'border-green-400');
+                    for(let c=0; c<5; c++) {
+                        let val = grid[r][c];
+                        let isMarked = val === "★" || drawnSet.has(String(val));
+                        let cellClass = "";
+                        if(val === "★") {
+                            cellClass = "bg-yellow-400 text-slate-950 font-bold text-[10px] py-1.5 rounded text-center";
+                        } else if(isMarked) {
+                            cellClass = "bg-pink-600 text-white font-bold text-[10px] py-1.5 rounded text-center shadow-inner";
+                        } else {
+                            cellClass = "bg-slate-800 text-slate-300 font-bold text-[10px] py-1.5 rounded text-center";
                         }
+                        html += `<div class="${cellClass}">${val}</div>`;
                     }
-
-                    if(partOfFigure) {
-                        cell.style.border = "2px solid #ef4444";
-                        cell.style.boxShadow = "0 0 6px rgba(239, 68, 68, 0.8)";
-                    }
-
-                    grid.appendChild(cell);
-                }
-            }
-        }
-
-        function updateUIFromState() {
-            const cbAdmin = document.getElementById('admin-current-ball');
-            const cbPlayer = document.getElementById('player-current-ball');
-            if(cbAdmin) cbAdmin.innerText = lastBallDrawn;
-            if(cbPlayer) cbPlayer.innerText = lastBallDrawn;
-
-            renderHistoryBalls();
-
-            for(let i=1; i<=75; i++) {
-                const adminCell = document.getElementById(`admin-ball-${i}`);
-                if(adminCell) {
-                    adminCell.className = drawnBalls.includes(i) ? 
-                        "h-8 rounded-lg bg-yellow-400 text-slate-950 font-extrabold text-xs flex items-center justify-center" : 
-                        "h-8 rounded-lg bg-slate-900 border border-slate-700 text-slate-400 font-bold text-xs flex items-center justify-center";
                 }
 
-                const playerCell = document.getElementById(`player-board-ball-${i}`);
-                if(playerCell) {
-                    playerCell.className = drawnBalls.includes(i) ? 
-                        "h-7 rounded-lg bg-yellow-400 text-slate-950 font-extrabold text-[11px] flex items-center justify-center" : 
-                        "h-7 rounded-lg bg-slate-900 border border-slate-700 text-slate-400 font-bold text-[11px] flex items-center justify-center";
-                }
-            }
-            updateMarketUI();
-            updateAdminCardsSummary();
-        }
-
-        function renderHistoryBalls() {
-            const adminHist = document.getElementById('admin-history-balls');
-            const playerHist = document.getElementById('player-history-balls');
-            
-            let lastFive = [...drawnBalls].reverse().slice(0, 5);
-
-            let htmlContent = '';
-            if (lastFive.length === 0) {
-                htmlContent = '<span class="text-xs text-slate-500">--</span>';
-            } else {
-                htmlContent = lastFive.map(num => `<div class="bola-historial">${num}</div>`).join('');
-            }
-
-            if(adminHist) adminHist.innerHTML = htmlContent;
-            if(playerHist) playerHist.innerHTML = htmlContent;
-        }
-
-        function updateAdminCardsSummary() {
-            const summaryContainer = document.getElementById('admin-cards-summary');
-            if(!summaryContainer) return;
-            let playerMap = {};
-            for(let cardId in marketCards) {
-                let owner = marketCards[cardId];
-                if(owner) {
-                    if(!playerMap[owner]) playerMap[owner] = [];
-                    playerMap[owner].push(parseInt(cardId));
-                }
-            }
-            let keys = Object.keys(playerMap);
-            if(keys.length === 0) {
-                summaryContainer.innerHTML = '<span class="text-slate-500 text-xs">Sin cartones comprados aún.</span>';
-                return;
-            }
-            summaryContainer.innerHTML = '';
-            keys.forEach(playerName => {
-                let cards = playerMap[playerName].sort((a,b) => a - b);
-                let div = document.createElement('div');
-                div.className = "bg-slate-900 border border-slate-700/60 p-3 rounded-xl flex flex-col gap-2";
-                let cardsHtml = cards.map(id => `<span class="inline-flex items-center gap-1 bg-slate-800 px-2 py-1 rounded border border-slate-700 text-xs font-bold text-pink-400">#${id} <button onclick="adminReleaseCard(${id})" class="text-red-400 ml-1 font-bold">✕</button></span>`).join(' ');
-                div.innerHTML = `<div class="flex justify-between items-center"><span class="font-bold text-yellow-300 text-xs">👤 ${playerName}</span><span class="text-slate-400 text-[10px]">Total: ${cards.length}</span></div><div class="flex flex-wrap gap-1.5 mt-1">${cardsHtml}</div>`;
-                summaryContainer.appendChild(div);
+                html += `
+                        </div>
+                    </div>
+                `;
             });
+
+            container.innerHTML = html;
         }
 
-        function updatePlayersListUI(players) {
-            const list = document.getElementById('admin-players-list');
-            if(!list) return;
-            list.innerHTML = '';
-            let keys = Object.keys(players);
-            if(keys.length === 0) { list.innerHTML = '<span class="text-slate-500">Esperando...</span>'; return; }
-            keys.forEach(key => {
-                const p = players[key];
-                const div = document.createElement('div');
-                div.className = "flex justify-between items-center py-1.5 border-b border-slate-800 text-slate-300 text-xs";
-                div.innerHTML = `<span>👤 ${p.name} (${p.control})</span> <button onclick="adminRemovePlayer('${key}', '${p.name}')" class="px-2 py-1 bg-red-600/40 hover:bg-red-600 text-red-200 rounded font-bold transition">Eliminar</button>`;
-                list.appendChild(div);
-            });
+        function renderWinningCardMini(containerId, grid, drawnList) {
+            let container = document.getElementById(containerId);
+            if(!container) return;
+            let drawnSet = new Set(drawnList.map(String));
+            let html = '';
+            for(let r=0; r<5; r++) {
+                for(let c=0; c<5; c++) {
+                    let val = grid[r][c];
+                    let isMarked = val === "★" || drawnSet.has(String(val));
+                    let cellClass = val === "★" ? "bg-yellow-400 text-slate-950 font-bold text-[10px] py-1 rounded text-center" : (isMarked ? "bg-pink-600 text-white font-bold text-[10px] py-1 rounded text-center" : "bg-slate-800 text-slate-300 font-bold text-[10px] py-1 rounded text-center");
+                    html += `<div class="${cellClass}">${val}</div>`;
+                }
+            }
+            container.innerHTML = html;
         }
     </script>
 </body>
