@@ -15,7 +15,6 @@
         @keyframes flash-bg { 0%, 100% { background-color: rgba(234, 179, 8, 0.9); } 50% { background-color: rgba(219, 39, 119, 0.9); } }
         .flash-winner { animation: flash-bg 1s infinite; }
         
-        /* Estilo para las últimas 5 bolas */
         .bola-historial {
             width: 38px;
             height: 38px;
@@ -83,7 +82,6 @@
                 <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 text-xs rounded-xl">Salir</button>
             </div>
 
-            <!-- REPORTE DE GANADOR PARA LA ADMIN -->
             <div id="admin-winner-alert" class="hidden bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-950 p-6 rounded-3xl font-extrabold text-center text-xl shadow-xl alert-bingo flex flex-col gap-3">
                 <div>🎉 ¡BINGO VALIDADO! 🎉</div>
                 <div id="admin-winner-text" class="text-base font-bold bg-white/20 py-2 px-4 rounded-xl">Ganador...</div>
@@ -98,12 +96,10 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- ÚLTIMA BOLA Y HISTORIAL DE 5 -->
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col items-center gap-4">
                     <h3 class="font-bold text-yellow-300">Última Bola</h3>
                     <div id="admin-current-ball" class="w-28 h-28 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-5xl flex items-center justify-center shadow-lg">--</div>
                     
-                    <!-- Historial últimas 5 bolas (Admin) -->
                     <div class="w-full flex flex-col items-center gap-1.5 mt-1">
                         <span class="text-[11px] text-slate-400 font-semibold">Últimas 5 salidas:</span>
                         <div id="admin-history-balls" class="flex gap-2 items-center justify-center min-h-[42px]">
@@ -112,7 +108,7 @@
                     </div>
 
                     <button onclick="drawBallManually()" class="w-full py-3 bg-purple-600 hover:bg-purple-500 font-bold rounded-xl text-sm shadow mt-2">Sacar Bola (Manual)</button>
-                    <button id="auto-draw-btn" onclick="toggleAutoDraw()" class="w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold rounded-xl shadow">▶ Iniciar Auto (Cada 6s)</button>
+                    <button id="auto-draw-btn" onclick="toggleAutoDraw()" class="w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold rounded-xl shadow">▶ Iniciar Auto (Cada 3s)</button>
                     <button onclick="resetGame()" class="w-full py-2 bg-red-600/30 text-red-300 text-xs font-bold rounded-xl">Reiniciar Partida</button>
                 </div>
 
@@ -163,7 +159,6 @@
                 </div>
             </div>
 
-            <!-- FIESTA ÉPICA DE BINGO PARA LA JUGADORA -->
             <div id="player-winner-notification" class="hidden flash-winner text-slate-950 p-6 rounded-3xl font-extrabold text-center text-xl shadow-2xl alert-bingo flex flex-col gap-3">
                 <div id="player-winner-title" class="text-3xl text-yellow-300 drop-shadow">👑 ¡B I N G O ! 👑</div>
                 <div id="player-winner-details" class="text-base font-bold bg-black/40 text-white py-2 px-4 rounded-xl">¡Tu cartón hizo bingo!</div>
@@ -177,7 +172,6 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- ÚLTIMA BOLA Y HISTORIAL DE 5 (Jugadora) -->
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col items-center justify-center gap-3">
                     <h3 class="font-bold text-yellow-300 text-sm">Última Bola Cantada</h3>
                     <div id="player-current-ball" class="w-24 h-24 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-4xl flex items-center justify-center shadow-lg">--</div>
@@ -199,7 +193,7 @@
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <div>
-                        <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (100 Disponibles)</h3>
+                        <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (<span id="available-count">100</span> Disponibles)</h3>
                         <p class="text-xs text-slate-400">Toca para marcar o desmarcar. Confirma cuando estés lista.</p>
                     </div>
                     <button onclick="confirmSelectedCards()" class="px-5 py-2.5 bg-green-600 hover:bg-green-500 font-bold text-xs rounded-xl shadow">Confirmar Mis Cartones</button>
@@ -236,7 +230,7 @@
         let isAutoRunning = false;
         let roomCodeSecret = '1234';
         let hasSpokenMyBingo = false;
-        let lastSpokenBall = null; // Para evitar repetir la voz del mismo número
+        let lastSpokenBall = null;
 
         window.onload = function() {
             initAdminBoard();
@@ -278,7 +272,6 @@
                     patternLabel.innerText = patternNames[gamePattern] || 'Línea';
                 }
 
-                // Canto de voz para los números que van saliendo en tiempo real
                 if (lastBallDrawn && lastBallDrawn !== '--' && lastBallDrawn !== lastSpokenBall) {
                     lastSpokenBall = lastBallDrawn;
                     speakBall(lastBallDrawn);
@@ -403,15 +396,23 @@
             renderMyCards();
         }
 
-        // Voz animada para cantar los números
+        function getBallLetter(num) {
+            if (num <= 15) return 'B';
+            if (num <= 30) return 'I';
+            if (num <= 45) return 'N';
+            if (num <= 60) return 'G';
+            return 'O';
+        }
+
         function speakBall(ballNum) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
-                let text = `Número ${ballNum}`;
+                let letra = getBallLetter(ballNum);
+                let text = `${letra} ${ballNum}`;
                 let utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'es-ES';
-                utterance.rate = 1.15; // Un poco más ágil
-                utterance.pitch = 1.25; // Más alegre y animada
+                utterance.rate = 1.15;
+                utterance.pitch = 1.25;
                 
                 const voces = window.speechSynthesis.getVoices();
                 const vozNatural = voces.find(v => v.lang.includes('es') && (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Helena')));
@@ -421,7 +422,6 @@
             }
         }
 
-        // Voz para cuando la jugadora canta bingo
         function speakPlayerBingo() {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
@@ -463,7 +463,7 @@
                         return;
                     }
                     drawBallManually();
-                }, 6000);
+                }, 3000);
             }
         }
 
@@ -472,7 +472,7 @@
             isAutoRunning = false;
             const btn = document.getElementById('auto-draw-btn');
             if(btn) {
-                btn.innerText = "▶ Iniciar Auto (Cada 6s)";
+                btn.innerText = "▶ Iniciar Auto (Cada 3s)";
                 btn.className = "w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold rounded-xl shadow";
             }
         }
@@ -724,7 +724,9 @@
         }
 
         function updateMarketUI() {
+            let takenCount = 0;
             for(let i=1; i<=100; i++) {
+                if(marketCards[i]) takenCount++;
                 const btn = document.getElementById(`market-card-${i}`);
                 const ownerSpan = document.getElementById(`owner-card-${i}`);
                 if(!btn || !ownerSpan) continue;
@@ -751,6 +753,11 @@
                         btn.className = "p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-bold text-slate-300 flex flex-col items-center gap-1";
                     }
                 }
+            }
+
+            const availableCountSpan = document.getElementById('available-count');
+            if(availableCountSpan) {
+                availableCountSpan.innerText = (100 - takenCount);
             }
         }
 
@@ -859,7 +866,6 @@
             if(cbAdmin) cbAdmin.innerText = lastBallDrawn;
             if(cbPlayer) cbPlayer.innerText = lastBallDrawn;
 
-            // Renderizar las últimas 5 bolas en orden
             renderHistoryBalls();
 
             for(let i=1; i<=75; i++) {
