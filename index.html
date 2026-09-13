@@ -664,7 +664,6 @@
 
             if (hayGanador) {
                 alertBox.classList.remove('hidden');
-                // DETENER EL SORTEO AUTOMÁTICO INMEDIATAMENTE AL HABER GANADOR
                 if (isAutoRunning) {
                     clearInterval(autoDrawInterval);
                     isAutoRunning = false;
@@ -678,7 +677,6 @@
         }
 
         function drawBallManually() {
-            // Verificar si hay algún ganador antes de sacar más bolas
             for (let id in marketCards) {
                 if (marketCards[id].owner && verificarFiguraGanadora(marketCards[id].grid, drawnBalls, gamePattern)) {
                     alert("⚠️ ¡Ya hay un cartón ganador en esta ronda! El juego está detenido hasta limpiar o pasar de figura.");
@@ -710,7 +708,6 @@
                 document.getElementById('auto-draw-btn').innerText = "⏸ Pausar Auto";
                 document.getElementById('auto-draw-btn').classList.replace('bg-pink-600', 'bg-slate-600');
                 autoDrawInterval = setInterval(() => {
-                    // Verificar si ya hay ganador para frenar automáticamente en cada ciclo
                     for (let id in marketCards) {
                         if (marketCards[id].owner && verificarFiguraGanadora(marketCards[id].grid, drawnBalls, gamePattern)) {
                             clearInterval(autoDrawInterval);
