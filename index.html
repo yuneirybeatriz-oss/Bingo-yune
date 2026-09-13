@@ -148,11 +148,11 @@
                 </div>
             </div>
 
-            <!-- RADAR DE CARTONES MÁS CERCANOS -->
+            <!-- RADAR DE CARTONES MÁS CERCANOS Y QUÉ NÚMERO LES FALTA -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-yellow-300 text-lg">📡 Radar de Cartones en Espera (Más Cercanos)</h3>
-                    <span class="text-xs text-slate-400">Control en vivo de avance de cada cartón</span>
+                    <h3 class="font-bold text-yellow-300 text-lg">📡 Radar de Cartones Cercanos (¡A qué número les falta!)</h3>
+                    <span class="text-xs text-slate-400">Monitoreo en vivo de los números pendientes</span>
                 </div>
                 <div id="admin-radar-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl">
                     <span class="text-slate-500 text-xs col-span-2 text-center py-4">Analizando avance de cartones en juego...</span>
@@ -193,8 +193,6 @@
             <div id="player-winner-notification" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
                 <div class="flash-winner text-slate-950 p-6 md:p-8 rounded-3xl font-extrabold text-center shadow-2xl alert-bingo flex flex-col gap-4 max-w-lg w-full">
                     <div class="text-3xl md:text-4xl text-yellow-300 drop-shadow">👑 ¡B I N G O ! 👑</div>
-                    
-                    <!-- Textos idénticos a los del panel de la administradora -->
                     <div id="public-winner-text" class="text-base font-bold bg-white/20 py-2 px-4 rounded-xl text-slate-950">¡Tu cartón hizo bingo! El juego se ha detenido.</div>
                     
                     <div class="bg-slate-900 text-white p-4 rounded-2xl max-w-xs mx-auto w-full flex flex-col gap-2">
@@ -207,6 +205,11 @@
 
                     <button onclick="cerrarModalJugadora()" class="mt-2 py-2 px-6 bg-slate-900 text-yellow-300 text-xs rounded-xl font-bold shadow mx-auto">Cerrar y Ver Tablero</button>
                 </div>
+            </div>
+
+            <!-- MODAL DE ALERTA "¡A UNA!" PARA LA JUGADORA -->
+            <div id="player-one-away-alert" class="hidden fixed top-6 left-1/2 transform -translate-x-1/2 z-40 bg-gradient-to-r from-pink-600 to-yellow-500 text-slate-950 px-6 py-3 rounded-2xl font-extrabold text-center shadow-2xl alert-bingo border-2 border-white">
+                <div id="player-one-away-text" class="text-sm md:text-base">🔥 ¡ATENCIÓN! ¡Estás a una bolita de cantar BINGO! 🔥</div>
             </div>
 
             <!-- ÚLTIMA BOLA CANTADA -->
@@ -230,9 +233,9 @@
             <div class="flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-yellow-300 text-lg">Tus Cartones en Juego</h3>
-                    <span class="text-xs text-slate-400">Tus cartones seleccionados</span>
+                    <span class="text-xs text-slate-400">Tus cartones seleccionados y números pendientes</span>
                 </div>
-                <div id="player-my-cards-container" class="grid grid-cols-2 gap-3">
+                <div id="player-my-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <span class="text-slate-500 text-sm col-span-2">Aún no has seleccionado cartones.</span>
                 </div>
             </div>
@@ -332,35 +335,67 @@
             });
         }
 
-        function verificarFiguraGanadora(grid, drawnArray, patron) {
+        // Analiza las líneas ganadoras posibles y devuelve los números que faltan exactamente para completar una línea/figura
+        function obtenerNumerosFaltantesGanar(grid, drawnArray, patron) {
             let isChecked = (num) => num === 0 || drawnArray.includes(num);
+            let lineasPosibles = [];
 
             if (patron === 'line') {
+                // Filas
                 for (let r = 0; r < 5; r++) {
-                    if (isChecked(grid[r][0]) && isChecked(grid[r][1]) && isChecked(grid[r][2]) && isChecked(grid[r][3]) && isChecked(grid[r][4])) return true;
+                    let linea = [];
+                    for (let c = 0; c < 5; c++) linea.push({r, c, num: grid[r][c]});
+                    lineasPosibles.push(linea);
                 }
+                // Columnas
                 for (let c = 0; c < 5; c++) {
-                    if (isChecked(grid[0][c]) && isChecked(grid[1][c]) && isChecked(grid[2][c]) && isChecked(grid[3][c]) && isChecked(grid[4][c])) return true;
+                    let linea = [];
+                    for (let r = 0; r < 5; r++) linea.push({r, c, num: grid[r][c]});
+                    lineasPosibles.push(linea);
                 }
-                return false;
-            } 
-            else if (patron === 'full_card') {
+            } else if (patron === 'full_card') {
+                let linea = [];
                 for (let r = 0; r < 5; r++) {
-                    for (let c = 0; c < 5; c++) {
-                        if (!isChecked(grid[r][c])) return false;
-                    }
+                    for (let c = 0; c < 5; c++) linea.push({r, c, num: grid[r][c]});
                 }
-                return true;
+                lineasPosibles.push(linea);
+            } else if (patron === 'four_corners') {
+                lineasPosibles.push([{r:0,c:0,num:grid[0][0]}, {r:0,c:4,num:grid[0][4]}, {r:4,c:0,num:grid[4][0]}, {r:4,c:4,num:grid[4][4]}]);
+            } else if (patron === 'diagonal') {
+                let diag1 = [], diag2 = [];
+                for (let i = 0; i < 5; i++) {
+                    diag1.push({r:i, c:i, num:grid[i][i]});
+                    diag2.push({r:i, c:4-i, num:grid[i][4-i]});
+                }
+                lineasPosibles.push(diag1);
+                lineasPosibles.push(diag2);
+            } else {
+                // Por defecto evalúa filas y columnas
+                for (let r = 0; r < 5; r++) {
+                    let linea = [];
+                    for (let c = 0; c < 5; c++) linea.push({r, c, num: grid[r][c]});
+                    lineasPosibles.push(linea);
+                }
             }
-            else if (patron === 'four_corners') {
-                return isChecked(grid[0][0]) && isChecked(grid[0][4]) && isChecked(grid[4][0]) && isChecked(grid[4][4]);
-            }
-            else if (patron === 'diagonal') {
-                let diag1 = isChecked(grid[0][0]) && isChecked(grid[1][1]) && isChecked(grid[2][2]) && isChecked(grid[3][3]) && isChecked(grid[4][4]);
-                let diag2 = isChecked(grid[0][4]) && isChecked(grid[1][3]) && isChecked(grid[2][2]) && isChecked(grid[3][1]) && isChecked(grid[4][0]);
-                return diag1 || diag2;
-            }
-            return false;
+
+            // Buscar la línea a la que le falten menos números
+            let mejorFaltantes = [];
+            let menorFaltasCount = 99;
+
+            lineasPosibles.forEach(linea => {
+                let faltanEnLinea = linea.filter(item => !isChecked(item.num));
+                if (faltanEnLinea.length < menorFaltasCount) {
+                    menorFaltasCount = faltanEnLinea.length;
+                    mejorFaltantes = faltanEnLinea.map(item => item.num);
+                }
+            });
+
+            return { faltantes: mejorFaltantes, count: menorFaltasCount };
+        }
+
+        function verificarFiguraGanadora(grid, drawnArray, patron) {
+            let resultado = obtenerNumerosFaltantesGanar(grid, drawnArray, patron);
+            return resultado.count === 0;
         }
 
         function showPlayerLogin() {
@@ -472,6 +507,7 @@
                 if (drawnBalls.length === 0) {
                     hasSpokenMyBingo = false;
                     document.getElementById('player-winner-notification').classList.add('hidden');
+                    document.getElementById('player-one-away-alert').classList.add('hidden');
                 }
 
                 document.getElementById('player-pattern-label').innerText = gamePattern === 'line' ? 'Línea' : 'Cartón Lleno';
@@ -618,23 +654,18 @@
                 let card = marketCards[id];
                 if (card.owner) {
                     cartonesOcupados++;
-                    let aciertos = 0;
-
-                    for (let r = 0; r < 5; r++) {
-                        for (let c = 0; c < 5; c++) {
-                            let num = card.grid[r][c];
-                            if (num === 0 || drawnBalls.includes(num)) {
-                                aciertos++;
-                            }
-                        }
-                    }
+                    let analisis = obtenerNumerosFaltantesGanar(card.grid, drawnBalls, gamePattern);
+                    let faltantesTexto = analisis.faltantes.length > 0 ? analisis.faltantes.map(n => n === 0 ? '⭐' : '#' + n).join(', ') : '¡BINGO LISTO!';
 
                     let div = document.createElement('div');
-                    div.className = "bg-slate-900 p-3 rounded-xl flex flex-col gap-1 border border-slate-700 text-xs";
+                    div.className = `bg-slate-900 p-3 rounded-xl flex flex-col gap-1.5 border ${analisis.count === 1 ? 'border-yellow-400 bg-yellow-500/10' : 'border-slate-700'} text-xs`;
                     div.innerHTML = `
                         <div class="flex justify-between font-bold">
                             <span class="text-yellow-300">Cartón #${card.id} (${card.owner})</span>
-                            <span class="text-pink-400">${aciertos}/25 marcados</span>
+                            <span class="${analisis.count === 1 ? 'text-yellow-400 font-extrabold animate-pulse' : 'text-pink-400'}">${analisis.count === 1 ? '🔥 ¡A UNA BOLITA!' : analisis.count + ' faltantes'}</span>
+                        </div>
+                        <div class="text-[11px] text-slate-300">
+                            <strong>Números que le faltan:</strong> <span class="text-pink-300 font-bold">${faltantesTexto}</span>
                         </div>
                         <span class="text-[10px] text-slate-400">Control: ${card.ownerControl || 'N/A'}</span>
                     `;
@@ -754,6 +785,7 @@
             db.ref('room/drawnBalls').set([]);
             document.getElementById('admin-winner-alert').classList.add('hidden');
             document.getElementById('player-winner-notification').classList.add('hidden');
+            document.getElementById('player-one-away-alert').classList.add('hidden');
             hasSpokenMyBingo = false;
             alert("¡Balotas reiniciadas! Los cartones se mantienen para la siguiente figura.");
         }
@@ -763,6 +795,7 @@
                 db.ref('room/drawnBalls').set([]);
                 document.getElementById('admin-winner-alert').classList.add('hidden');
                 document.getElementById('player-winner-notification').classList.add('hidden');
+                document.getElementById('player-one-away-alert').classList.add('hidden');
                 hasSpokenMyBingo = false;
                 
                 let initialMarket = {};
@@ -860,16 +893,26 @@
 
             if (misCartones.length === 0) {
                 container.innerHTML = '<span class="text-slate-500 text-sm col-span-2">Aún no has seleccionado cartones. Toca abajo en el mercado para elegir.</span>';
+                document.getElementById('player-one-away-alert').classList.add('hidden');
                 return;
             }
 
+            let tieneUnoAprobado = false;
+            let cartonesAUnaLista = [];
+
             misCartones.forEach(card => {
-                let gano = verificarFiguraGanadora(card.grid, drawnBalls, gamePattern);
+                let analisis = obtenerNumerosFaltantesGanar(card.grid, drawnBalls, gamePattern);
+                let gano = analisis.count === 0;
+                let estaAUna = analisis.count === 1;
+
+                if (estaAUna && !gano) {
+                    tieneUnoAprobado = true;
+                    cartonesAUnaLista.push(`Cartón #${card.id} (Falta: ${analisis.faltantes.map(n => n === 0 ? '⭐' : '#' + n).join(', ')})`);
+                }
                 
                 if (gano && !hasSpokenMyBingo) {
                     hasSpokenMyBingo = true;
                     
-                    // Rellenar idéntico a la admin: Título con el nombre del cartón y ganador, y su cuadrícula exacta
                     document.getElementById('public-winner-text').innerText = `¡Cartón #${card.id} de ${card.owner} hizo BINGO!`;
                     document.getElementById('public-winner-card-title').innerText = `Cartón Ganador #${card.id}`;
                     
@@ -887,7 +930,7 @@
                 }
 
                 let cardDiv = document.createElement('div');
-                cardDiv.className = `bg-slate-900 border ${gano ? 'border-yellow-400 bg-yellow-500/10' : 'border-slate-700'} p-3 rounded-2xl flex flex-col gap-2`;
+                cardDiv.className = `bg-slate-900 border ${gano ? 'border-yellow-400 bg-yellow-500/10' : estaAUna ? 'border-pink-500 bg-pink-500/10' : 'border-slate-700'} p-3 rounded-2xl flex flex-col gap-2`;
                 
                 let htmlGrid = '<div class="grid grid-cols-5 gap-1 text-center">';
                 for (let r = 0; r < 5; r++) {
@@ -899,15 +942,29 @@
                 }
                 htmlGrid += '</div>';
 
+                let faltantesStr = analisis.faltantes.map(n => n === 0 ? '⭐' : '#' + n).join(', ');
+
                 cardDiv.innerHTML = `
                     <div class="flex justify-between items-center text-xs">
-                        <span class="font-bold text-yellow-300">Cartón #${card.id} ${gano ? '👑 ¡BINGO!' : ''}</span>
+                        <span class="font-bold text-yellow-300">Cartón #${card.id} ${gano ? '👑 ¡BINGO!' : estaAUna ? '🔥 ¡A UNA!' : ''}</span>
                         <span class="text-[10px] text-slate-400">${card.paid ? '💰 Pagado' : '⏳ Por Pagar'}</span>
                     </div>
                     ${htmlGrid}
+                    <div class="text-[11px] bg-slate-950 p-2 rounded-xl border border-slate-800">
+                        <span class="text-slate-400">Le falta(n):</span> <span class="text-pink-400 font-bold">${analisis.count === 0 ? '¡Listo para cantar!' : faltantesStr}</span>
+                    </div>
                 `;
                 container.appendChild(cardDiv);
             });
+
+            // Activar o desactivar cartel superior "¡A una!"
+            let alertAura = document.getElementById('player-one-away-alert');
+            if (tieneUnoAprobado && !hasSpokenMyBingo) {
+                document.getElementById('player-one-away-text').innerHTML = `🔥 ¡ATENCIÓN! A tu(s) ${cartonesAUnaLista.join(' | ')} le(s) falta una bolita para BINGO! 🔥`;
+                alertAura.classList.remove('hidden');
+            } else {
+                alertAura.classList.add('hidden');
+            }
         }
     </script>
 </body>
