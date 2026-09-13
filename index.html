@@ -283,6 +283,34 @@
         let hasSpokenMyBingo = false;
         let previewingCardId = null;
 
+        // --- SISTEMA DE VOZ BONITA Y CLARA ---
+        function cantarNumeroVoz(num) {
+            if (!window.speechSynthesis) return;
+            window.speechSynthesis.cancel(); // Detiene cualquier voz anterior para hablar de inmediato
+            
+            let letra = getBallLetter(num);
+            let texto = `${letra}, ${num}`;
+            let utterance = new SpeechSynthesisUtterance(texto);
+            utterance.lang = 'es-ES';
+            utterance.rate = 0.95; // Velocidad pausada y clara
+            utterance.pitch = 1.1; // Tono alegre y amigable (voz bonita estilo asistente)
+            
+            // Buscar la mejor voz en español disponible en el teléfono o PC
+            let voces = window.speechSynthesis.getVoices();
+            let vozElegida = voces.find(v => v.lang.startsWith('es') && (v.name.includes('Google') || v.name.includes('Lucia') || v.name.includes('Helena') || v.name.includes('Monica') || v.name.includes('Spanish'))) || voces.find(v => v.lang.startsWith('es'));
+            
+            if (vozElegida) {
+                utterance.voice = vozElegida;
+            }
+            
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Cargar voces al iniciar
+        if (window.speechSynthesis) {
+            window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
+        }
+
         // --- ASIGNACIÓN DE COLORES POR LETRA ---
         function getBallColorClass(num) {
             let n = parseInt(num);
@@ -327,6 +355,7 @@
             db.ref('gameState').on('value', (snapshot) => {
                 const state = snapshot.val();
                 if(state) {
+                    let oldLength = drawnBalls.length;
                     drawnBalls = state.drawnBalls || [];
                     gamePattern = state.gamePattern || 'line';
                     roomCodeSecret = state.roomCode || 'BINGO2026';
@@ -341,6 +370,12 @@
                     };
                     if(document.getElementById('player-pattern-label')) {
                         document.getElementById('player-pattern-label').innerText = patternNames[gamePattern] || gamePattern;
+                    }
+
+                    // Si hay una nueva bolita cantada, reproducir la voz bonita
+                    if (drawnBalls.length > oldLength && drawnBalls.length > 0) {
+                        let ultimaCantada = drawnBalls[drawnBalls.length - 1];
+                        cantarNumeroVoz(ultimaCantada);
                     }
 
                     updateBoardsUI();
