@@ -264,6 +264,9 @@
 
     <footer class="text-center text-xs text-slate-500 py-6">Bingo Lineal Yune &bull; Tiempo Real 🌟</footer>
 
+    <!-- AUDIO CLÁSICO CONFIABLE -->
+    <audio id="bingo-audio" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
+
     <script>
         const firebaseConfig = { databaseURL: "https://bingo-lineal-yune-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
@@ -283,32 +286,13 @@
         let hasSpokenMyBingo = false;
         let previewingCardId = null;
 
-        // --- SISTEMA DE VOZ BONITA Y CLARA ---
-        function cantarNumeroVoz(num) {
-            if (!window.speechSynthesis) return;
-            window.speechSynthesis.cancel(); // Detiene cualquier voz anterior para hablar de inmediato
-            
-            let letra = getBallLetter(num);
-            let texto = `${letra}, ${num}`;
-            let utterance = new SpeechSynthesisUtterance(texto);
-            utterance.lang = 'es-ES';
-            utterance.rate = 0.95; // Velocidad pausada y clara
-            utterance.pitch = 1.1; // Tono alegre y amigable (voz bonita estilo asistente)
-            
-            // Buscar la mejor voz en español disponible en el teléfono o PC
-            let voces = window.speechSynthesis.getVoices();
-            let vozElegida = voces.find(v => v.lang.startsWith('es') && (v.name.includes('Google') || v.name.includes('Lucia') || v.name.includes('Helena') || v.name.includes('Monica') || v.name.includes('Spanish'))) || voces.find(v => v.lang.startsWith('es'));
-            
-            if (vozElegida) {
-                utterance.voice = vozElegida;
+        // --- REPRODUCIR SONIDO CLÁSICO ---
+        function reproducirSonidoAlerta() {
+            let audio = document.getElementById('bingo-audio');
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play().catch(e => console.log("Audio bloqueado temporalmente por navegador"));
             }
-            
-            window.speechSynthesis.speak(utterance);
-        }
-
-        // Cargar voces al iniciar
-        if (window.speechSynthesis) {
-            window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
         }
 
         // --- ASIGNACIÓN DE COLORES POR LETRA ---
@@ -372,10 +356,9 @@
                         document.getElementById('player-pattern-label').innerText = patternNames[gamePattern] || gamePattern;
                     }
 
-                    // Si hay una nueva bolita cantada, reproducir la voz bonita
+                    // Si hay una nueva bolita cantada, reproducir sonido clásico seguro
                     if (drawnBalls.length > oldLength && drawnBalls.length > 0) {
-                        let ultimaCantada = drawnBalls[drawnBalls.length - 1];
-                        cantarNumeroVoz(ultimaCantada);
+                        reproducirSonidoAlerta();
                     }
 
                     updateBoardsUI();
