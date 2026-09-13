@@ -8,20 +8,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Poppins', sans-serif; background: #0f172a; color: #f8fafc; }
-        .neon-glow { text-shadow: 0 0 15px rgba(236, 72, 153, 0.8), 0 0 30px rgba(236, 72, 153, 0.6); }
+        .neon-glow { text-shadow: 0 0 10px rgba(236, 72, 153, 0.7), 0 0 20px rgba(236, 72, 153, 0.5); }
         .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5); }
-        @keyframes pulse-fast { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.85; transform: scale(1.04); } }
-        .alert-bingo { animation: pulse-fast 0.8s infinite; }
-        @keyframes flash-bg { 0%, 100% { background-color: rgba(234, 179, 8, 0.95); } 50% { background-color: rgba(219, 39, 119, 0.95); } }
-        .flash-winner { animation: flash-bg 0.8s infinite; }
+        @keyframes pulse-slow { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.9; transform: scale(1.02); } }
+        .alert-bingo { animation: pulse-slow 1.2s infinite; }
+        @keyframes flash-bg { 0%, 100% { background-color: rgba(234, 179, 8, 0.9); } 50% { background-color: rgba(219, 39, 119, 0.9); } }
+        .flash-winner { animation: flash-bg 1s infinite; }
         
-        .bola-animada {
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .bola-animada:hover {
-            transform: scale(1.1);
-        }
-
         .bola-historial {
             width: 38px;
             height: 38px;
@@ -36,6 +29,9 @@
             border: 2px solid rgba(255,255,255,0.3);
         }
     </style>
+    <!-- AUDIO ORIGINAL -->
+    <audio id="audio-bola" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 </head>
@@ -51,15 +47,15 @@
         <!-- PANTALLA INICIAL -->
         <div id="view-home" class="w-full bg-slate-800/80 backdrop-blur border border-slate-700 p-6 md:p-8 rounded-3xl card-shadow flex flex-col items-center gap-6 max-w-md">
             <h2 class="text-2xl font-bold text-yellow-300">¡Bienvenida a la Diversión!</h2>
-            <button onclick="showPlayerLogin()" class="w-full py-4 bg-gradient-to-r from-pink-600 to-purple-600 font-bold text-lg rounded-2xl shadow-lg transition transform active:scale-95">🎮 Entrar como Jugadora</button>
-            <button onclick="showAdminLogin()" class="w-full py-3 bg-slate-700 text-slate-300 font-semibold text-sm rounded-2xl transition transform active:scale-95">🔐 Acceso Administradora</button>
+            <button onclick="showPlayerLogin()" class="w-full py-4 bg-gradient-to-r from-pink-600 to-purple-600 font-bold text-lg rounded-2xl shadow-lg">🎮 Entrar como Jugadora</button>
+            <button onclick="showAdminLogin()" class="w-full py-3 bg-slate-700 text-slate-300 font-semibold text-sm rounded-2xl">🔐 Acceso Administradora</button>
         </div>
 
         <!-- LOGIN ADMIN -->
         <div id="view-admin-login" class="w-full bg-slate-800/80 p-6 rounded-3xl card-shadow flex flex-col items-center gap-6 max-w-md hidden">
             <h2 class="text-2xl font-bold text-pink-400">Panel de Administradora</h2>
             <p class="text-xs text-slate-400 text-center">Ingresa tu clave secreta maestra.</p>
-            <input type="password" id="admin-password-input" placeholder="Clave secreta" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-center text-xl text-white outline-none focus:border-pink-500">
+            <input type="password" id="admin-password-input" placeholder="Clave secreta" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-center text-xl text-white">
             <div class="flex gap-3 w-full">
                 <button onclick="backToHome()" class="w-1/2 py-3 bg-slate-700 rounded-xl font-semibold">Volver</button>
                 <button onclick="verifyAdminPassword()" class="w-1/2 py-3 bg-pink-600 rounded-xl font-bold">Ingresar</button>
@@ -71,24 +67,24 @@
             <h2 class="text-2xl font-bold text-yellow-300 text-center">Registro de Jugadora</h2>
             <div id="welcome-back-msg" class="text-green-400 font-semibold text-center hidden"></div>
             <div class="w-full flex flex-col gap-4">
-                <input type="text" id="player-name-input" placeholder="Tu Nombre o Apodo" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-yellow-400">
-                <input type="text" id="player-control-input" placeholder="Número de Control" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-yellow-400">
-                <input type="password" id="player-access-code-input" placeholder="🔑 Código de Acceso de Sala" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-center text-white tracking-widest font-bold outline-none focus:border-yellow-400">
+                <input type="text" id="player-name-input" placeholder="Tu Nombre o Apodo" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                <input type="text" id="player-control-input" placeholder="Número de Control" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                <input type="password" id="player-access-code-input" placeholder="🔑 Código de Acceso de Sala" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-center text-white tracking-widest font-bold">
             </div>
             <div class="flex gap-3 w-full">
                 <button onclick="backToHome()" class="w-1/2 py-3 bg-slate-700 rounded-xl font-semibold">Volver</button>
-                <button onclick="registerPlayer()" class="w-1/2 py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-bold shadow">Entrar al Juego</button>
+                <button onclick="registerPlayer()" class="w-1/2 py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-bold">Entrar al Juego</button>
             </div>
         </div>
 
         <!-- PANEL ADMIN -->
         <div id="view-admin-panel" class="w-full flex flex-col gap-6 hidden">
-            <div class="bg-slate-800 p-6 rounded-3xl flex justify-between items-center shadow-lg">
+            <div class="bg-slate-800 p-6 rounded-3xl flex justify-between items-center">
                 <h2 class="text-2xl font-bold text-pink-400">Torre de Control</h2>
-                <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 text-xs rounded-xl font-semibold">Salir</button>
+                <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 text-xs rounded-xl">Salir</button>
             </div>
 
-            <div id="admin-winner-alert" class="hidden bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-950 p-6 rounded-3xl font-extrabold text-center text-xl shadow-2xl alert-bingo flex flex-col gap-3">
+            <div id="admin-winner-alert" class="hidden bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-950 p-6 rounded-3xl font-extrabold text-center text-xl shadow-xl alert-bingo flex flex-col gap-3">
                 <div>🎉 ¡BINGO VALIDADO! 🎉</div>
                 <div id="admin-winner-text" class="text-base font-bold bg-white/20 py-2 px-4 rounded-xl">Ganador...</div>
                 <div class="bg-slate-900 text-white p-4 rounded-2xl max-w-xs mx-auto w-full flex flex-col gap-2">
@@ -102,9 +98,9 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-slate-800 p-6 rounded-3xl flex flex-col items-center gap-4 card-shadow">
+                <div class="bg-slate-800 p-6 rounded-3xl flex flex-col items-center gap-4">
                     <h3 class="font-bold text-yellow-300">Última Bola</h3>
-                    <div id="admin-current-ball" class="w-28 h-28 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-5xl flex items-center justify-center shadow-lg bola-animada">--</div>
+                    <div id="admin-current-ball" class="w-28 h-28 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-5xl flex items-center justify-center shadow-lg">--</div>
                     
                     <div class="w-full flex flex-col items-center gap-1.5 mt-1">
                         <span class="text-[11px] text-slate-400 font-semibold">Últimas 5 salidas:</span>
@@ -113,18 +109,18 @@
                         </div>
                     </div>
 
-                    <button onclick="drawBallManually()" class="w-full py-3 bg-purple-600 hover:bg-purple-500 font-bold rounded-xl text-sm shadow mt-2 transition">Sacar Bola (Manual)</button>
-                    <button id="auto-draw-btn" onclick="toggleAutoDraw()" class="w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold rounded-xl shadow transition">▶ Iniciar Auto (Cada 3s)</button>
+                    <button onclick="drawBallManually()" class="w-full py-3 bg-purple-600 hover:bg-purple-500 font-bold rounded-xl text-sm shadow mt-2">Sacar Bola (Manual)</button>
+                    <button id="auto-draw-btn" onclick="toggleAutoDraw()" class="w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold rounded-xl shadow">▶ Iniciar Auto (Cada 3s)</button>
                     
-                    <div class="flex flex-col gap-2 w-full mt-2">
-                        <button onclick="continueRoundKeepCards()" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl shadow transition">🔄 Continuar Ronda (Mantiene Cartones)</button>
-                        <button onclick="resetGame()" class="w-full py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-xl shadow transition">🗑️ Reinicio Completo</button>
+                    <div class="flex flex-col gap-2 w-full mt-1">
+                        <button onclick="continueRoundKeepCards()" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl shadow">🔄 Continuar Ronda (Mantiene Cartones)</button>
+                        <button onclick="resetGame()" class="w-full py-2 bg-red-600/30 text-red-300 text-xs font-bold rounded-xl">🗑️ Reiniciar Partida Completa</button>
                     </div>
                 </div>
 
-                <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 card-shadow">
+                <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                     <h3 class="font-bold text-pink-400">Figura en Juego</h3>
-                    <select id="game-pattern-select" onchange="updateGamePattern()" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white font-semibold outline-none">
+                    <select id="game-pattern-select" onchange="updateGamePattern()" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white font-semibold">
                         <option value="line">Línea (Horizontal o Vertical)</option>
                         <option value="letter_l">Letra L</option>
                         <option value="cross_x">La X (Cruz Grande)</option>
@@ -136,39 +132,35 @@
                     </select>
                     <div class="mt-2">
                         <label class="text-xs text-slate-400 block mb-1">🔑 Código de Acceso para Jugadoras:</label>
-                        <input type="text" id="admin-room-code" onchange="updateRoomCode()" placeholder="Ej: BINGO2026" class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-center outline-none">
+                        <input type="text" id="admin-room-code" onchange="updateRoomCode()" placeholder="Ej: BINGO2026" class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-center">
                     </div>
                 </div>
-
-                <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3 card-shadow">
+                <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
                     <h3 class="font-bold text-yellow-300">Jugadoras Conectadas</h3>
-                    <div class="flex-grow overflow-y-auto max-h-36 bg-slate-900/60 p-3 rounded-xl text-xs flex flex-col gap-2" id="admin-players-list">
-                        <span class="text-slate-500">Esperando...</span>
-                    </div>
+                    <div class="flex-grow overflow-y-auto max-h-36 bg-slate-900/60 p-3 rounded-xl text-xs flex flex-col gap-2" id="admin-players-list"><span class="text-slate-500">Esperando...</span></div>
                 </div>
             </div>
 
-            <!-- RADAR DE CARTONES -->
-            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 card-shadow">
+            <!-- PANEL ADMINISTRADORA: RADAR DE CARTONES MÁS CERCANOS -->
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-yellow-300 text-lg">📡 Radar de Cartones en Espera (Más Cercanos)</h3>
-                    <span class="text-xs text-slate-400">Clic para verificar</span>
+                    <span class="text-xs text-slate-400">Clic en un cartón para verificar</span>
                 </div>
                 <div id="admin-radar-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl">
-                    <span class="text-slate-500 text-xs col-span-2 text-center py-4">Analizando avance de cartones...</span>
+                    <span class="text-slate-500 text-xs col-span-2 text-center py-4">Analizando avance de cartones en juego...</span>
                 </div>
             </div>
 
-            <!-- CONTROL Y PAGOS -->
-            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 card-shadow">
+            <!-- CONTROL Y PAGOS DE CARTONES -->
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-pink-400 text-lg">Control y Resumen de Cartones por Jugadora</h3>
-                    <span class="text-xs text-slate-400">Marcar pagado / pendiente</span>
+                    <h3 class="font-bold text-pink-400 text-lg">Control de Cartones (💰 Pagados / ✕ Pendiente)</h3>
+                    <span class="text-xs text-slate-400">Marca ✔ cuando cancelen</span>
                 </div>
-                <div id="admin-cards-summary" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
+                <div id="admin-cards-summary" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-56 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
             </div>
-
-            <div class="bg-slate-800 p-6 rounded-3xl card-shadow">
+            <div class="bg-slate-800 p-6 rounded-3xl">
                 <h3 class="font-bold text-yellow-300 mb-4">Tablero General (1-75)</h3>
                 <div id="admin-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1.5"></div>
             </div>
@@ -176,7 +168,7 @@
 
         <!-- SALA JUGADORA -->
         <div id="view-player-room" class="w-full flex flex-col gap-6 hidden">
-            <div class="bg-slate-800 p-6 rounded-3xl flex justify-between items-center shadow-lg">
+            <div class="bg-slate-800 p-6 rounded-3xl flex justify-between items-center">
                 <div>
                     <h2 class="text-2xl font-bold text-yellow-300">¡Hola, <span id="player-display-name">Jugadora</span>!</h2>
                     <p class="text-xs text-slate-400">Control ID: <span id="player-display-control">--</span></p>
@@ -185,34 +177,53 @@
                     <div class="bg-pink-950/80 border border-pink-500 px-3 py-1.5 rounded-xl text-xs font-bold text-pink-300">
                         Figura: <span id="player-pattern-label" class="text-yellow-300">Línea</span>
                     </div>
-                    <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 text-xs rounded-xl font-semibold">Salir</button>
+                    <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 text-xs rounded-xl">Salir</button>
                 </div>
             </div>
 
-            <!-- MODAL VISTA PREVIA DE CARTÓN -->
+            <!-- MODAL / CARTEL GIGANTE DE VICTORIA A PANTALLA COMPLETA -->
+            <div id="player-winner-notification" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+                <div class="flash-winner text-slate-950 p-6 md:p-8 rounded-3xl font-extrabold text-center shadow-2xl alert-bingo flex flex-col gap-4 max-w-lg w-full">
+                    <div id="player-winner-title" class="text-3xl md:text-4xl text-yellow-300 drop-shadow">👑 ¡B I N G O ! 👑</div>
+                    <div id="player-winner-details" class="text-base md:text-lg font-bold bg-black/40 text-white py-3 px-4 rounded-xl">¡Tu cartón hizo bingo!</div>
+                    <div class="bg-slate-900 text-white p-4 rounded-2xl max-w-xs mx-auto w-full flex flex-col gap-2">
+                        <span class="text-xs text-yellow-300 font-bold" id="public-winner-card-title">Cartón Ganador</span>
+                        <div class="grid grid-cols-5 gap-1 text-[10px] text-pink-400 font-bold">
+                            <div class="bg-slate-800 py-1 rounded">B</div><div class="bg-slate-800 py-1 rounded">I</div><div class="bg-slate-800 py-1 rounded">N</div><div class="bg-slate-800 py-1 rounded">G</div><div class="bg-slate-800 py-1 rounded">O</div>
+                        </div>
+                        <div id="public-winning-card-grid" class="grid grid-cols-5 gap-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MODAL / VISTA PREVIA DE NÚMEROS DEL CARTÓN ANTES DE ELEGIR -->
             <div id="preview-card-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
                 <div class="bg-slate-800 border border-slate-700 p-6 rounded-3xl flex flex-col gap-4 max-w-xs w-full shadow-2xl">
                     <div class="flex justify-between items-center">
                         <h3 id="preview-card-title" class="font-bold text-yellow-300 text-lg">Cartón #--</h3>
                         <button onclick="closePreviewModal()" class="w-8 h-8 bg-slate-700 text-slate-300 rounded-xl font-bold flex items-center justify-center">✕</button>
                     </div>
-                    <p class="text-xs text-slate-400">Revisa los números de este cartón:</p>
+                    <p class="text-xs text-slate-400">Revisa los números que trae este cartón de la suerte:</p>
                     <div class="grid grid-cols-5 gap-1 text-[10px] text-pink-400 font-bold text-center">
-                        <div class="bg-slate-900 py-1 rounded">B</div><div class="bg-slate-900 py-1 rounded">I</div><div class="bg-slate-900 py-1 rounded">N</div><div class="bg-slate-900 py-1 rounded">G</div><div class="bg-slate-900 py-1 rounded">O</div>
+                        <div class="bg-slate-900 py-1 rounded">B</div>
+                        <div class="bg-slate-900 py-1 rounded">I</div>
+                        <div class="bg-slate-900 py-1 rounded">N</div>
+                        <div class="bg-slate-900 py-1 rounded">G</div>
+                        <div class="bg-slate-900 py-1 rounded">O</div>
                     </div>
                     <div id="preview-card-grid" class="grid grid-cols-5 gap-1.5"></div>
                     <button onclick="confirmPreviewSelection()" class="w-full py-2.5 bg-pink-600 hover:bg-pink-500 font-bold text-xs rounded-xl text-white shadow">Seleccionar / Quitar Cartón</button>
                 </div>
             </div>
 
-            <!-- BOLA ACTUAL ARRIBA DE LOS CARTONES -->
-            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 border-2 border-yellow-500/50 shadow-xl card-shadow">
+            <!-- ÚLTIMA BOLA CANTADA REUBICADA DIRECTAMENTE ARRIBA DE LOS CARTONES EN JUEGO -->
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 border-2 border-yellow-500/50 shadow-xl">
                 <div class="flex flex-col items-center md:items-start text-center md:text-left">
                     <span class="text-xs uppercase tracking-wider text-yellow-400 font-bold mb-1">🔥 Bola Actual en Juego</span>
                     <h3 class="text-slate-300 text-sm">¡Mantén tu vista aquí para cantar rápido!</h3>
                 </div>
                 <div class="flex items-center gap-6">
-                    <div id="player-current-ball" class="w-24 h-24 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-4xl flex items-center justify-center shadow-lg animate-pulse bola-animada">--</div>
+                    <div id="player-current-ball" class="w-24 h-24 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-4xl flex items-center justify-center shadow-lg animate-pulse">--</div>
                     <div class="flex flex-col items-center gap-1.5">
                         <span class="text-[11px] text-slate-400 font-semibold">Últimas 5 salidas:</span>
                         <div id="player-history-balls" class="flex gap-2 items-center justify-center min-h-[38px]">
@@ -222,7 +233,7 @@
                 </div>
             </div>
 
-            <!-- CARTONES EN JUEGO -->
+            <!-- ZONA DE TUS CARTONES EN JUEGO (2 COLUMNAS FIJAS) -->
             <div class="flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-yellow-300 text-lg">Tus Cartones en Juego (Ordenados por avance 🚀)</h3>
@@ -233,20 +244,20 @@
                 </div>
             </div>
 
-            <!-- TABLERO GENERAL ABAJO -->
-            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-2 card-shadow">
+            <!-- TABLERO GENERAL (1-75) ABAJO -->
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-2">
                 <h3 class="font-bold text-pink-400 text-sm">Tablero General (1-75)</h3>
                 <div id="player-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1"></div>
             </div>
 
-            <!-- SELECCIÓN DE CARTONES -->
-            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 card-shadow">
+            <!-- SELECCIÓN DE CARTONES (CON VISTA PREVIA Y DESELECCIÓN LIBRE) -->
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <div>
                         <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (<span id="available-count">100</span> Disponibles)</h3>
-                        <p class="text-xs text-slate-400">Toca un cartón para ver sus números.</p>
+                        <p class="text-xs text-slate-400">Toca un cartón para **ver sus números** o cambiar de opinión antes de confirmar.</p>
                     </div>
-                    <button id="confirm-cards-btn" onclick="confirmSelectedCards()" class="px-5 py-2.5 bg-green-600 hover:bg-green-500 font-bold text-xs rounded-xl shadow transition">Confirmar Mis Cartones</button>
+                    <button id="confirm-cards-btn" onclick="confirmSelectedCards()" class="px-5 py-2.5 bg-green-600 hover:bg-green-500 font-bold text-xs rounded-xl shadow">Confirmar Mis Cartones</button>
                 </div>
                 <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
             </div>
@@ -265,37 +276,28 @@
         let gamePattern = 'line';
         let marketCards = {}; 
         let mySelectedCards = [];
+        let lastBallDrawn = null;
         let autoDrawInterval = null;
         let isAutoRunning = false;
         let adminSecretKey = 'June 2026';
         let roomCodeSecret = 'BINGO2026';
+        let hasSpokenMyBingo = false;
         let previewingCardId = null;
 
-        // --- SISTEMA DE AUDIO DIGITAL DE ALTA FRECUENCIA (INFALIBLE) ---
-        let audioCtx = null;
+        // FUNCIÓN DE AUDIO ORIGINAL
         function reproducirSonidoAlerta() {
             try {
-                if (!audioCtx) {
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                let audio = document.getElementById('audio-bola');
+                if(audio) {
+                    audio.currentTime = 0;
+                    audio.play().catch(e => console.log("Audio esperando interacción"));
                 }
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
-                let osc = audioCtx.createOscillator();
-                let gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime); // Mi5 brillante
-                gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.45);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.45);
             } catch(e) {
-                console.log("Audio activado por toque");
+                console.log("Error de audio:", e);
             }
         }
 
+        // COLORES DE LAS BOLITAS (AZUL, ROJA, BLANCA, VERDE, AMARILLA)
         function getBallColorClass(num) {
             let n = parseInt(num);
             if (n >= 1 && n <= 15) return 'bg-blue-600 text-white border-blue-400';
@@ -357,6 +359,7 @@
 
                     if (drawnBalls.length > oldLength && drawnBalls.length > 0) {
                         reproducirSonidoAlerta();
+                        lastBallDrawn = drawnBalls[drawnBalls.length - 1];
                     }
 
                     updateBoardsUI();
@@ -468,14 +471,13 @@
             db.ref('gameState').update({ drawnBalls: drawnBalls });
         }
 
-        let autoDrawTimer = null;
         function toggleAutoDraw() {
             let btn = document.getElementById('auto-draw-btn');
             if(!isAutoRunning) {
                 isAutoRunning = true;
                 btn.innerText = '⏹ Detener Auto';
                 btn.classList.replace('bg-pink-600', 'bg-red-600');
-                autoDrawTimer = setInterval(() => {
+                autoDrawInterval = setInterval(() => {
                     let available = [];
                     for(let i=1; i<=75; i++) { if(!drawnBalls.includes(i)) available.push(i); }
                     if(available.length === 0) { toggleAutoDraw(); return; }
@@ -487,7 +489,7 @@
                 isAutoRunning = false;
                 btn.innerText = '▶ Iniciar Auto (Cada 3s)';
                 btn.classList.replace('bg-red-600', 'bg-pink-600');
-                clearInterval(autoDrawTimer);
+                clearInterval(autoDrawInterval);
             }
         }
 
@@ -516,10 +518,10 @@
             if(adminCurrent) {
                 if(last) {
                     adminCurrent.innerText = getBallLetter(last) + '-' + last;
-                    adminCurrent.className = `w-28 h-28 rounded-full font-extrabold text-4xl flex items-center justify-center shadow-lg border-4 bola-animada ${getBallColorClass(last)}`;
+                    adminCurrent.className = `w-28 h-28 rounded-full font-extrabold text-4xl flex items-center justify-center shadow-lg border-4 ${getBallColorClass(last)}`;
                 } else {
                     adminCurrent.innerText = '--';
-                    adminCurrent.className = 'w-28 h-28 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-5xl flex items-center justify-center shadow-lg bola-animada';
+                    adminCurrent.className = 'w-28 h-28 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-5xl flex items-center justify-center shadow-lg';
                 }
             }
             if(adminHistory) {
@@ -532,10 +534,10 @@
             if(playerCurrent) {
                 if(last) {
                     playerCurrent.innerText = getBallLetter(last) + '-' + last;
-                    playerCurrent.className = `w-24 h-24 rounded-full font-extrabold text-3xl flex items-center justify-center shadow-lg animate-pulse border-4 bola-animada ${getBallColorClass(last)}`;
+                    playerCurrent.className = `w-24 h-24 rounded-full font-extrabold text-3xl flex items-center justify-center shadow-lg animate-pulse border-4 ${getBallColorClass(last)}`;
                 } else {
                     playerCurrent.innerText = '--';
-                    playerCurrent.className = 'w-24 h-24 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-4xl flex items-center justify-center shadow-lg animate-pulse bola-animada';
+                    playerCurrent.className = 'w-24 h-24 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-4xl flex items-center justify-center shadow-lg animate-pulse';
                 }
             }
             if(playerHistory) {
@@ -556,7 +558,111 @@
 
             if(currentUser && !currentUser.isAdmin && currentUser.control) {
                 renderPlayerMarketAndCards();
+                checkMyBingoWin();
             }
+        }
+
+        function checkCardBingo(card, pattern, drawn) {
+            let letters = ['B', 'I', 'N', 'G', 'O'];
+            let matrix = [];
+            for (let r = 0; r < 5; r++) {
+                matrix[r] = [];
+                for (let c = 0; c < 5; c++) {
+                    let val = card[letters[c]][r];
+                    matrix[r][c] = (val === 'FREE' || drawn.includes(val));
+                }
+            }
+
+            if (pattern === 'line') {
+                for (let r = 0; r < 5; r++) {
+                    if (matrix[r].every(v => v)) return true;
+                }
+                for (let c = 0; c < 5; c++) {
+                    if ([0,1,2,3,4].every(r => matrix[r][c])) return true;
+                }
+                return false;
+            }
+            if (pattern === 'letter_l') {
+                let col0 = [0,1,2,3,4].every(r => matrix[r][0]);
+                let row4 = matrix[4].every(v => v);
+                return col0 && row4;
+            }
+            if (pattern === 'cross_x') {
+                let d1 = [0,1,2,3,4].every(i => matrix[i][i]);
+                let d2 = [0,1,2,3,4].every(i => matrix[i][4 - i]);
+                return d1 && d2;
+            }
+            if (pattern === 'four_corners') {
+                return matrix[0][0] && matrix[0][4] && matrix[4][0] && matrix[4][4];
+            }
+            if (pattern === 'diagonal') {
+                let d1 = [0,1,2,3,4].every(i => matrix[i][i]);
+                let d2 = [0,1,2,3,4].every(i => matrix[i][4 - i]);
+                return d1 || d2;
+            }
+            if (pattern === 'small_cross') {
+                let r2 = [1,2,3].every(c => matrix[2][c]);
+                let c2 = [1,2,3].every(r => matrix[r][2]);
+                return r2 && c2;
+            }
+            if (pattern === 'letter_o') {
+                let top = matrix[0].every(v => v);
+                let bot = matrix[4].every(v => v);
+                let sides = [1,2,3].every(r => matrix[r][0] && matrix[r][4]);
+                return top && bot && sides;
+            }
+            if (pattern === 'full_card') {
+                for (let r = 0; r < 5; r++) {
+                    if (!matrix[r].every(v => v)) return false;
+                }
+                return true;
+            }
+            return false;
+        }
+
+        function checkMyBingoWin() {
+            for(let id of mySelectedCards) {
+                let card = marketCards[id];
+                if(card && checkCardBingo(card, gamePattern, drawnBalls)) {
+                    showPlayerWinnerNotification(id, card);
+                    return;
+                }
+            }
+        }
+
+        function showPlayerWinnerNotification(cardId, card) {
+            document.getElementById('player-winner-title').innerText = `👑 ¡BINGO EN CARTÓN #${cardId}! 👑`;
+            document.getElementById('player-winner-details').innerText = `¡${currentUser.name}, completaste la figura de ${gamePattern.toUpperCase()}!`;
+            document.getElementById('public-winner-card-title').innerText = `Cartón Ganador #${cardId}`;
+            
+            let gridHtml = '';
+            let letters = ['B', 'I', 'N', 'G', 'O'];
+            for(let r=0; r<5; r++) {
+                for(let c=0; c<5; c++) {
+                    let letName = letters[c];
+                    let val = card[letName][r];
+                    let isFree = (val === 'FREE');
+                    let hit = isFree || drawnBalls.includes(val);
+                    let cellBg = hit ? 'bg-red-600 text-white font-extrabold' : 'bg-slate-900 text-slate-300';
+                    gridHtml += `<div class="h-7 rounded flex items-center justify-center text-[10px] ${cellBg}">${val}</div>`;
+                }
+            }
+            document.getElementById('public-winning-card-grid').innerHTML = gridHtml;
+            document.getElementById('player-winner-notification').classList.remove('hidden');
+        }
+
+        function countMissingForCard(id) {
+            let card = marketCards[id];
+            if (!card) return 99;
+            let missing = 0;
+            let letters = ['B', 'I', 'N', 'G', 'O'];
+            for(let r=0; r<5; r++) {
+                for(let c=0; c<5; c++) {
+                    let val = card[letters[c]][r];
+                    if(val !== 'FREE' && !drawnBalls.includes(val)) missing++;
+                }
+            }
+            return missing;
         }
 
         function renderPlayerMarketAndCards() {
@@ -577,7 +683,6 @@
             if(mySelectedCards.length === 0) {
                 myHtml = '<span class="text-slate-500 text-sm col-span-2">Aún no has seleccionado cartones.</span>';
             } else {
-                // ORDENAR AUTOMÁTICAMENTE: Cartones con menos números faltantes van primero (¡Arriba el que esté más cerca de ganar!)
                 let sortedCards = [...mySelectedCards].sort((a, b) => {
                     return countMissingForCard(a) - countMissingForCard(b);
                 });
@@ -614,20 +719,6 @@
                 }).join('');
             }
             myCardsContainer.innerHTML = myHtml;
-        }
-
-        function countMissingForCard(id) {
-            let card = marketCards[id];
-            if (!card) return 99;
-            let missing = 0;
-            let letters = ['B', 'I', 'N', 'G', 'O'];
-            for(let r=0; r<5; r++) {
-                for(let c=0; c<5; c++) {
-                    let val = card[letters[c]][r];
-                    if(val !== 'FREE' && !drawnBalls.includes(val)) missing++;
-                }
-            }
-            return missing;
         }
 
         function previewCard(id) {
