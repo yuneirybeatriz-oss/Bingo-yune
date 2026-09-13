@@ -15,19 +15,23 @@
         @keyframes flash-bg { 0%, 100% { background-color: rgba(234, 179, 8, 0.9); } 50% { background-color: rgba(219, 39, 119, 0.9); } }
         .flash-winner { animation: flash-bg 1s infinite; }
         
+        /* Colores tradicionales de balotas por letra */
+        .bola-b { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; border: 2px solid #60a5fa; }
+        .bola-i { background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; border: 2px solid #f87171; }
+        .bola-n { background: linear-gradient(135deg, #f8fafc, #cbd5e1); color: #0f172a; border: 2px solid #ffffff; }
+        .bola-g { background: linear-gradient(135deg, #22c55e, #15803d); color: white; border: 2px solid #4ade80; }
+        .bola-o { background: linear-gradient(135deg, #a855f7, #7e22ce); color: white; border: 2px solid #c084fc; }
+
         .bola-historial {
             width: 38px;
             height: 38px;
-            background-color: #fbbf24;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: 800;
             font-size: 14px;
-            color: #0f172a;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            border: 2px solid #f59e0b;
         }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -92,7 +96,10 @@
                     </div>
                     <div id="admin-winning-card-grid" class="grid grid-cols-5 gap-1"></div>
                 </div>
-                <button onclick="clearWinnerAlert()" class="mt-2 py-2 px-4 bg-slate-900 text-yellow-300 text-xs rounded-xl font-bold mx-auto w-fit shadow">Cerrar Alerta / Continuar</button>
+                <div class="flex gap-2 justify-center mt-2">
+                    <button onclick="clearWinnerAlert()" class="py-2 px-4 bg-slate-900 text-yellow-300 text-xs rounded-xl font-bold shadow">Cerrar Alerta</button>
+                    <button onclick="iniciarSegundaRonda()" class="py-2 px-4 bg-pink-600 text-white text-xs rounded-xl font-bold shadow">▶ Iniciar 2da Ronda</button>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -109,7 +116,7 @@
 
                     <button onclick="drawBallManually()" class="w-full py-3 bg-purple-600 hover:bg-purple-500 font-bold rounded-xl text-sm shadow mt-2">Sacar Bola (Manual)</button>
                     <button id="auto-draw-btn" onclick="toggleAutoDraw()" class="w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold rounded-xl shadow">▶ Iniciar Auto (Cada 3s)</button>
-                    <button onclick="resetGame()" class="w-full py-2 bg-red-600/30 text-red-300 text-xs font-bold rounded-xl">Reiniciar Partida</button>
+                    <button onclick="resetGame()" class="w-full py-2 bg-red-600/30 text-red-300 text-xs font-bold rounded-xl">Reiniciar Partida Completa</button>
                 </div>
 
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
@@ -135,7 +142,7 @@
                 </div>
             </div>
 
-            <!-- PANEL ADMINISTRADORA: RADAR DE CARTONES MÁS CERCANOS -->
+            <!-- RADAR DE CARTONES MÁS CERCANOS -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-yellow-300 text-lg">📡 Radar de Cartones en Espera (Más Cercanos)</h3>
@@ -175,7 +182,7 @@
                 </div>
             </div>
 
-            <!-- MODAL / CARTEL GIGANTE DE VICTORIA A PANTALLA COMPLETA -->
+            <!-- MODAL / CARTEL GIGANTE DE VICTORIA -->
             <div id="player-winner-notification" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
                 <div class="flash-winner text-slate-950 p-6 md:p-8 rounded-3xl font-extrabold text-center shadow-2xl alert-bingo flex flex-col gap-4 max-w-lg w-full">
                     <div id="player-winner-title" class="text-3xl md:text-4xl text-yellow-300 drop-shadow">👑 ¡B I N G O ! 👑</div>
@@ -187,26 +194,6 @@
                         </div>
                         <div id="public-winning-card-grid" class="grid grid-cols-5 gap-1"></div>
                     </div>
-                </div>
-            </div>
-
-            <!-- MODAL / VISTA PREVIA DE NÚMEROS DEL CARTÓN ANTES DE ELEGIR -->
-            <div id="preview-card-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-                <div class="bg-slate-800 border border-slate-700 p-6 rounded-3xl flex flex-col gap-4 max-w-xs w-full shadow-2xl">
-                    <div class="flex justify-between items-center">
-                        <h3 id="preview-card-title" class="font-bold text-yellow-300 text-lg">Cartón #--</h3>
-                        <button onclick="closePreviewModal()" class="w-8 h-8 bg-slate-700 text-slate-300 rounded-xl font-bold flex items-center justify-center">✕</button>
-                    </div>
-                    <p class="text-xs text-slate-400">Revisa los números que trae este cartón de la suerte:</p>
-                    <div class="grid grid-cols-5 gap-1 text-[10px] text-pink-400 font-bold text-center">
-                        <div class="bg-slate-900 py-1 rounded">B</div>
-                        <div class="bg-slate-900 py-1 rounded">I</div>
-                        <div class="bg-slate-900 py-1 rounded">N</div>
-                        <div class="bg-slate-900 py-1 rounded">G</div>
-                        <div class="bg-slate-900 py-1 rounded">O</div>
-                    </div>
-                    <div id="preview-card-grid" class="grid grid-cols-5 gap-1.5"></div>
-                    <button onclick="confirmPreviewSelection()" class="w-full py-2.5 bg-pink-600 hover:bg-pink-500 font-bold text-xs rounded-xl text-white shadow">Seleccionar / Quitar Cartón</button>
                 </div>
             </div>
 
@@ -238,7 +225,7 @@
                 </div>
             </div>
 
-            <!-- TABLERO GENERAL (1-75) ABAJO -->
+            <!-- TABLERO GENERAL (1-75) -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-2">
                 <h3 class="font-bold text-pink-400 text-sm">Tablero General (1-75)</h3>
                 <div id="player-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1"></div>
@@ -249,9 +236,8 @@
                 <div class="flex justify-between items-center">
                     <div>
                         <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (<span id="available-count">100</span> Disponibles)</h3>
-                        <p class="text-xs text-slate-400">Toca un cartón para **ver sus números** o cambiar de opinión antes de confirmar.</p>
+                        <p class="text-xs text-slate-400">Toca un cartón para apartarlo o liberarlo.</p>
                     </div>
-                    <button id="confirm-cards-btn" onclick="confirmSelectedCards()" class="px-5 py-2.5 bg-green-600 hover:bg-green-500 font-bold text-xs rounded-xl shadow">Confirmar Mis Cartones</button>
                 </div>
                 <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
             </div>
@@ -269,16 +255,22 @@
         let drawnBalls = [];
         let gamePattern = 'line';
         let marketCards = {}; 
-        let paidCards = {};
-        let mySelectedCards = [];
         let lastBallDrawn = null;
         let autoDrawInterval = null;
         let isAutoRunning = false;
         let adminSecretKey = 'June 2026';
-        let roomCodeSecret = 'BINGO2026';
         let hasSpokenMyBingo = false;
 
-        // --- 1. GENERADOR DE CARTONES (5x5 Tradicional con Comodín Libre al Centro) ---
+        // Función para asignar clase de color tradicional por letra de balota
+        function obtenerClaseBolaColor(num) {
+            if (num >= 1 && num <= 15) return 'bola-b';
+            if (num >= 16 && num <= 30) return 'bola-i';
+            if (num >= 31 && num <= 45) return 'bola-n';
+            if (num >= 46 && num <= 60) return 'bola-g';
+            if (num >= 61 && num <= 75) return 'bola-o';
+            return 'bg-yellow-400 text-slate-950';
+        }
+
         function generarNumeroAleatorio(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
@@ -337,7 +329,7 @@
             });
         }
 
-        // --- 2. VOZ CLARA Y FUERTE (TEXT TO SPEECH) ---
+        // Voz clara y fuerte
         function cantarBalotaVoz(numero) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
@@ -362,20 +354,15 @@
             };
         }
 
-        // --- 3. VALIDADOR DE FIGURAS (LÍNEA, X, LLENO, ETC.) ---
         function verificarFiguraGanadora(grid, drawnArray, patron) {
             let isChecked = (num) => num === 0 || drawnArray.includes(num);
 
             if (patron === 'line') {
                 for (let r = 0; r < 5; r++) {
-                    if (isChecked(grid[r][0]) && isChecked(grid[r][1]) && isChecked(grid[r][2]) && isChecked(grid[r][3]) && isChecked(grid[r][4])) {
-                        return true;
-                    }
+                    if (isChecked(grid[r][0]) && isChecked(grid[r][1]) && isChecked(grid[r][2]) && isChecked(grid[r][3]) && isChecked(grid[r][4])) return true;
                 }
                 for (let c = 0; c < 5; c++) {
-                    if (isChecked(grid[0][c]) && isChecked(grid[1][c]) && isChecked(grid[2][c]) && isChecked(grid[3][c]) && isChecked(grid[4][c])) {
-                        return true;
-                    }
+                    if (isChecked(grid[0][c]) && isChecked(grid[1][c]) && isChecked(grid[2][c]) && isChecked(grid[3][c]) && isChecked(grid[4][c])) return true;
                 }
                 return false;
             } 
@@ -398,7 +385,6 @@
             return false;
         }
 
-        // --- 4. FUNCIONES DE NAVEGACIÓN Y BOTONES ---
         function showPlayerLogin() {
             document.getElementById('view-home').classList.add('hidden');
             document.getElementById('view-player-register').classList.remove('hidden');
@@ -477,12 +463,16 @@
                 if (drawnBalls.length > 0) {
                     let ultima = drawnBalls[drawnBalls.length - 1];
                     currentBallEl.innerText = ultima;
+                    currentBallEl.className = `w-28 h-28 rounded-full font-extrabold text-5xl flex items-center justify-center shadow-lg ${obtenerClaseBolaColor(ultima)}`;
                 } else {
                     currentBallEl.innerText = "--";
+                    currentBallEl.className = "w-28 h-28 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-5xl flex items-center justify-center shadow-lg";
                 }
 
+                renderizarHistorialAdmin();
                 renderizarTableroAdmin();
                 renderizarResumenCartonesAdmin();
+                verificarGanadoresEnVivoAdmin();
             });
         }
 
@@ -495,6 +485,8 @@
                 gamePattern = data.gamePattern || 'line';
                 marketCards = data.marketCards || {};
 
+                document.getElementById('player-pattern-label').innerText = gamePattern === 'line' ? 'Línea' : 'Cartón Lleno';
+
                 let currentBallEl = document.getElementById('player-current-ball');
                 if (drawnBalls.length > 0) {
                     let ultima = drawnBalls[drawnBalls.length - 1];
@@ -503,12 +495,50 @@
                         cantarBalotaVoz(ultima);
                     }
                     currentBallEl.innerText = ultima;
+                    currentBallEl.className = `w-24 h-24 rounded-full font-extrabold text-4xl flex items-center justify-center shadow-lg animate-pulse ${obtenerClaseBolaColor(ultima)}`;
                 } else {
                     currentBallEl.innerText = "--";
+                    currentBallEl.className = "w-24 h-24 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-4xl flex items-center justify-center shadow-lg animate-pulse";
                 }
 
+                renderizarHistorialJugadora();
+                renderizarTableroJugadora();
                 renderizarMercadoJugadora();
                 renderizarMisCartones();
+            });
+        }
+
+        function renderizarHistorialAdmin() {
+            let container = document.getElementById('admin-history-balls');
+            if (!container) return;
+            container.innerHTML = '';
+            let ultimas5 = drawnBalls.slice(-5).reverse();
+            if (ultimas5.length === 0) {
+                container.innerHTML = '<span class="text-xs text-slate-500">--</span>';
+                return;
+            }
+            ultimas5.forEach(num => {
+                let div = document.createElement('div');
+                div.className = `bola-historial ${obtenerClaseBolaColor(num)}`;
+                div.innerText = num;
+                container.appendChild(div);
+            });
+        }
+
+        function renderizarHistorialJugadora() {
+            let container = document.getElementById('player-history-balls');
+            if (!container) return;
+            container.innerHTML = '';
+            let ultimas5 = drawnBalls.slice(-5).reverse();
+            if (ultimas5.length === 0) {
+                container.innerHTML = '<span class="text-xs text-slate-500">--</span>';
+                return;
+            }
+            ultimas5.forEach(num => {
+                let div = document.createElement('div');
+                div.className = `bola-historial ${obtenerClaseBolaColor(num)}`;
+                div.innerText = num;
+                container.appendChild(div);
             });
         }
 
@@ -518,7 +548,21 @@
             gridEl.innerHTML = '';
             for (let i = 1; i <= 75; i++) {
                 let div = document.createElement('div');
-                div.className = `w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${drawnBalls.includes(i) ? 'bg-yellow-400 text-slate-950 shadow-md' : 'bg-slate-900 text-slate-500'}`;
+                let activo = drawnBalls.includes(i);
+                div.className = `w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${activo ? obtenerClaseBolaColor(i) + ' shadow-md' : 'bg-slate-900 text-slate-500'}`;
+                div.innerText = i;
+                gridEl.appendChild(div);
+            }
+        }
+
+        function renderizarTableroJugadora() {
+            let gridEl = document.getElementById('player-board-grid');
+            if (!gridEl) return;
+            gridEl.innerHTML = '';
+            for (let i = 1; i <= 75; i++) {
+                let div = document.createElement('div');
+                let activo = drawnBalls.includes(i);
+                div.className = `w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[10px] ${activo ? obtenerClaseBolaColor(i) + ' shadow' : 'bg-slate-900 text-slate-600'}`;
                 div.innerText = i;
                 gridEl.appendChild(div);
             }
@@ -544,6 +588,43 @@
                     </div>
                 `;
                 container.appendChild(div);
+            }
+        }
+
+        function verificarGanadoresEnVivoAdmin() {
+            let alertBox = document.getElementById('admin-winner-alert');
+            let winnerText = document.getElementById('admin-winner-text');
+            let winningGridContainer = document.getElementById('admin-winning-card-grid');
+            let radarContainer = document.getElementById('admin-radar-container');
+            if (!radarContainer) return;
+
+            radarContainer.innerHTML = '';
+            let hayGanador = false;
+            let ganadorInfo = "";
+
+            for (let id in marketCards) {
+                let card = marketCards[id];
+                if (card.owner) {
+                    let gano = verificarFiguraGanadora(card.grid, drawnBalls, gamePattern);
+                    if (gano) {
+                        hayGanador = true;
+                        ganadorInfo = `¡Cartón #${card.id} de ${card.owner} (Control: ${card.ownerControl}) hizo BINGO!`;
+                        
+                        winnerText.innerText = ganadorInfo;
+                        winningGridContainer.innerHTML = '';
+                        for (let r = 0; r < 5; r++) {
+                            for (let c = 0; c < 5; c++) {
+                                let num = card.grid[r][c];
+                                let marcado = num === 0 || drawnBalls.includes(num);
+                                winningGridContainer.innerHTML += `<div class="py-1 text-[10px] font-bold text-center rounded ${marcado ? 'bg-yellow-400 text-slate-950' : 'bg-slate-800 text-slate-300'}">${num === 0 ? '⭐' : num}</div>`;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (hayGanador) {
+                alertBox.classList.remove('hidden');
             }
         }
 
@@ -585,9 +666,14 @@
         function resetGame() {
             if (confirm("¿Estás segura de reiniciar la partida completa y limpiar las balotas?")) {
                 db.ref('room/drawnBalls').set([]);
-                db.ref('room/winner').set(null);
                 alert("¡Partida reiniciada con éxito!");
             }
+        }
+
+        function iniciarSegundaRonda() {
+            db.ref('room/drawnBalls').set([]);
+            document.getElementById('admin-winner-alert').classList.add('hidden');
+            alert("¡Iniciando Segunda Ronda! Se limpiaron las balotas y el tablero.");
         }
 
         function togglePaidCard(id) {
@@ -695,18 +781,6 @@
                 `;
                 container.appendChild(cardDiv);
             });
-        }
-
-        function confirmSelectedCards() {
-            alert("¡Tus cartones están listos en pantalla! Sigue atento a las balotas.");
-        }
-
-        function clearWinnerAlert() {
-            document.getElementById('admin-winner-alert').classList.add('hidden');
-        }
-
-        function closePreviewModal() {
-            document.getElementById('preview-card-modal').classList.add('hidden');
         }
     </script>
 </body>
