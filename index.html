@@ -131,27 +131,11 @@
                 </div>
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
                     <h3 class="font-bold text-yellow-300">Jugadoras Conectadas</h3>
-                    <div class="flex-grow overflow-y-auto max-h-36 bg-slate-900/60 p-3 rounded-xl text-xs flex flex-col gap-2" id="admin-players-list"><span class="text-slate-500">Esperando...</span></div>
+                    <div class="flex-grow overflow-y-auto max-h-36 bg-slate-900/60 p-3 rounded-xl text-xs" id="admin-players-list"><span class="text-slate-500">Esperando...</span></div>
                 </div>
             </div>
-
-            <!-- PANEL ADMINISTRADORA: RADAR DE CARTONES MÁS CERCANOS -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
-                <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-yellow-300 text-lg">📡 Radar de Cartones en Espera (Más Cercanos)</h3>
-                    <span class="text-xs text-slate-400">Clic en un cartón para ver qué número le falta</span>
-                </div>
-                <div id="admin-radar-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl">
-                    <span class="text-slate-500 text-xs col-span-2 text-center py-4">Analizando avance de cartones en juego...</span>
-                </div>
-            </div>
-
-            <!-- CONTROL Y PAGOS DE CARTONES -->
-            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
-                <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-pink-400 text-lg">Control de Cartones (💰 Pagados / ✕ Liberar)</h3>
-                    <span class="text-xs text-slate-400">Marca ✔ cuando cancelen</span>
-                </div>
+                <h3 class="font-bold text-pink-400 text-lg">Control de Cartones (Liberar con ✕)</h3>
                 <div id="admin-cards-summary" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-56 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
             </div>
             <div class="bg-slate-800 p-6 rounded-3xl">
@@ -190,70 +174,45 @@
                 </div>
             </div>
 
-            <!-- MODAL / VISTA PREVIA DE NÚMEROS DEL CARTÓN ANTES DE ELEGIR -->
-            <div id="preview-card-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-                <div class="bg-slate-800 border border-slate-700 p-6 rounded-3xl flex flex-col gap-4 max-w-xs w-full shadow-2xl">
-                    <div class="flex justify-between items-center">
-                        <h3 id="preview-card-title" class="font-bold text-yellow-300 text-lg">Cartón #--</h3>
-                        <button onclick="closePreviewModal()" class="w-8 h-8 bg-slate-700 text-slate-300 rounded-xl font-bold flex items-center justify-center">✕</button>
-                    </div>
-                    <p class="text-xs text-slate-400">Revisa los números que trae este cartón de la suerte:</p>
-                    <div class="grid grid-cols-5 gap-1 text-[10px] text-pink-400 font-bold text-center">
-                        <div class="bg-slate-900 py-1 rounded">B</div>
-                        <div class="bg-slate-900 py-1 rounded">I</div>
-                        <div class="bg-slate-900 py-1 rounded">N</div>
-                        <div class="bg-slate-900 py-1 rounded">G</div>
-                        <div class="bg-slate-900 py-1 rounded">O</div>
-                    </div>
-                    <div id="preview-card-grid" class="grid grid-cols-5 gap-1.5"></div>
-                    <button onclick="confirmPreviewSelection()" class="w-full py-2.5 bg-pink-600 hover:bg-pink-500 font-bold text-xs rounded-xl text-white shadow">Seleccionar / Quitar Cartón</button>
-                </div>
-            </div>
-
-            <!-- ÚLTIMA BOLA CANTADA REUBICADA DIRECTAMENTE ARRIBA DE LOS CARTONES EN JUEGO -->
-            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 border-2 border-yellow-500/50 shadow-xl">
-                <div class="flex flex-col items-center md:items-start text-center md:text-left">
-                    <span class="text-xs uppercase tracking-wider text-yellow-400 font-bold mb-1">🔥 Bola Actual en Juego</span>
-                    <h3 class="text-slate-300 text-sm">¡Mantén tu vista aquí para cantar rápido!</h3>
-                </div>
-                <div class="flex items-center gap-6">
-                    <div id="player-current-ball" class="w-24 h-24 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-4xl flex items-center justify-center shadow-lg animate-pulse">--</div>
-                    <div class="flex flex-col items-center gap-1.5">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-slate-800 p-6 rounded-3xl flex flex-col items-center justify-center gap-3">
+                    <h3 class="font-bold text-yellow-300 text-sm">Última Bola Cantada</h3>
+                    <div id="player-current-ball" class="w-24 h-24 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-4xl flex items-center justify-center shadow-lg">--</div>
+                    
+                    <div class="w-full flex flex-col items-center gap-1.5 mt-1">
                         <span class="text-[11px] text-slate-400 font-semibold">Últimas 5 salidas:</span>
                         <div id="player-history-balls" class="flex gap-2 items-center justify-center min-h-[38px]">
                             <span class="text-xs text-slate-500">--</span>
                         </div>
                     </div>
                 </div>
+
+                <div class="bg-slate-800 p-6 rounded-3xl md:col-span-2 flex flex-col gap-2">
+                    <h3 class="font-bold text-pink-400 text-sm">Tablero General (1-75)</h3>
+                    <div id="player-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1"></div>
+                </div>
             </div>
 
-            <!-- ZONA DE TUS CARTONES EN JUEGO (2 COLUMNAS FIJAS) -->
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (<span id="available-count">100</span> Disponibles)</h3>
+                        <p class="text-xs text-slate-400" id="market-subtitle">Toca para marcar o desmarcar. Confirma cuando estés lista.</p>
+                    </div>
+                    <button id="confirm-cards-btn" onclick="confirmSelectedCards()" class="px-5 py-2.5 bg-green-600 hover:bg-green-500 font-bold text-xs rounded-xl shadow">Confirmar Mis Cartones</button>
+                </div>
+                <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
+            </div>
+
             <div class="flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-yellow-300 text-lg">Tus Cartones en Juego (Ordenados por avance 🚀)</h3>
                     <span class="text-xs text-slate-400">El más cercano sube automáticamente</span>
                 </div>
-                <div id="player-my-cards-container" class="grid grid-cols-2 gap-3">
-                    <span class="text-slate-500 text-sm col-span-2">Aún no has seleccionado cartones.</span>
+                <!-- AQUÍ ESTÁ EL CAMBIO EN CUADRÍCULA (2 columnas en PC, 1 en celular) -->
+                <div id="player-my-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <span class="text-slate-500 text-sm">Aún no has seleccionado cartones.</span>
                 </div>
-            </div>
-
-            <!-- TABLERO GENERAL (1-75) ABAJO -->
-            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-2">
-                <h3 class="font-bold text-pink-400 text-sm">Tablero General (1-75)</h3>
-                <div id="player-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1"></div>
-            </div>
-
-            <!-- SELECCIÓN DE CARTONES (CON VISTA PREVIA Y DESELECCIÓN LIBRE) -->
-            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (<span id="available-count">100</span> Disponibles)</h3>
-                        <p class="text-xs text-slate-400">Toca un cartón para **ver sus números** o cambiar de opinión antes de confirmar.</p>
-                    </div>
-                    <button id="confirm-cards-btn" onclick="confirmSelectedCards()" class="px-5 py-2.5 bg-green-600 hover:bg-green-500 font-bold text-xs rounded-xl shadow">Confirmar Mis Cartones</button>
-                </div>
-                <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
             </div>
         </div>
     </div>
@@ -269,11 +228,79 @@
         let drawnBalls = [];
         let gamePattern = 'line';
         let marketCards = {}; 
-        let paidCards = {};
         let mySelectedCards = [];
         let lastBallDrawn = null;
         let autoDrawInterval = null;
         let isAutoRunning = false;
-        let adminSecretKey = 'June 2026';
-        let roomCodeSecret = 'BINGO2026';
-        let hasSpokenMyBingo = f
+        let roomCodeSecret = '1234';
+        let hasSpokenMyBingo = false;
+        let lastSpokenBall = null;
+        let registeredPlayersList = {};
+
+        window.onload = function() {
+            initAdminBoard();
+            initPlayerBoard();
+            initCardsMarket();
+            listenFirebaseData();
+        };
+
+        function listenFirebaseData() {
+            db.ref('system').on('value', (snapshot) => {
+                const val = snapshot.val() || {};
+                drawnBalls = val.drawnBalls || [];
+                lastBallDrawn = val.lastBall || '--';
+                gamePattern = val.pattern || 'line';
+                marketCards = val.cards || {};
+                roomCodeSecret = val.roomCode || '1234';
+
+                const patternSelect = document.getElementById('game-pattern-select');
+                if(patternSelect && patternSelect.value !== gamePattern) {
+                    patternSelect.value = gamePattern;
+                }
+                const adminRoomInput = document.getElementById('admin-room-code');
+                if(adminRoomInput && adminRoomInput.value !== roomCodeSecret) {
+                    adminRoomInput.value = roomCodeSecret;
+                }
+
+                const patternNames = { 
+                    'line': 'Línea (Horizontal/Vertical)', 
+                    'letter_l': 'Letra L', 
+                    'cross_x': 'La X (Cruz Grande)', 
+                    'four_corners': 'Cuatro Esquinas', 
+                    'diagonal': 'Diagonal', 
+                    'small_cross': 'Cruz Pequeña', 
+                    'letter_o': 'Letra O', 
+                    'full_card': 'Cartón Lleno' 
+                };
+                const patternLabel = document.getElementById('player-pattern-label');
+                if(patternLabel) {
+                    patternLabel.innerText = patternNames[gamePattern] || 'Línea';
+                }
+
+                if (lastBallDrawn && lastBallDrawn !== '--' && lastBallDrawn !== lastSpokenBall) {
+                    lastSpokenBall = lastBallDrawn;
+                    speakBall(lastBallDrawn);
+                }
+
+                const winnersData = val.winners || {}; // Soportando múltiples ganadores
+                const adminAlert = document.getElementById('admin-winner-alert');
+                const adminWinnerText = document.getElementById('admin-winner-text');
+                const playerNotification = document.getElementById('player-winner-notification');
+                const playerWinnerDetails = document.getElementById('player-winner-details');
+                const playerWinnerTitle = document.getElementById('player-winner-title');
+
+                const winnerKeys = Object.keys(winnersData);
+                if (winnerKeys.length > 0) {
+                    stopAutoDraw();
+                    
+                    // Armar texto para múltiples ganadores
+                    let winnerTexts = [];
+                    let firstWinner = winnersData[winnerKeys[0]];
+
+                    winnerKeys.forEach(k => {
+                        let w = winnersData[k];
+                        winnerTexts.push(`${w.name} (Cartón #${w.card})`);
+                    });
+
+                    if (adminAlert && adminWinnerText) {
+                        adminWinnerText.innerText = `¡Ganador(es): ${w
