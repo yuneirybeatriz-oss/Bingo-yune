@@ -109,7 +109,7 @@
                     <button onclick="drawBallManually()" class="w-full py-3 bg-purple-600 hover:bg-purple-500 font-bold rounded-xl text-sm shadow mt-2">Sacar Bola (Manual)</button>
                     <button id="auto-draw-btn" onclick="toggleAutoDraw()" class="w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold rounded-xl shadow">▶ Iniciar Auto (Cada 3s)</button>
                     
-                    <!-- BOTONES DE CONTROL DE RONDAS SOLICITADOS -->
+                    <!-- BOTONES DE CONTROL DE RONDAS -->
                     <div class="flex flex-col gap-2 w-full mt-2">
                         <button onclick="continueRoundKeepCards()" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl shadow">🔄 Continuar Ronda (Mantiene Cartones/Pagos)</button>
                         <button onclick="resetGame()" class="w-full py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-xl shadow">🗑️ Reinicio Completo (Borra Todo)</button>
@@ -283,7 +283,7 @@
         let hasSpokenMyBingo = false;
         let previewingCardId = null;
 
-        // --- ASIGNACIÓN DE COLORES POR LETRA SEGÚN SOLICITUD ---
+        // --- ASIGNACIÓN DE COLORES POR LETRA ---
         function getBallColorClass(num) {
             let n = parseInt(num);
             if (n >= 1 && n <= 15) return 'bg-blue-600 text-white border-blue-400';     // B: Azul
@@ -340,7 +340,7 @@
                         'small_cross': 'Cruz Pequeña', 'letter_o': 'Letra O', 'full_card': 'Cartón Lleno'
                     };
                     if(document.getElementById('player-pattern-label')) {
-                        document.getElementById('player-pattern-labelinnerText = patternNames[gamePattern] || gamePattern;
+                        document.getElementById('player-pattern-label').innerText = patternNames[gamePattern] || gamePattern;
                     }
 
                     updateBoardsUI();
@@ -418,7 +418,6 @@
             document.getElementById('player-display-name').innerText = name;
             document.getElementById('player-display-control').innerText = control;
 
-            // Cargar cartones previos si los tiene
             db.ref('players/' + control).once('value').then((snap) => {
                 let data = snap.val();
                 if(data && data.cards) {
@@ -427,7 +426,6 @@
                 renderPlayerMarketAndCards();
             });
 
-            // Registrar presencia
             db.ref('players/' + control).update({ name: name, active: true });
         }
 
@@ -480,7 +478,6 @@
             }
         }
 
-        // --- BOTONES SOLICITADOS: CONTINUAR RONDA Y REINICIO COMPLETO ---
         function continueRoundKeepCards() {
             if(confirm('¿Continuar ronda rápida? Se mantendrán los cartones y pagos actuales pero se limpiarán las bolitas cantadas.')) {
                 drawnBalls = [];
@@ -505,7 +502,6 @@
         function updateBoardsUI() {
             let last = drawnBalls.length > 0 ? drawnBalls[drawnBalls.length - 1] : null;
 
-            // Admin Ball & History
             let adminCurrent = document.getElementById('admin-current-ball');
             let adminHistory = document.getElementById('admin-history-balls');
             if(adminCurrent) {
@@ -522,7 +518,6 @@
                 adminHistory.innerHTML = hist.length ? hist.map(n => `<div class="bola-historial ${getBallColorClass(n)}">${getBallLetter(n)}-${n}</div>`).join('') : '<span class="text-xs text-slate-500">--</span>';
             }
 
-            // Player Ball & History
             let playerCurrent = document.getElementById('player-current-ball');
             let playerHistory = document.getElementById('player-history-balls');
             if(playerCurrent) {
@@ -539,7 +534,6 @@
                 playerHistory.innerHTML = hist.length ? hist.map(n => `<div class="bola-historial ${getBallColorClass(n)}">${getBallLetter(n)}-${n}</div>`).join('') : '<span class="text-xs text-slate-500">--</span>';
             }
 
-            // Tablero General 1-75 Admin & Player
             let adminGrid = document.getElementById('admin-board-grid');
             let playerGrid = document.getElementById('player-board-grid');
             let boardHtml = '';
@@ -556,7 +550,6 @@
             }
         }
 
-        // --- RENDERIZADO DE MERCADO Y CARTONES DE JUGADORA ---
         function renderPlayerMarketAndCards() {
             let marketGrid = document.getElementById('cards-market-grid');
             let myCardsContainer = document.getElementById('player-my-cards-container');
@@ -571,7 +564,6 @@
             marketGrid.innerHTML = marketHtml;
             document.getElementById('available-count').innerText = 100 - mySelectedCards.length;
 
-            // Renderizar mis cartones en juego con números resaltados en rojo si ganaron
             let myHtml = '';
             if(mySelectedCards.length === 0) {
                 myHtml = '<span class="text-slate-500 text-sm col-span-2">Aún no has seleccionado cartones.</span>';
@@ -586,7 +578,6 @@
                             let val = card[letName][r];
                             let isFree = (val === 'FREE');
                             let hit = isFree || drawnBalls.includes(val);
-                            // Sombreado en rojo si hay acierto
                             let cellBg = hit ? 'bg-red-600 text-white font-extrabold shadow' : 'bg-slate-900 text-slate-300';
                             gridHtml += `<div class="h-7 rounded flex items-center justify-center text-[10px] ${cellBg}">${val}</div>`;
                         }
@@ -667,7 +658,6 @@
             });
         }
 
-        // --- PANEL ADMIN: RESUMEN DETALLADO Y ESTATUS OSCURO DE PAGO ---
         function renderAdminPlayersAndCards(players) {
             let playersList = document.getElementById('admin-players-list');
             let summaryContainer = document.getElementById('admin-cards-summary');
@@ -693,7 +683,6 @@
 
                 playersHtml += `<div class="flex justify-between items-center bg-slate-900 px-3 py-2 rounded-xl"><span>${pName} (Ctrl: ${ctrl})</span><span class="text-green-400 font-bold">${pCards.length} cartones</span></div>`;
 
-                // Estatus oscuro si no ha pagado
                 let cardBgStyle = isPaid ? 'bg-slate-900 border-green-500/50' : 'bg-slate-950 border-red-500/50 opacity-90';
                 let paidBadge = isPaid ? '<span class="text-green-400 font-bold">✔ Pagado</span>' : '<span class="text-red-400 font-bold">❌ Pendiente de Pago</span>';
 
@@ -710,7 +699,6 @@
                     </div>
                 `;
 
-                // Radar analítico
                 pCards.forEach(cid => {
                     let card = marketCards[cid];
                     let missingCount = 0;
@@ -768,10 +756,7 @@
             document.getElementById('admin-winner-alert').classList.add('hidden');
         }
 
-        // Validación automática de patrón de bingo
-        function checkWinningConditions() {
-            // Lógica interna de verificación activa sincronizada por Firebase
-        }
+        function checkWinningConditions() {}
     </script>
 </body>
 </html>
