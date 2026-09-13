@@ -15,7 +15,6 @@
         @keyframes flash-bg { 0%, 100% { background-color: rgba(234, 179, 8, 0.9); } 50% { background-color: rgba(219, 39, 119, 0.9); } }
         .flash-winner { animation: flash-bg 1s infinite; }
         
-        /* Colores tradicionales de balotas por letra */
         .bola-b { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; border: 2px solid #60a5fa; }
         .bola-i { background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; border: 2px solid #f87171; }
         .bola-n { background: linear-gradient(135deg, #f8fafc, #cbd5e1); color: #0f172a; border: 2px solid #ffffff; }
@@ -87,7 +86,7 @@
             </div>
 
             <div id="admin-winner-alert" class="hidden bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-950 p-6 rounded-3xl font-extrabold text-center text-xl shadow-xl alert-bingo flex flex-col gap-3">
-                <div>🎉 ¡BINGO VALIDADO! 🎉</div>
+                <div>🎉 ¡BINGO VALIDADO! (Juego Detenidos) 🎉</div>
                 <div id="admin-winner-text" class="text-base font-bold bg-white/20 py-2 px-4 rounded-xl">Ganador...</div>
                 <div class="bg-slate-900 text-white p-4 rounded-2xl max-w-xs mx-auto w-full flex flex-col gap-2">
                     <span class="text-xs text-yellow-300 font-bold" id="admin-winner-card-title">Cartón Ganador</span>
@@ -117,7 +116,6 @@
                     <button onclick="drawBallManually()" class="w-full py-3 bg-purple-600 hover:bg-purple-500 font-bold rounded-xl text-sm shadow mt-2">Sacar Bola (Manual)</button>
                     <button id="auto-draw-btn" onclick="toggleAutoDraw()" class="w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold rounded-xl shadow">▶ Iniciar Auto (Cada 3s)</button>
                     
-                    <!-- BOTONES DE REINICIO SEPARADOS -->
                     <div class="flex flex-col gap-2 w-full mt-2">
                         <button onclick="reiniciarBalotasParaSiguienteFigura()" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl shadow">🔄 Siguiente Figura (Mismos Cartones)</button>
                         <button onclick="resetGame()" class="w-full py-2 bg-red-600/30 hover:bg-red-600/50 text-red-300 text-xs font-bold rounded-xl">🗑️ Reiniciar Juego Completo (Borrar Cartones)</button>
@@ -141,9 +139,12 @@
                         <input type="text" id="admin-room-code" onchange="updateRoomCode()" placeholder="Ej: BINGO2026" class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-center">
                     </div>
                 </div>
+
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
                     <h3 class="font-bold text-yellow-300">Jugadoras Conectadas</h3>
-                    <div class="flex-grow overflow-y-auto max-h-36 bg-slate-900/60 p-3 rounded-xl text-xs flex flex-col gap-2" id="admin-players-list"><span class="text-slate-500">Esperando...</span></div>
+                    <div class="flex-grow overflow-y-auto max-h-36 bg-slate-900/60 p-3 rounded-xl text-xs flex flex-col gap-2" id="admin-players-list">
+                        <span class="text-slate-500">Esperando...</span>
+                    </div>
                 </div>
             </div>
 
@@ -151,7 +152,7 @@
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-yellow-300 text-lg">📡 Radar de Cartones en Espera (Más Cercanos)</h3>
-                    <span class="text-xs text-slate-400">Clic en un cartón para ver qué número le falta</span>
+                    <span class="text-xs text-slate-400">Control en vivo de avance de cada cartón</span>
                 </div>
                 <div id="admin-radar-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl">
                     <span class="text-slate-500 text-xs col-span-2 text-center py-4">Analizando avance de cartones en juego...</span>
@@ -166,6 +167,7 @@
                 </div>
                 <div id="admin-cards-summary" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-56 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
             </div>
+
             <div class="bg-slate-800 p-6 rounded-3xl">
                 <h3 class="font-bold text-yellow-300 mb-4">Tablero General (1-75)</h3>
                 <div id="admin-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1.5"></div>
@@ -191,7 +193,7 @@
             <div id="player-winner-notification" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
                 <div class="flash-winner text-slate-950 p-6 md:p-8 rounded-3xl font-extrabold text-center shadow-2xl alert-bingo flex flex-col gap-4 max-w-lg w-full">
                     <div id="player-winner-title" class="text-3xl md:text-4xl text-yellow-300 drop-shadow">👑 ¡B I N G O ! 👑</div>
-                    <div id="player-winner-details" class="text-base md:text-lg font-bold bg-black/40 text-white py-3 px-4 rounded-xl">¡Tu cartón hizo bingo!</div>
+                    <div id="player-winner-details" class="text-base md:text-lg font-bold bg-black/40 text-white py-3 px-4 rounded-xl">¡Tu cartón hizo bingo! El juego se ha detenido.</div>
                     <div class="bg-slate-900 text-white p-4 rounded-2xl max-w-xs mx-auto w-full flex flex-col gap-2">
                         <span class="text-xs text-yellow-300 font-bold" id="public-winner-card-title">Cartón Ganador</span>
                         <div class="grid grid-cols-5 gap-1 text-[10px] text-pink-400 font-bold">
@@ -222,8 +224,8 @@
             <!-- ZONA DE TUS CARTONES EN JUEGO -->
             <div class="flex flex-col gap-4">
                 <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-yellow-300 text-lg">Tus Cartones en Juego (Ordenados por avance 🚀)</h3>
-                    <span class="text-xs text-slate-400">El más cercano sube automáticamente</span>
+                    <h3 class="font-bold text-yellow-300 text-lg">Tus Cartones en Juego</h3>
+                    <span class="text-xs text-slate-400">Tus cartones seleccionados</span>
                 </div>
                 <div id="player-my-cards-container" class="grid grid-cols-2 gap-3">
                     <span class="text-slate-500 text-sm col-span-2">Aún no has seleccionado cartones.</span>
@@ -323,34 +325,6 @@
                     db.ref('room/marketCards').set(initialMarket);
                 }
             });
-        }
-
-        // Voz clara y fuerte corregida para evitar bloqueos del navegador
-        function cantarBalotaVoz(numero) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                let utterance = new SpeechSynthesisUtterance("Número " + numero);
-                utterance.lang = 'es-ES';
-                utterance.rate = 0.95;
-                utterance.pitch = 1.0;
-
-                let voces = window.speechSynthesis.getVoices();
-                let vozEspanol = voces.find(v => v.lang && v.lang.startsWith('es'));
-                if (vozEspanol) {
-                    utterance.voice = vozEspanol;
-                }
-                
-                // Forzar lectura inmediata
-                setTimeout(() => {
-                    window.speechSynthesis.speak(utterance);
-                }, 50);
-            }
-        }
-
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.onvoiceschanged = () => {
-                window.speechSynthesis.getVoices();
-            };
         }
 
         function verificarFiguraGanadora(grid, drawnArray, patron) {
@@ -471,6 +445,8 @@
                 renderizarHistorialAdmin();
                 renderizarTableroAdmin();
                 renderizarResumenCartonesAdmin();
+                renderizarRadarAdmin();
+                renderizarJugadorasConectadasAdmin();
                 verificarGanadoresEnVivoAdmin();
             });
         }
@@ -489,10 +465,6 @@
                 let currentBallEl = document.getElementById('player-current-ball');
                 if (drawnBalls.length > 0) {
                     let ultima = drawnBalls[drawnBalls.length - 1];
-                    if (ultima !== lastBallDrawn) {
-                        lastBallDrawn = ultima;
-                        cantarBalotaVoz(ultima);
-                    }
                     currentBallEl.innerText = ultima;
                     currentBallEl.className = `w-24 h-24 rounded-full font-extrabold text-4xl flex items-center justify-center shadow-lg animate-pulse ${obtenerClaseBolaColor(ultima)}`;
                 } else {
@@ -579,7 +551,7 @@
                 div.innerHTML = `
                     <div>
                         <span class="font-bold text-yellow-300">Cartón #${id}</span><br>
-                        <span class="text-slate-400">${card.owner ? card.owner : 'Libre'}</span>
+                        <span class="text-slate-400">${card.owner ? card.owner + ' (Ctrl: ' + card.ownerControl + ')' : 'Libre'}</span>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="togglePaidCard(${id})" class="px-2.5 py-1 rounded-lg font-bold ${card.paid ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-400'}">${card.paid ? '💰 Pagado' : '⏳ Debe'}</button>
@@ -590,14 +562,82 @@
             }
         }
 
+        function renderizarJugadorasConectadasAdmin() {
+            let container = document.getElementById('admin-players-list');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            let jugadorasMap = {};
+            for (let id in marketCards) {
+                let card = marketCards[id];
+                if (card.owner && card.ownerControl) {
+                    if (!jugadorasMap[card.ownerControl]) {
+                        jugadorasMap[card.ownerControl] = { name: card.owner, count: 0 };
+                    }
+                    jugadorasMap[card.ownerControl].count++;
+                }
+            }
+
+            let keys = Object.keys(jugadorasMap);
+            if (keys.length === 0) {
+                container.innerHTML = '<span class="text-slate-500">Ninguna jugadora ha seleccionado cartones aún.</span>';
+                return;
+            }
+
+            keys.forEach(ctrl => {
+                let j = jugadorasMap[ctrl];
+                let div = document.createElement('div');
+                div.className = "flex justify-between items-center bg-slate-800 p-2 rounded-lg";
+                div.innerHTML = `<span><strong>${j.name}</strong> (Control: ${ctrl})</span> <span class="bg-pink-600 text-white px-2 py-0.5 rounded-full font-bold text-[10px]">${j.count} cartón(es)</span>`;
+                container.appendChild(div);
+            });
+        }
+
+        function renderizarRadarAdmin() {
+            let radarContainer = document.getElementById('admin-radar-container');
+            if (!radarContainer) return;
+            radarContainer.innerHTML = '';
+
+            let cartonesOcupados = 0;
+
+            for (let id in marketCards) {
+                let card = marketCards[id];
+                if (card.owner) {
+                    cartonesOcupados++;
+                    let aciertos = 0;
+
+                    for (let r = 0; r < 5; r++) {
+                        for (let c = 0; c < 5; c++) {
+                            let num = card.grid[r][c];
+                            if (num === 0 || drawnBalls.includes(num)) {
+                                aciertos++;
+                            }
+                        }
+                    }
+
+                    let div = document.createElement('div');
+                    div.className = "bg-slate-900 p-3 rounded-xl flex flex-col gap-1 border border-slate-700 text-xs";
+                    div.innerHTML = `
+                        <div class="flex justify-between font-bold">
+                            <span class="text-yellow-300">Cartón #${card.id} (${card.owner})</span>
+                            <span class="text-pink-400">${aciertos}/25 marcados</span>
+                        </div>
+                        <span class="text-[10px] text-slate-400">Control: ${card.ownerControl || 'N/A'}</span>
+                    `;
+                    radarContainer.appendChild(div);
+                }
+            }
+
+            if (cartonesOcupados === 0) {
+                radarContainer.innerHTML = '<span class="text-slate-500 text-xs col-span-2 text-center py-4">Ningún jugador ha seleccionado cartones todavía.</span>';
+            }
+        }
+
         function verificarGanadoresEnVivoAdmin() {
             let alertBox = document.getElementById('admin-winner-alert');
             let winnerText = document.getElementById('admin-winner-text');
             let winningGridContainer = document.getElementById('admin-winning-card-grid');
-            let radarContainer = document.getElementById('admin-radar-container');
-            if (!radarContainer) return;
 
-            radarContainer.innerHTML = '';
             let hayGanador = false;
             let ganadorInfo = "";
 
@@ -624,10 +664,28 @@
 
             if (hayGanador) {
                 alertBox.classList.remove('hidden');
+                // DETENER EL SORTEO AUTOMÁTICO INMEDIATAMENTE AL HABER GANADOR
+                if (isAutoRunning) {
+                    clearInterval(autoDrawInterval);
+                    isAutoRunning = false;
+                    let autoBtn = document.getElementById('auto-draw-btn');
+                    if (autoBtn) {
+                        autoBtn.innerText = "▶ Iniciar Auto (Cada 3s)";
+                        autoBtn.classList.replace('bg-slate-600', 'bg-pink-600');
+                    }
+                }
             }
         }
 
         function drawBallManually() {
+            // Verificar si hay algún ganador antes de sacar más bolas
+            for (let id in marketCards) {
+                if (marketCards[id].owner && verificarFiguraGanadora(marketCards[id].grid, drawnBalls, gamePattern)) {
+                    alert("⚠️ ¡Ya hay un cartón ganador en esta ronda! El juego está detenido hasta limpiar o pasar de figura.");
+                    return;
+                }
+            }
+
             if (drawnBalls.length >= 75) {
                 alert("¡Ya salieron todas las balotas!");
                 return;
@@ -652,6 +710,17 @@
                 document.getElementById('auto-draw-btn').innerText = "⏸ Pausar Auto";
                 document.getElementById('auto-draw-btn').classList.replace('bg-pink-600', 'bg-slate-600');
                 autoDrawInterval = setInterval(() => {
+                    // Verificar si ya hay ganador para frenar automáticamente
+                    for (let id in marketCards) {
+                        if (marketCards[id].owner && verificarFiguraGanadora(marketCards[id].grid, drawnBalls, gamePattern)) {
+                            clearInterval(autoDrawInterval);
+                            isAutoRunning = false;
+                            document.getElementById('auto-draw-btn').innerText = "▶ Iniciar Auto (Cada 3s)";
+                            document.getElementById('auto-draw-btn').classList.replace('bg-slate-600', 'bg-pink-600');
+                            return;
+                        }
+                    }
+
                     if (drawnBalls.length >= 75) {
                         clearInterval(autoDrawInterval);
                         isAutoRunning = false;
@@ -662,7 +731,6 @@
             }
         }
 
-        // REINICIAR SÓLO LAS BALOTAS (Mantiene los cartones y dueños para la siguiente figura/ronda)
         function reiniciarBalotasParaSiguienteFigura() {
             db.ref('room/drawnBalls').set([]);
             document.getElementById('admin-winner-alert').classList.add('hidden');
@@ -671,7 +739,6 @@
             alert("¡Balotas reiniciadas! Los cartones se mantienen para la siguiente figura.");
         }
 
-        // REINICIAR TODO EL JUEGO COMPLETO (Borra cartones y libera todo)
         function resetGame() {
             if (confirm("¿Estás segura de reiniciar TODO el juego completo? Se borrarán todos los cartones pedidos por las jugadoras.")) {
                 db.ref('room/drawnBalls').set([]);
