@@ -233,7 +233,6 @@
                     <h3 class="font-bold text-yellow-300 text-lg">Tus Cartones en Juego</h3>
                     <span class="text-xs text-slate-400">Los cartones más avanzados suben automáticamente en filas de 2</span>
                 </div>
-                <!-- CLASE CORREGIDA A grid-cols-2 PARA QUE SALGAN DE DOS EN DOS -->
                 <div id="player-my-cards-container" class="grid grid-cols-2 gap-3">
                     <span class="text-slate-500 text-sm col-span-2">Aún no has seleccionado cartones.</span>
                 </div>
@@ -250,10 +249,15 @@
                 <div class="flex justify-between items-center">
                     <div>
                         <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (<span id="available-count">100</span> Disponibles)</h3>
-                        <p id="market-status-msg" class="text-xs text-slate-400">Toca un cartón para apartarlo o liberarlo.</p>
+                        <p id="market-status-msg" class="text-xs text-slate-400">Toca los cartones que deseas y luego presiona el botón de cargar.</p>
                     </div>
                 </div>
                 <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
+                
+                <!-- BOTÓN DE CARGAR CARTONES -->
+                <button onclick="cargarMisCartones()" class="w-full py-3.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-extrabold text-sm rounded-2xl shadow-lg transition transform active:scale-95">
+                    📥 Cargar / Confirmar Mis Cartones
+                </button>
             </div>
         </div>
     </div>
@@ -269,7 +273,6 @@
         let drawnBalls = [];
         let gamePattern = 'line';
         let marketCards = {}; 
-        let lastBallDrawn = null;
         let autoDrawInterval = null;
         let isAutoRunning = false;
         let adminSecretKey = 'June 2026';
@@ -326,6 +329,7 @@
                             grid: generarEstructuraCarton(),
                             owner: null,
                             ownerControl: null,
+                            loaded: false,
                             paid: false
                         };
                     }
@@ -392,11 +396,22 @@
             return resultado.count === 0;
         }
 
+        // Recordar sesión del jugador automáticamente
+        window.onload = function() {
+            let savedName = localStorage.getItem('bingo_player_name');
+            let savedControl = localStorage.getItem('bingo_player_control');
+            if (savedName && savedControl) {
+                document.getElementById('player-name-input').value = savedName;
+                document.getElementById('player-control-input').value = savedControl;
+                let msg = document.getElementById('welcome-back-msg');
+                msg.innerText = `¡Hola de nuevo, ${savedName}! Solo ingresa tu código de acceso.`;
+                msg.classList.remove('hidden');
+            }
+        };
+
         function showPlayerLogin() {
             document.getElementById('view-home').classList.add('hidden');
             document.getElementById('view-player-register').classList.remove('hidden');
-            document.getElementById('welcome-back-msg').innerText = "";
-            document.getElementById('welcome-back-msg').classList.add('hidden');
         }
 
         function showAdminLogin() {
@@ -442,6 +457,10 @@
                     alert("El código de sala es incorrecto.");
                     return;
                 }
+
+                // Guardar localmente para ingresos futuros rápidos
+                localStorage.setItem('bingo_player_name', name);
+                localStorage.setItem('bingo_player_control', control);
 
                 currentUser.name = name;
                 currentUser.control = control;
@@ -594,7 +613,7 @@
                 div.innerHTML = `
                     <div>
                         <span class="font-bold text-yellow-300">Cartón #${id}</span><br>
-                        <span class="text-slate-400">${card.owner ? card.owner + ' (Ctrl: ' + card.ownerControl + ')' : 'Libre'}</span>
+                        <span class="text-slate-400">${card.owner ? card.owner + ' (Ctrl: ' + card.ownerControl + ')' + (card.loaded ? ' [Cargado]' : ' [Seleccionado]') : 'Libre'}</span>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="togglePaidCard(${id})" class="px-2.5 py-1 rounded-lg font-bold ${card.paid ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-400'}">${card.paid ? '💰 Pagado' : '⏳ Debe'}</button>
@@ -613,7 +632,7 @@
             let jugadorasMap = {};
             for (let id in marketCards) {
                 let card = marketCards[id];
-                if (card.owner && card.ownerControl) {
+                if (card.owner && card.ownerControl && card.loaded) {
                     if (!jugadorasMap[card.ownerControl]) {
                         jugadorasMap[card.ownerControl] = { name: card.owner, count: 0 };
                     }
@@ -623,7 +642,7 @@
 
             let keys = Object.keys(jugadorasMap);
             if (keys.length === 0) {
-                container.innerHTML = '<span class="text-slate-500">Ninguna jugadora ha seleccionado cartones aún.</span>';
+                container.innerHTML = '<span class="text-slate-500">Ninguna jugadora ha cargado cartones aún.</span>';
                 return;
             }
 
@@ -645,7 +664,7 @@
 
             for (let id in marketCards) {
                 let card = marketCards[id];
-                if (card.owner) {
+                if (card.owner && card.loaded) {
                     let analisis = obtenerNumerosFaltantesGanar(card.grid, drawnBalls, gamePattern);
                     listaRadar.push({
                         card: card,
@@ -657,7 +676,7 @@
             listaRadar.sort((a, b) => a.analisis.count - b.analisis.count);
 
             if (listaRadar.length === 0) {
-                radarContainer.innerHTML = '<span class="text-slate-500 text-xs col-span-2 text-center py-4">Ningún jugador ha seleccionado cartones todavía.</span>';
+                radarContainer.innerHTML = '<span class="text-slate-500 text-xs col-span-2 text-center py-4">Ningún jugador ha cargado cartones todavía.</span>';
                 return;
             }
 
@@ -692,7 +711,7 @@
 
             for (let id in marketCards) {
                 let card = marketCards[id];
-                if (card.owner) {
+                if (card.owner && card.loaded) {
                     let gano = verificarFiguraGanadora(card.grid, drawnBalls, gamePattern);
                     if (gano) {
                         hayGanador = true;
@@ -727,8 +746,8 @@
 
         function drawBallManually() {
             for (let id in marketCards) {
-                if (marketCards[id].owner && verificarFiguraGanadora(marketCards[id].grid, drawnBalls, gamePattern)) {
-                    alert("⚠️ ¡Ya hay un cartón ganador en esta ronda! El juego está detenido hasta limpiar o pasar de figura.");
+                if (marketCards[id].owner && marketCards[id].loaded && verificarFiguraGanadora(marketCards[id].grid, drawnBalls, gamePattern)) {
+                    alert("⚠️ ¡Ya hay un cartón ganador en esta ronda! El juego está detenido.");
                     return;
                 }
             }
@@ -758,7 +777,7 @@
                 document.getElementById('auto-draw-btn').classList.replace('bg-pink-600', 'bg-slate-600');
                 autoDrawInterval = setInterval(() => {
                     for (let id in marketCards) {
-                        if (marketCards[id].owner && verificarFiguraGanadora(marketCards[id].grid, drawnBalls, gamePattern)) {
+                        if (marketCards[id].owner && marketCards[id].loaded && verificarFiguraGanadora(marketCards[id].grid, drawnBalls, gamePattern)) {
                             clearInterval(autoDrawInterval);
                             isAutoRunning = false;
                             let autoBtn = document.getElementById('auto-draw-btn');
@@ -790,11 +809,11 @@
             document.getElementById('admin-winner-alert').classList.add('hidden');
             document.getElementById('player-winner-notification').classList.add('hidden');
             hasSpokenMyBingo = false;
-            alert("¡Balotas reiniciadas! Los cartones se mantienen para la siguiente figura.");
+            alert("¡Balotas reiniciadas! Los cartones cargados se mantienen para la siguiente figura.");
         }
 
         function resetGame() {
-            if (confirm("¿Estás segura de reiniciar TODO el juego completo? Se borrarán todos los cartones pedidos por las jugadoras.")) {
+            if (confirm("¿Estás segura de reiniciar TODO el juego completo? Se borrarán todos los cartones.")) {
                 db.ref('room/drawnBalls').set([]);
                 document.getElementById('admin-winner-alert').classList.add('hidden');
                 document.getElementById('player-winner-notification').classList.add('hidden');
@@ -807,6 +826,7 @@
                         grid: generarEstructuraCarton(),
                         owner: null,
                         ownerControl: null,
+                        loaded: false,
                         paid: false
                     };
                 }
@@ -829,7 +849,7 @@
         }
 
         function liberarCarton(id) {
-            db.ref(`room/marketCards/${id}`).update({ owner: null, ownerControl: null, paid: false });
+            db.ref(`room/marketCards/${id}`).update({ owner: null, ownerControl: null, loaded: false, paid: false });
         }
 
         function updateGamePattern() {
@@ -854,9 +874,9 @@
             let juegoIniciado = drawnBalls.length > 0;
 
             if (juegoIniciado) {
-                statusMsg.innerText = "🔒 Partida iniciada: El mercado está cerrado y los cartones no se pueden modificar.";
+                statusMsg.innerText = "🔒 Partida iniciada: El mercado está cerrado.";
             } else {
-                statusMsg.innerText = "Toca un cartón para apartarlo (si es tuyo y aún no empieza la partida, puedes volver a tocarlo para soltarlo).";
+                statusMsg.innerText = "Toca los cartones que desees apartar y luego presiona 'Cargar / Confirmar Mis Cartones'.";
             }
 
             for (let id in marketCards) {
@@ -865,13 +885,18 @@
 
                 let div = document.createElement('div');
                 let esMio = card.ownerControl === currentUser.control;
+                let estaCargadoMio = esMio && card.loaded;
                 
-                div.className = `p-2 rounded-xl text-center font-bold text-xs border ${esMio ? 'bg-green-600/30 border-green-500 text-green-300' : card.owner ? 'bg-slate-900 border-slate-800 text-slate-600' : 'bg-slate-800 border-slate-700 text-yellow-300'} ${!juegoIniciado && (!card.owner || esMio) ? 'cursor-pointer hover:bg-slate-700' : 'cursor-not-allowed opacity-80'}`;
+                div.className = `p-2 rounded-xl text-center font-bold text-xs border ${estaCargadoMio ? 'bg-pink-600/40 border-pink-500 text-pink-200' : esMio ? 'bg-green-600/30 border-green-500 text-green-300' : card.owner ? 'bg-slate-900 border-slate-800 text-slate-600' : 'bg-slate-800 border-slate-700 text-yellow-300'} ${!juegoIniciado && (!card.owner || (esMio && !card.loaded)) ? 'cursor-pointer hover:bg-slate-700' : 'cursor-not-allowed opacity-80'}`;
                 div.innerText = `#${id}`;
                 
                 div.onclick = () => {
                     if (juegoIniciado) {
-                        alert("⚠️ La partida ya comenzó. Ya no se pueden tomar ni soltar cartones.");
+                        alert("⚠️ La partida ya comenzó.");
+                        return;
+                    }
+                    if (card.loaded && esMio) {
+                        alert("⚠️ Tus cartones ya están cargados. Debes escribirle a la administradora si necesitas liberarlos.");
                         return;
                     }
                     seleccionarCarton(id);
@@ -890,9 +915,30 @@
             }
 
             if (card.ownerControl === currentUser.control) {
-                db.ref(`room/marketCards/${id}`).update({ owner: null, ownerControl: null, paid: false });
+                if (card.loaded) {
+                    alert("Este cartón ya fue cargado. No puedes quitarlo por ti misma.");
+                    return;
+                }
+                db.ref(`room/marketCards/${id}`).update({ owner: null, ownerControl: null, loaded: false, paid: false });
             } else {
-                db.ref(`room/marketCards/${id}`).update({ owner: currentUser.name, ownerControl: currentUser.control, paid: false });
+                db.ref(`room/marketCards/${id}`).update({ owner: currentUser.name, ownerControl: currentUser.control, loaded: false, paid: false });
+            }
+        }
+
+        // Función para cargar/confirmar los cartones seleccionados (Candado de seguridad)
+        function cargarMisCartones() {
+            let seleccionados = 0;
+            for (let id in marketCards) {
+                let card = marketCards[id];
+                if (card.ownerControl === currentUser.control && !card.loaded) {
+                    db.ref(`room/marketCards/${id}/loaded`).set(true);
+                    seleccionados++;
+                }
+            }
+            if (seleccionados > 0) {
+                alert("¡Cartones cargados con éxito! Ya han quedado bloqueados y registrados. Si necesitas cambiarlos, pídele a la administradora que te los libere.");
+            } else {
+                alert("No tienes cartones nuevos seleccionados para cargar.");
             }
         }
 
@@ -903,7 +949,8 @@
             
             let misCartones = [];
             for (let id in marketCards) {
-                if (marketCards[id].ownerControl === currentUser.control) {
+                // Solo muestra los cartones que ya fueron CARGADOS oficialmente por la jugadora
+                if (marketCards[id].ownerControl === currentUser.control && marketCards[id].loaded) {
                     let analisis = obtenerNumerosFaltantesGanar(marketCards[id].grid, drawnBalls, gamePattern);
                     misCartones.push({
                         card: marketCards[id],
@@ -913,7 +960,7 @@
             }
 
             if (misCartones.length === 0) {
-                container.innerHTML = '<span class="text-slate-500 text-sm col-span-2">Aún no has seleccionado cartones. Toca abajo en el mercado para elegir.</span>';
+                container.innerHTML = '<span class="text-slate-500 text-sm col-span-2">Aún no tienes cartones cargados. Selecciona en el mercado y presiona "Cargar / Confirmar Mis Cartones".</span>';
                 return;
             }
 
