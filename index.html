@@ -151,11 +151,11 @@
                 </div>
             </div>
 
-            <!-- RADAR DE CARTONES MÁS CERCANOS Y QUÉ NÚMERO LES FALTA -->
+            <!-- RADAR DE CARTONES MÁS CERCANOS (ORDENADOS DEL MÁS AVANZADO AL MENOS) -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-yellow-300 text-lg">📡 Radar de Cartones Cercanos (¡A qué número les falta!)</h3>
-                    <span class="text-xs text-slate-400">Monitoreo en vivo de los números pendientes</span>
+                    <h3 class="font-bold text-yellow-300 text-lg">📡 Radar de Cartones Cercanos (¡Los más avanzados primero!)</h3>
+                    <span class="text-xs text-slate-400">Ordenados automáticamente por cercanía al BINGO</span>
                 </div>
                 <div id="admin-radar-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl">
                     <span class="text-slate-500 text-xs col-span-2 text-center py-4">Analizando avance de cartones en juego...</span>
@@ -646,34 +646,46 @@
             if (!radarContainer) return;
             radarContainer.innerHTML = '';
 
-            let cartonesOcupados = 0;
+            let listaRadar = [];
 
             for (let id in marketCards) {
                 let card = marketCards[id];
                 if (card.owner) {
-                    cartonesOcupados++;
                     let analisis = obtenerNumerosFaltantesGanar(card.grid, drawnBalls, gamePattern);
-                    let faltantesTexto = analisis.faltantes.length > 0 ? analisis.faltantes.map(n => n === 0 ? '⭐' : '#' + n).join(', ') : '¡BINGO LISTO!';
-
-                    let div = document.createElement('div');
-                    div.className = `bg-slate-900 p-3 rounded-xl flex flex-col gap-1.5 border ${analisis.count === 1 ? 'border-yellow-400 bg-yellow-500/10' : 'border-slate-700'} text-xs`;
-                    div.innerHTML = `
-                        <div class="flex justify-between font-bold">
-                            <span class="text-yellow-300">Cartón #${card.id} (${card.owner})</span>
-                            <span class="${analisis.count === 1 ? 'text-yellow-400 font-extrabold animate-pulse' : 'text-pink-400'}">${analisis.count === 1 ? '🔥 ¡A UNA BOLITA!' : analisis.count + ' faltantes'}</span>
-                        </div>
-                        <div class="text-[11px] text-slate-300">
-                            <strong>Números que le faltan:</strong> <span class="text-pink-300 font-bold">${faltantesTexto}</span>
-                        </div>
-                        <span class="text-[10px] text-slate-400">Control: ${card.ownerControl || 'N/A'}</span>
-                    `;
-                    radarContainer.appendChild(div);
+                    listaRadar.push({
+                        card: card,
+                        analisis: analisis
+                    });
                 }
             }
 
-            if (cartonesOcupados === 0) {
+            // ORDENAR AUTOMÁTICAMENTE: El que tenga menos faltantes (más avanzado) va primero
+            listaRadar.sort((a, b) => a.analisis.count - b.analisis.count);
+
+            if (listaRadar.length === 0) {
                 radarContainer.innerHTML = '<span class="text-slate-500 text-xs col-span-2 text-center py-4">Ningún jugador ha seleccionado cartones todavía.</span>';
+                return;
             }
+
+            listaRadar.forEach(item => {
+                let card = item.card;
+                let analisis = item.analisis;
+                let faltantesTexto = analisis.faltantes.length > 0 ? analisis.faltantes.map(n => n === 0 ? '⭐' : '#' + n).join(', ') : '¡BINGO LISTO!';
+
+                let div = document.createElement('div');
+                div.className = `bg-slate-900 p-3 rounded-xl flex flex-col gap-1.5 border ${analisis.count === 1 ? 'border-yellow-400 bg-yellow-500/10' : 'border-slate-700'} text-xs`;
+                div.innerHTML = `
+                    <div class="flex justify-between font-bold">
+                        <span class="text-yellow-300">Cartón #${card.id} (${card.owner})</span>
+                        <span class="${analisis.count === 1 ? 'text-yellow-400 font-extrabold animate-pulse' : 'text-pink-400'}">${analisis.count === 1 ? '🔥 ¡A UNA BOLITA!' : analisis.count + ' faltantes'}</span>
+                    </div>
+                    <div class="text-[11px] text-slate-300">
+                        <strong>Números que le faltan:</strong> <span class="text-pink-300 font-bold">${faltantesTexto}</span>
+                    </div>
+                    <span class="text-[10px] text-slate-400">Control: ${card.ownerControl || 'N/A'}</span>
+                `;
+                radarContainer.appendChild(div);
+            });
         }
 
         function verificarGanadoresEnVivoAdmin() {
@@ -865,8 +877,6 @@
                 div.className = `p-2 rounded-xl text-center font-bold text-xs border ${esMio ? 'bg-green-600/30 border-green-500 text-green-300' : card.owner ? 'bg-slate-900 border-slate-800 text-slate-600' : 'bg-slate-800 border-slate-700 text-yellow-300'} ${!juegoIniciado && (!card.owner || esMio) ? 'cursor-pointer hover:bg-slate-700' : 'cursor-not-allowed opacity-80'}`;
                 div.innerText = `#${id}`;
                 
-                // REGLA: Si la partida ya empezó (drawnBalls.length > 0), nadie puede tocar nada.
-                // REGLA: Si la partida NO ha empezado, solo puedes apartar o soltar TUS propios cartones.
                 div.onclick = () => {
                     if (juegoIniciado) {
                         alert("⚠️ La partida ya comenzó. Ya no se pueden tomar ni soltar cartones.");
@@ -945,7 +955,6 @@
                 }
 
                 let cardDiv = document.createElement('div');
-                // APLICAR CLASE DE TITILACIÓN SI ESTÁ A UNA
                 let estiloExtra = gano ? 'border-yellow-400 bg-yellow-500/10' : estaAUna ? 'card-one-away bg-pink-500/10' : 'border-slate-700';
                 cardDiv.className = `bg-slate-900 border ${estiloExtra} p-3 rounded-2xl flex flex-col gap-2`;
                 
