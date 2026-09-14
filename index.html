@@ -39,13 +39,13 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-between p-4">
+<body class="min-h-screen flex flex-col items-center justify-between p-4" onclick="desbloquearAudioInicial()">
     <div id="app" class="w-full max-w-4xl mx-auto flex flex-col items-center flex-grow">
         <header class="text-center my-6">
             <h1 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-400 to-yellow-400 neon-glow">
                 Bingo Lineal Yune 🎰✨
             </h1>
-            <p class="text-slate-400 text-sm mt-1">El sistema oficial en tiempo real</p>
+            <p class="text-slate-400 text-sm mt-1">El sistema oficial en tiempo real con voz cantante</p>
         </header>
 
         <!-- PANTALLA INICIAL -->
@@ -120,8 +120,9 @@
                     <button id="auto-draw-btn" onclick="toggleAutoDraw()" class="w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold rounded-xl shadow">▶ Iniciar Auto (Cada 3s)</button>
                     
                     <div class="flex flex-col gap-2 w-full mt-2">
+                        <button onclick="probarVoz()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow">🔊 Probar Sonido / Voz</button>
                         <button onclick="reiniciarBalotasParaSiguienteFigura()" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl shadow">🔄 Siguiente Figura (Mismos Cartones)</button>
-                        <button onclick="resetGame()" class="w-full py-2 bg-red-600/30 hover:bg-red-600/50 text-red-300 text-xs font-bold rounded-xl">🗑️ Reiniciar Juego Completo (Borrar Cartones)</button>
+                        <button onclick="resetGame()" class="w-full py-2 bg-red-600/30 hover:bg-red-600/50 text-red-300 text-xs font-bold rounded-xl">🗑️ Reiniciar Juego Completo</button>
                     </div>
                 </div>
 
@@ -154,15 +155,15 @@
             <!-- RADAR DE CARTONES MÁS CERCANOS -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-yellow-300 text-lg">📡 Radar de Cartones Cercanos (¡Los más avanzados primero!)</h3>
+                    <h3 class="font-bold text-yellow-300 text-lg">📡 Radar de Cartones Cercanos</h3>
                     <span class="text-xs text-slate-400">Ordenados automáticamente por cercanía al BINGO</span>
                 </div>
                 <div id="admin-radar-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl">
-                    <span class="text-slate-500 text-xs col-span-2 text-center py-4">Analizando avance de cartones en juego...</span>
+                    <span class="text-slate-500 text-xs col-span-2 text-center py-4">Analizando avance de cartones...</span>
                 </div>
             </div>
 
-            <!-- CONTROL Y PAGOS DE CARTONES AGRUPADO POR JUGADORA (EN LÍNEA HORIZONTAL) -->
+            <!-- CONTROL Y PAGOS DE CARTONES -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-pink-400 text-lg">Control de Pagos por Jugadora</h3>
@@ -174,7 +175,6 @@
             <!-- SECCIÓN DE LIBERAR CARTONES -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
                 <h3 class="font-bold text-red-400 text-sm">🗑️ Sección para Liberar Cartones Ocupados</h3>
-                <p class="text-xs text-slate-400">Busca el número de cartón que deseas liberar de su dueña actual:</p>
                 <div class="flex gap-3 items-center">
                     <select id="admin-liberar-select" class="flex-grow px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs font-bold"></select>
                     <button onclick="liberarCartonSeleccionadoAdmin()" class="px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold text-xs shadow">Liberar Cartón</button>
@@ -241,7 +241,7 @@
             <div class="flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-yellow-300 text-lg">Tus Cartones en Juego</h3>
-                    <span class="text-xs text-slate-400">Los cartones más avanzados suben automáticamente en filas de 2</span>
+                    <span class="text-xs text-slate-400">Los cartones más avanzados suben automáticamente</span>
                 </div>
                 <div id="player-my-cards-container" class="grid grid-cols-2 gap-3">
                     <span class="text-slate-500 text-sm col-span-2">Aún no has seleccionado cartones.</span>
@@ -259,7 +259,7 @@
                 <div class="flex justify-between items-center">
                     <div>
                         <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (<span id="available-count">100</span> Disponibles)</h3>
-                        <p id="market-status-msg" class="text-xs text-slate-400">Toca los cartones que deseas y luego presiona el botón de cargar.</p>
+                        <p id="market-status-msg" class="text-xs text-slate-400">Toca los cartones que deseas y luego presiona cargar.</p>
                     </div>
                 </div>
                 <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
@@ -286,6 +286,7 @@
         let isAutoRunning = false;
         let adminSecretKey = 'June 2026';
         let hasSpokenMyBingo = false;
+        let lastSpokenBallCount = 0;
 
         const nombresPatrones = {
             'line': 'Línea (Horizontal o Vertical)',
@@ -297,6 +298,39 @@
             'letter_o': 'Letra O (Marco Exterior)',
             'full_card': 'Cartón Lleno (Apagón)'
         };
+
+        function desbloquearAudioInicial() {
+            // Desbloquea el sintetizador de voz en navegadores móviles al primer toque
+            if ('speechSynthesis' in window) {
+                let utterance = new SpeechSynthesisUtterance("");
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function cantarTextoVoz(texto) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Detiene cualquier eco anterior
+                let utterance = new SpeechSynthesisUtterance(texto);
+                utterance.lang = 'es-ES';
+                utterance.rate = 1.0; // Velocidad normal clara
+                utterance.pitch = 1.1; // Tono alegre
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function probarVoz() {
+            cantarTextoVoz("¡Bienvenida a Bingo Lineal Yune! El sistema de audio está funcionando perfectamente.");
+        }
+
+        function obtenerLetraYNumeroVoz(num) {
+            let letra = '';
+            if (num >= 1 && num <= 15) letra = 'B';
+            else if (num >= 16 && num <= 30) letra = 'I';
+            else if (num >= 31 && num <= 45) letra = 'N';
+            else if (num >= 46 && num <= 60) letra = 'G';
+            else if (num >= 61 && num <= 75) letra = 'O';
+            return `${letra}, ${num}`;
+        }
 
         function obtenerClaseBolaColor(num) {
             if (num >= 1 && num <= 15) return 'bola-b';
@@ -381,10 +415,8 @@
                 lineasPosibles.push(linea);
             } else if (patron === 'four_corners') {
                 lineasPosibles.push([
-                    {r:0, c:0, num: grid[0][0]},
-                    {r:0, c:4, num: grid[0][4]},
-                    {r:4, c:0, num: grid[4][0]},
-                    {r:4, c:4, num: grid[4][4]}
+                    {r:0, c:0, num: grid[0][0]}, {r:0, c:4, num: grid[0][4]},
+                    {r:4, c:0, num: grid[4][0]}, {r:4, c:4, num: grid[4][4]}
                 ]);
             } else if (patron === 'diagonal') {
                 let diag1 = [], diag2 = [];
@@ -408,10 +440,8 @@
                 lineasPosibles.push(cross);
             } else if (patron === 'small_cross') {
                 lineasPosibles.push([
-                    {r: 2, c: 2, num: grid[2][2]},
-                    {r: 1, c: 2, num: grid[1][2]},
-                    {r: 3, c: 2, num: grid[3][2]},
-                    {r: 2, c: 1, num: grid[2][1]},
+                    {r: 2, c: 2, num: grid[2][2]}, {r: 1, c: 2, num: grid[1][2]},
+                    {r: 3, c: 2, num: grid[3][2]}, {r: 2, c: 1, num: grid[2][1]},
                     {r: 2, c: 3, num: grid[2][3]}
                 ]);
             } else if (patron === 'letter_o') {
@@ -544,6 +574,14 @@
 
                 if (drawnBalls.length === 0) {
                     document.getElementById('admin-winner-alert').classList.add('hidden');
+                    lastSpokenBallCount = 0;
+                } else {
+                    // Control de voz si entra una nueva bola por Firebase
+                    if (drawnBalls.length > lastSpokenBallCount) {
+                        let ultima = drawnBalls[drawnBalls.length - 1];
+                        cantarTextoVoz(obtenerLetraYNumeroVoz(ultima));
+                        lastSpokenBallCount = drawnBalls.length;
+                    }
                 }
 
                 let currentBallEl = document.getElementById('admin-current-ball');
@@ -669,11 +707,7 @@
                 let card = marketCards[id];
                 if (card.owner && card.ownerControl) {
                     if (!jugadorasMap[card.ownerControl]) {
-                        jugadorasMap[card.ownerControl] = {
-                            name: card.owner,
-                            control: card.ownerControl,
-                            cards: []
-                        };
+                        jugadorasMap[card.ownerControl] = { name: card.owner, control: card.ownerControl, cards: [] };
                     }
                     jugadorasMap[card.ownerControl].cards.push(card);
                 }
@@ -709,16 +743,12 @@
                         <span class="font-bold text-pink-400 text-sm">${j.name}</span>
                         <span class="text-[10px] text-slate-400">Control: ${j.control}</span>
                     </div>
-                    <div class="flex flex-wrap items-center gap-2 flex-grow">
-                        ${listadoHorizontalHtml}
-                    </div>
+                    <div class="flex flex-wrap items-center gap-2 flex-grow">${listadoHorizontalHtml}</div>
                     <div class="flex items-center gap-2">
                         <button onclick="marcarTodosPagadosJugadora('${j.control}', ${!todosPagados})" class="px-3 py-1.5 rounded-xl font-bold text-[11px] ${todosPagados ? 'bg-green-600 text-white' : 'bg-slate-800 text-yellow-300 border border-yellow-500/50'}">
                             ${todosPagados ? '✅ Todos Pagados' : '💰 Pagar Todos'}
                         </button>
-                        <button onclick="eliminarJugadorSistema('${j.control}', '${j.name}')" class="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold text-[11px] shadow">
-                            ❌ Sacar
-                        </button>
+                        <button onclick="eliminarJugadorSistema('${j.control}', '${j.name}')" class="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold text-[11px] shadow">❌ Sacar</button>
                     </div>
                 `;
                 container.appendChild(div);
@@ -729,12 +759,7 @@
             if (confirm(`¿Estás segura de sacar a ${nombreJugadora} (Control: ${controlJugadora}) de la partida? Sus cartones serán liberados y podrá volver a entrar cuando quiera.`)) {
                 for (let id in marketCards) {
                     if (marketCards[id].ownerControl === controlJugadora) {
-                        db.ref(`room/marketCards/${id}`).update({
-                            owner: null,
-                            ownerControl: null,
-                            loaded: false,
-                            paid: false
-                        });
+                        db.ref(`room/marketCards/${id}`).update({ owner: null, ownerControl: null, loaded: false, paid: false });
                     }
                 }
                 alert(`¡${nombreJugadora} ha sido sacada de la partida con éxito y sus cartones liberados!`);
@@ -748,9 +773,7 @@
             
             let ocupados = [];
             for (let id in marketCards) {
-                if (marketCards[id].owner) {
-                    ocupados.push(marketCards[id]);
-                }
+                if (marketCards[id].owner) ocupados.push(marketCards[id]);
             }
 
             if (ocupados.length === 0) {
@@ -823,15 +846,11 @@
             radarContainer.innerHTML = '';
 
             let listaRadar = [];
-
             for (let id in marketCards) {
                 let card = marketCards[id];
                 if (card.owner && card.loaded) {
                     let analisis = obtenerNumerosFaltantesGanar(card.grid, drawnBalls, gamePattern);
-                    listaRadar.push({
-                        card: card,
-                        analisis: analisis
-                    });
+                    listaRadar.push({ card: card, analisis: analisis });
                 }
             }
 
@@ -893,6 +912,9 @@
             }
 
             if (hayGanador) {
+                if (alertBox.classList.contains('hidden')) {
+                    cantarTextoVoz("¡Bingo! ¡Tenemos un cartón ganador en la sala!");
+                }
                 alertBox.classList.remove('hidden');
                 if (isAutoRunning) {
                     clearInterval(autoDrawInterval);
@@ -971,6 +993,7 @@
             document.getElementById('admin-winner-alert').classList.add('hidden');
             document.getElementById('player-winner-notification').classList.add('hidden');
             hasSpokenMyBingo = false;
+            lastSpokenBallCount = 0;
             alert("¡Balotas reiniciadas! Los cartones cargados se mantienen para la siguiente figura.");
         }
 
@@ -980,6 +1003,7 @@
                 document.getElementById('admin-winner-alert').classList.add('hidden');
                 document.getElementById('player-winner-notification').classList.add('hidden');
                 hasSpokenMyBingo = false;
+                lastSpokenBallCount = 0;
                 
                 let initialMarket = {};
                 for (let i = 1; i <= 100; i++) {
@@ -1034,7 +1058,7 @@
             if (juegoIniciado) {
                 statusMsg.innerText = "🔒 Partida iniciada: El mercado está cerrado.";
             } else {
-                statusMsg.innerText = "Toca tus cartones para seleccionarlos o deseleccionarlos, y luego presiona 'Cargar / Confirmar Mis Cartones'.";
+                statusMsg.innerText = "Toca tus cartones para seleccionarlos y luego presiona cargar.";
             }
 
             for (let id in marketCards) {
@@ -1085,7 +1109,7 @@
                 }
             }
             if (seleccionados > 0) {
-                alert("¡Cartones cargados con éxito! Ya han quedado guardados.");
+                alert("¡Cartones cargados con éxito!");
             } else {
                 alert("No tienes cartones nuevos seleccionados para cargar.");
             }
@@ -1100,15 +1124,12 @@
             for (let id in marketCards) {
                 if (marketCards[id].ownerControl === currentUser.control && marketCards[id].loaded) {
                     let analisis = obtenerNumerosFaltantesGanar(marketCards[id].grid, drawnBalls, gamePattern);
-                    misCartones.push({
-                        card: marketCards[id],
-                        analisis: analisis
-                    });
+                    misCartones.push({ card: marketCards[id], analisis: analisis });
                 }
             }
 
             if (misCartones.length === 0) {
-                container.innerHTML = '<span class="text-slate-500 text-sm col-span-2">Aún no tienes cartones cargados. Selecciona en el mercado y presiona "Cargar / Confirmar Mis Cartones".</span>';
+                container.innerHTML = '<span class="text-slate-500 text-sm col-span-2">Aún no tienes cartones cargados. Selecciona en el mercado y presiona "Cargar".</span>';
                 return;
             }
 
@@ -1162,7 +1183,7 @@
                     </div>
                     ${htmlGrid}
                     <div class="text-[11px] bg-slate-950 p-2 rounded-xl border border-slate-800 flex justify-between items-center">
-                        <div><span class="text-slate-400">Le falta(n):</span> <span class="text-pink-400 font-bold">${analisis.count === 0 ? '¡Listo para cantar!' : faltantesStr}</span></div>
+                        <div><span class="text-slate-400">Le falta(n):</span> <span class="text-pink-400 font-bold">${analisis.count === 0 ? '¡Listo!' : faltantesStr}</span></div>
                         ${estaAUna ? '<span class="text-[10px] bg-yellow-400 text-slate-950 px-2 py-0.5 rounded-full font-extrabold animate-bounce">¡CANTANDO!</span>' : ''}
                     </div>
                 `;
