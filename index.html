@@ -210,11 +210,6 @@
                 </div>
             </div>
 
-            <!-- MODAL DE ALERTA "¡A UNA!" PARA LA JUGADORA -->
-            <div id="player-one-away-alert" class="hidden fixed top-6 left-1/2 transform -translate-x-1/2 z-40 bg-gradient-to-r from-pink-600 to-yellow-500 text-slate-950 px-6 py-3 rounded-2xl font-extrabold text-center shadow-2xl alert-bingo border-2 border-white">
-                <div id="player-one-away-text" class="text-sm md:text-base">🔥 ¡ATENCIÓN! ¡Estás a una bolita de cantar BINGO! 🔥</div>
-            </div>
-
             <!-- ÚLTIMA BOLA CANTADA -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 border-2 border-yellow-500/50 shadow-xl">
                 <div class="flex flex-col items-center md:items-start text-center md:text-left">
@@ -232,11 +227,11 @@
                 </div>
             </div>
 
-            <!-- ZONA DE TUS CARTONES EN JUEGO -->
+            <!-- ZONA DE TUS CARTONES EN JUEGO (ORDENADOS AUTOMÁTICAMENTE: LOS MÁS AVANZADOS ARRIBA) -->
             <div class="flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-yellow-300 text-lg">Tus Cartones en Juego</h3>
-                    <span class="text-xs text-slate-400">Tus cartones seleccionados y números pendientes</span>
+                    <span class="text-xs text-slate-400">Los cartones más avanzados suben automáticamente</span>
                 </div>
                 <div id="player-my-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <span class="text-slate-500 text-sm col-span-2">Aún no has seleccionado cartones.</span>
@@ -505,7 +500,6 @@
                 if (drawnBalls.length === 0) {
                     hasSpokenMyBingo = false;
                     document.getElementById('player-winner-notification').classList.add('hidden');
-                    document.getElementById('player-one-away-alert').classList.add('hidden');
                 }
 
                 document.getElementById('player-pattern-label').innerText = gamePattern === 'line' ? 'Línea' : 'Cartón Lleno';
@@ -659,7 +653,6 @@
                 }
             }
 
-            // ORDENAR AUTOMÁTICAMENTE: El que tenga menos faltantes (más avanzado) va primero
             listaRadar.sort((a, b) => a.analisis.count - b.analisis.count);
 
             if (listaRadar.length === 0) {
@@ -795,7 +788,6 @@
             db.ref('room/drawnBalls').set([]);
             document.getElementById('admin-winner-alert').classList.add('hidden');
             document.getElementById('player-winner-notification').classList.add('hidden');
-            document.getElementById('player-one-away-alert').classList.add('hidden');
             hasSpokenMyBingo = false;
             alert("¡Balotas reiniciadas! Los cartones se mantienen para la siguiente figura.");
         }
@@ -805,7 +797,6 @@
                 db.ref('room/drawnBalls').set([]);
                 document.getElementById('admin-winner-alert').classList.add('hidden');
                 document.getElementById('player-winner-notification').classList.add('hidden');
-                document.getElementById('player-one-away-alert').classList.add('hidden');
                 hasSpokenMyBingo = false;
                 
                 let initialMarket = {};
@@ -912,28 +903,27 @@
             let misCartones = [];
             for (let id in marketCards) {
                 if (marketCards[id].ownerControl === currentUser.control) {
-                    misCartones.push(marketCards[id]);
+                    let analisis = obtenerNumerosFaltantesGanar(marketCards[id].grid, drawnBalls, gamePattern);
+                    misCartones.push({
+                        card: marketCards[id],
+                        analisis: analisis
+                    });
                 }
             }
 
             if (misCartones.length === 0) {
                 container.innerHTML = '<span class="text-slate-500 text-sm col-span-2">Aún no has seleccionado cartones. Toca abajo en el mercado para elegir.</span>';
-                document.getElementById('player-one-away-alert').classList.add('hidden');
                 return;
             }
 
-            let tieneUnoAprobado = false;
-            let cartonesAUnaLista = [];
+            // 🚀 ORDENAMIENTO AUTOMÁTICO: Los cartones con menos faltantes se colocan primeros
+            misCartones.sort((a, b) => a.analisis.count - b.analisis.count);
 
-            misCartones.forEach(card => {
-                let analisis = obtenerNumerosFaltantesGanar(card.grid, drawnBalls, gamePattern);
+            misCartones.forEach(item => {
+                let card = item.card;
+                let analisis = item.analisis;
                 let gano = analisis.count === 0;
                 let estaAUna = analisis.count === 1;
-
-                if (estaAUna && !gano) {
-                    tieneUnoAprobado = true;
-                    cartonesAUnaLista.push(`Cartón #${card.id} (Falta: ${analisis.faltantes.map(n => n === 0 ? '⭐' : '#' + n).join(', ')})`);
-                }
                 
                 if (gano && !hasSpokenMyBingo) {
                     hasSpokenMyBingo = true;
@@ -983,14 +973,6 @@
                 `;
                 container.appendChild(cardDiv);
             });
-
-            let alertAura = document.getElementById('player-one-away-alert');
-            if (tieneUnoAprobado && !hasSpokenMyBingo) {
-                document.getElementById('player-one-away-text').innerHTML = `🔥 ¡ATENCIÓN! A tu(s) ${cartonesAUnaLista.join(' | ')} le(s) falta una bolita para BINGO! 🔥`;
-                alertAura.classList.remove('hidden');
-            } else {
-                alertAura.classList.add('hidden');
-            }
         }
     </script>
 </body>
