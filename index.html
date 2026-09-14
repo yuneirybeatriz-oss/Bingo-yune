@@ -166,7 +166,7 @@
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-pink-400 text-lg">Control de Pagos por Jugadora</h3>
-                    <span class="text-xs text-slate-400">Cartones en horizontal con botón directo de pago</span>
+                    <span class="text-xs text-slate-400">Cartones en horizontal con botón directo de pago y opción de sacar</span>
                 </div>
                 <div id="admin-cards-summary" class="flex flex-col gap-3 max-h-64 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
             </div>
@@ -363,13 +363,11 @@
             let lineasPosibles = [];
 
             if (patron === 'line') {
-                // Filas
                 for (let r = 0; r < 5; r++) {
                     let linea = [];
                     for (let c = 0; c < 5; c++) linea.push({r, c, num: grid[r][c]});
                     lineasPosibles.push(linea);
                 }
-                // Columnas
                 for (let c = 0; c < 5; c++) {
                     let linea = [];
                     for (let r = 0; r < 5; r++) linea.push({r, c, num: grid[r][c]});
@@ -397,7 +395,6 @@
                 lineasPosibles.push(diag1);
                 lineasPosibles.push(diag2);
             } else if (patron === 'letter_l') {
-                // Columna izquierda (c=0) + Fila inferior (r=4)
                 let l = [];
                 for (let r = 0; r < 5; r++) l.push({r, c: 0, num: grid[r][0]});
                 for (let c = 1; c < 5; c++) l.push({r: 4, c, num: grid[4][c]});
@@ -429,7 +426,6 @@
                 }
                 lineasPosibles.push(marco);
             } else {
-                // Default a línea por seguridad
                 for (let r = 0; r < 5; r++) {
                     let linea = [];
                     for (let c = 0; c < 5; c++) linea.push({r, c, num: grid[r][c]});
@@ -543,7 +539,6 @@
                 gamePattern = data.gamePattern || 'line';
                 marketCards = data.marketCards || {};
 
-                // Actualizar select de patrón visual
                 let selectPattern = document.getElementById('game-pattern-select');
                 if (selectPattern) selectPattern.value = gamePattern;
 
@@ -579,6 +574,19 @@
                 drawnBalls = data.drawnBalls || [];
                 gamePattern = data.gamePattern || 'line';
                 marketCards = data.marketCards || {};
+
+                let sigoJugar = false;
+                for (let id in marketCards) {
+                    if (marketCards[id].ownerControl === currentUser.control && marketCards[id].loaded) {
+                        sigoJugar = true;
+                        break;
+                    }
+                }
+                if (!sigoJugar && currentUser.control) {
+                    alert("⚠️ Has sido sacada de la partida actual por la administradora.");
+                    backToHome();
+                    return;
+                }
 
                 if (drawnBalls.length === 0) {
                     hasSpokenMyBingo = false;
@@ -717,14 +725,33 @@
                     <div class="flex flex-wrap items-center gap-2 flex-grow">
                         ${listadoHorizontalHtml}
                     </div>
-                    <div>
+                    <div class="flex items-center gap-2">
                         <button onclick="marcarTodosPagadosJugadora('${j.control}', ${!todosPagados})" class="px-3 py-1.5 rounded-xl font-bold text-[11px] ${todosPagados ? 'bg-green-600 text-white' : 'bg-slate-800 text-yellow-300 border border-yellow-500/50'}">
                             ${todosPagados ? '✅ Todos Pagados' : '💰 Pagar Todos'}
+                        </button>
+                        <button onclick="eliminarJugadorSistema('${j.control}', '${j.name}')" class="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold text-[11px] shadow">
+                            ❌ Sacar
                         </button>
                     </div>
                 `;
                 container.appendChild(div);
             });
+        }
+
+        function eliminarJugadorSistema(controlJugadora, nombreJugadora) {
+            if (confirm(`¿Estás segura de sacar a ${nombreJugadora} (Control: ${controlJugadora}) de la partida? Sus cartones serán liberados y podrá volver a entrar cuando quiera.`)) {
+                for (let id in marketCards) {
+                    if (marketCards[id].ownerControl === controlJugadora) {
+                        db.ref(`room/marketCards/${id}`).update({
+                            owner: null,
+                            ownerControl: null,
+                            loaded: false,
+                            paid: false
+                        });
+                    }
+                }
+                alert(`¡${nombreJugadora} ha sido sacada de la partida con éxito!`);
+            }
         }
 
         function renderizarSelectLiberarAdmin() {
