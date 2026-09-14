@@ -300,7 +300,6 @@
         };
 
         function desbloquearAudioInicial() {
-            // Desbloquea el sintetizador de voz en navegadores móviles al primer toque
             if ('speechSynthesis' in window) {
                 let utterance = new SpeechSynthesisUtterance("");
                 window.speechSynthesis.speak(utterance);
@@ -309,11 +308,11 @@
 
         function cantarTextoVoz(texto) {
             if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); // Detiene cualquier eco anterior
+                window.speechSynthesis.cancel();
                 let utterance = new SpeechSynthesisUtterance(texto);
                 utterance.lang = 'es-ES';
-                utterance.rate = 1.0; // Velocidad normal clara
-                utterance.pitch = 1.1; // Tono alegre
+                utterance.rate = 1.0;
+                utterance.pitch = 1.1;
                 window.speechSynthesis.speak(utterance);
             }
         }
@@ -576,7 +575,6 @@
                     document.getElementById('admin-winner-alert').classList.add('hidden');
                     lastSpokenBallCount = 0;
                 } else {
-                    // Control de voz si entra una nueva bola por Firebase
                     if (drawnBalls.length > lastSpokenBallCount) {
                         let ultima = drawnBalls[drawnBalls.length - 1];
                         cantarTextoVoz(obtenerLetraYNumeroVoz(ultima));
@@ -616,6 +614,12 @@
                 if (drawnBalls.length === 0) {
                     hasSpokenMyBingo = false;
                     document.getElementById('player-winner-notification').classList.add('hidden');
+                } else {
+                    if (drawnBalls.length > lastSpokenBallCount) {
+                        let ultima = drawnBalls[drawnBalls.length - 1];
+                        cantarTextoVoz(obtenerLetraYNumeroVoz(ultima));
+                        lastSpokenBallCount = drawnBalls.length;
+                    }
                 }
 
                 document.getElementById('player-pattern-label').innerText = nombresPatrones[gamePattern] || 'Línea';
@@ -1144,7 +1148,10 @@
                 if (gano && !hasSpokenMyBingo) {
                     hasSpokenMyBingo = true;
                     
-                    document.getElementById('public-winner-text').innerText = `¡Cartón #${card.id} de ${card.owner} hizo BINGO!`;
+                    // Activación de voz y anuncio de Bingo en el celular del jugador
+                    cantarTextoVoz("¡Bingo! ¡Tu cartón ha ganado!");
+
+                    document.getElementById('public-winner-text').innerText = `¡Tu Cartón #${card.id} hizo BINGO!`;
                     document.getElementById('public-winner-card-title').innerText = `Cartón Ganador #${card.id}`;
                     
                     let publicWinningGrid = document.getElementById('public-winning-card-grid');
