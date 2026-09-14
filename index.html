@@ -163,7 +163,7 @@
                 </div>
             </div>
 
-            <!-- CONTROL DE PAGOS DE JUGADORA (ESTILO EXACTO SOLICITADO) -->
+            <!-- CONTROL DE PAGOS DE JUGADORA -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-pink-400 text-lg">Control de pagos de jugadora</h3>
@@ -1045,9 +1045,9 @@
             let juegoIniciado = drawnBalls.length > 0;
 
             if (juegoIniciado) {
-                statusMsg.innerText = "🔒 Partida iniciada: El mercado está cerrado.";
+                statusMsg.innerText = "🔒 Partida iniciada: El mercado está cerrado y los cartones en juego no se pueden modificar.";
             } else {
-                statusMsg.innerText = "Toca los cartones que deseas y luego presiona cargar. Una vez cargados, debes escribirle a la administradora si deseas modificarlos.";
+                statusMsg.innerText = "Toca los cartones que deseas y presiona cargar. Una vez cargados, no podrás quitarlos; debes escribirle a Yune si necesitas liberarlos.";
             }
 
             for (let id in marketCards) {
@@ -1058,20 +1058,16 @@
                 let esMio = card.ownerControl === currentUser.control;
                 let estaCargadoMio = esMio && card.loaded;
                 
-                // REGLA CLAVE: Si ya está cargado por la jugadora, no se puede quitar tocando el mercado.
-                // Solo se permite tocar si está libre o si es de ella pero aún NO ha dado al botón de "Cargar".
-                let sePuedeTocar = !juegoIniciado && (!card.owner || (esMio && !card.loaded));
-
                 div.className = `p-2 rounded-xl text-center font-bold text-xs border ${estaCargadoMio ? 'bg-pink-600/40 border-pink-500 text-pink-200 cursor-not-allowed opacity-90' : esMio ? 'bg-green-600/30 border-green-500 text-green-300 cursor-pointer hover:bg-slate-700' : card.owner ? 'bg-slate-900 border-slate-800 text-slate-600 cursor-not-allowed opacity-80' : 'bg-slate-800 border-slate-700 text-yellow-300 cursor-pointer hover:bg-slate-700'}`;
                 div.innerText = `#${id}`;
                 
                 div.onclick = () => {
                     if (juegoIniciado) {
-                        alert("⚠️ La partida ya comenzó.");
+                        alert("⚠️ La partida ya comenzó. Nadie puede agarrar ni quitar cartones.");
                         return;
                     }
                     if (estaCargadoMio) {
-                        alert("🔒 Este cartón ya fue cargado y confirmado. Si necesitas liberarlo o cambiarlo, debes escribirle a la administradora.");
+                        alert("🔒 Este cartón ya fue cargado y confirmado. Si necesitas liberarlo o cambiarlo, debes escribirle a la administradora (Yune).");
                         return;
                     }
                     seleccionarCarton(id);
@@ -1084,13 +1080,25 @@
 
         function seleccionarCarton(id) {
             let card = marketCards[id];
+            let juegoIniciado = drawnBalls.length > 0;
+
+            if (juegoIniciado) {
+                alert("⚠️ La partida ya comenzó.");
+                return;
+            }
+
             if (card.owner && card.ownerControl !== currentUser.control) {
                 alert("Este cartón ya está ocupado por otra jugadora.");
                 return;
             }
 
-            if (card.ownerControl === currentUser.control) {
-                // Si lo tenía seleccionado pero aún sin cargar, se lo puede quitar ella misma
+            if (card.ownerControl === currentUser.control && card.loaded) {
+                alert("🔒 Este cartón ya está cargado. Escríbele a Yune para que te lo libere si deseas cambiarlo.");
+                return;
+            }
+
+            if (card.ownerControl === currentUser.control && !card.loaded) {
+                // Si lo tenía seleccionado pero aún NO le había dado a cargar, se lo puede quitar ella misma
                 db.ref(`room/marketCards/${id}`).update({ owner: null, ownerControl: null, loaded: false, paid: false });
             } else {
                 db.ref(`room/marketCards/${id}`).update({ owner: currentUser.name, ownerControl: currentUser.control, loaded: false, paid: false });
@@ -1098,6 +1106,12 @@
         }
 
         function cargarMisCartones() {
+            let juegoIniciado = drawnBalls.length > 0;
+            if (juegoIniciado) {
+                alert("⚠️ La partida ya comenzó. No puedes cargar más cartones.");
+                return;
+            }
+
             let seleccionados = 0;
             for (let id in marketCards) {
                 let card = marketCards[id];
@@ -1107,7 +1121,7 @@
                 }
             }
             if (seleccionados > 0) {
-                alert("¡Cartones cargados con éxito! Ahora están fijos en tu cuenta.");
+                alert("¡Cartones cargados con éxito! Ya quedaron fijos en tu cuenta. Si necesitas cambiarlos, escríbele a Yune.");
             } else {
                 alert("No tienes cartones nuevos seleccionados para cargar.");
             }
