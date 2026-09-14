@@ -163,14 +163,13 @@
                 </div>
             </div>
 
-            <!-- CONTROL Y PAGOS DE CARTONES (MODIFICADO A HORIZONTAL) -->
+            <!-- CONTROL Y PAGOS DE CARTONES (EN HORIZONTAL HACIA EL LADO) -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-pink-400 text-lg">Control de Pagos por Jugadora</h3>
-                    <span class="text-xs text-slate-400">Cartones en horizontal con botón directo de pago y opción de sacar</span>
+                    <span class="text-xs text-slate-400">Cartones en horizontal hacia el lado con scroll fluido</span>
                 </div>
-                <!-- Cambiado de flex-col a flex-row con envoltura para mostrarse en horizontal -->
-                <div id="admin-cards-summary" class="flex flex-row flex-wrap gap-3 max-h-64 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
+                <div id="admin-cards-summary" class="flex flex-col gap-3 max-h-64 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
             </div>
 
             <!-- SECCIÓN DE LIBERAR CARTONES -->
@@ -238,14 +237,14 @@
                 </div>
             </div>
 
-            <!-- ZONA DE TUS CARTONES EN JUEGO (MODIFICADO A HORIZONTAL) -->
+            <!-- ZONA DE TUS CARTONES EN JUEGO (EN HORIZONTAL HACIA EL LADO) -->
             <div class="flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-yellow-300 text-lg">Tus Cartones en Juego</h3>
-                    <span class="text-xs text-slate-400">Los cartones se muestran en horizontal</span>
+                    <span class="text-xs text-slate-400">Cartones ordenados en horizontal hacia el lado</span>
                 </div>
-                <!-- Cambiado de grid a flex horizontal con desplazamiento fluido -->
-                <div id="player-my-cards-container" class="flex flex-row overflow-x-auto gap-3 pb-2">
+                <!-- Contenedor flex horizontal con scroll lateral fluido -->
+                <div id="player-my-cards-container" class="flex flex-row overflow-x-auto gap-3 pb-2 w-full">
                     <span class="text-slate-500 text-sm">Aún no has seleccionado cartones.</span>
                 </div>
             </div>
@@ -735,7 +734,7 @@
                 j.cards.forEach(card => {
                     if (!card.paid) todosPagados = false;
                     listadoHorizontalHtml += `
-                        <div class="flex items-center gap-1.5 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800 text-xs">
+                        <div class="flex items-center gap-1.5 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800 text-xs flex-shrink-0">
                             <span class="font-bold text-yellow-300">#${card.id}</span>
                             <button onclick="togglePaidCard(${card.id})" class="px-2 py-0.5 rounded-lg font-bold text-[10px] ${card.paid ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300'}">${card.paid ? '💰 Pagado' : '⏳ Pagar'}</button>
                         </div>
@@ -743,19 +742,22 @@
                 });
 
                 let div = document.createElement('div');
-                div.className = "bg-slate-900 p-3 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border border-slate-700 shadow min-w-[300px] flex-grow";
+                div.className = "bg-slate-900 p-3 rounded-2xl flex flex-col gap-3 border border-slate-700 shadow w-full";
                 div.innerHTML = `
-                    <div class="flex flex-col">
-                        <span class="font-bold text-pink-400 text-sm">${j.name}</span>
-                        <span class="text-[10px] text-slate-400">Control: ${j.control}</span>
+                    <div class="flex justify-between items-center">
+                        <div class="flex flex-col">
+                            <span class="font-bold text-pink-400 text-sm">${j.name}</span>
+                            <span class="text-[10px] text-slate-400">Control: ${j.control}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="marcarTodosPagadosJugadora('${j.control}', ${!todosPagados})" class="px-3 py-1 rounded-xl font-bold text-[11px] ${todosPagados ? 'bg-green-600 text-white' : 'bg-slate-800 text-yellow-300 border border-yellow-500/50'}">
+                                ${todosPagados ? '✅ Todos Pagados' : '💰 Pagar Todos'}
+                            </button>
+                            <button onclick="eliminarJugadorSistema('${j.control}', '${j.name}')" class="px-3 py-1 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold text-[11px] shadow">❌ Sacar</button>
+                        </div>
                     </div>
-                    <div class="flex flex-wrap items-center gap-2 flex-grow">${listadoHorizontalHtml}</div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="marcarTodosPagadosJugadora('${j.control}', ${!todosPagados})" class="px-3 py-1.5 rounded-xl font-bold text-[11px] ${todosPagados ? 'bg-green-600 text-white' : 'bg-slate-800 text-yellow-300 border border-yellow-500/50'}">
-                            ${todosPagados ? '✅ Todos Pagados' : '💰 Pagar Todos'}
-                        </button>
-                        <button onclick="eliminarJugadorSistema('${j.control}', '${j.name}')" class="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold text-[11px] shadow">❌ Sacar</button>
-                    </div>
+                    <!-- Cartones de la jugadora ordenados en horizontal hacia el lado con scroll -->
+                    <div class="flex flex-row overflow-x-auto gap-2 py-1 items-center w-full">${listadoHorizontalHtml}</div>
                 `;
                 container.appendChild(div);
             });
