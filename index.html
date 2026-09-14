@@ -14,6 +14,9 @@
         .alert-bingo { animation: pulse-slow 1.2s infinite; }
         @keyframes flash-bg { 0%, 100% { background-color: rgba(234, 179, 8, 0.9); } 50% { background-color: rgba(219, 39, 119, 0.9); } }
         .flash-winner { animation: flash-bg 1s infinite; }
+
+        @keyframes border-flash { 0%, 100% { border-color: rgba(234, 179, 8, 1); box-shadow: 0 0 15px rgba(234, 179, 8, 0.8); } 50% { border-color: rgba(219, 39, 119, 1); box-shadow: 0 0 25px rgba(219, 39, 119, 0.9); } }
+        .card-one-away { animation: border-flash 0.8s infinite; border-width: 3px; }
         
         .bola-b { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; border: 2px solid #60a5fa; }
         .bola-i { background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; border: 2px solid #f87171; }
@@ -163,7 +166,7 @@
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-pink-400 text-lg">Control de Cartones (💰 Pagados / ✕ Liberar)</h3>
-                    <span class="text-xs text-slate-400">Marca ✔ cuando cancelen</span>
+                    <span class="text-xs text-slate-400">Solo tú puedes liberar cartones ocupados</span>
                 </div>
                 <div id="admin-cards-summary" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-56 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
             </div>
@@ -246,12 +249,12 @@
                 <div id="player-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1"></div>
             </div>
 
-            <!-- SELECCIÓN DE CARTONES -->
+            <!-- SELECCIÓN DE CARTONES (MERCADO) -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <div>
                         <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (<span id="available-count">100</span> Disponibles)</h3>
-                        <p class="text-xs text-slate-400">Toca un cartón para apartarlo o liberarlo.</p>
+                        <p id="market-status-msg" class="text-xs text-slate-400">Toca un cartón para apartarlo o liberarlo.</p>
                     </div>
                 </div>
                 <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
@@ -335,19 +338,16 @@
             });
         }
 
-        // Analiza las líneas ganadoras posibles y devuelve los números que faltan exactamente para completar una línea/figura
         function obtenerNumerosFaltantesGanar(grid, drawnArray, patron) {
             let isChecked = (num) => num === 0 || drawnArray.includes(num);
             let lineasPosibles = [];
 
             if (patron === 'line') {
-                // Filas
                 for (let r = 0; r < 5; r++) {
                     let linea = [];
                     for (let c = 0; c < 5; c++) linea.push({r, c, num: grid[r][c]});
                     lineasPosibles.push(linea);
                 }
-                // Columnas
                 for (let c = 0; c < 5; c++) {
                     let linea = [];
                     for (let r = 0; r < 5; r++) linea.push({r, c, num: grid[r][c]});
@@ -370,7 +370,6 @@
                 lineasPosibles.push(diag1);
                 lineasPosibles.push(diag2);
             } else {
-                // Por defecto evalúa filas y columnas
                 for (let r = 0; r < 5; r++) {
                     let linea = [];
                     for (let c = 0; c < 5; c++) linea.push({r, c, num: grid[r][c]});
@@ -378,7 +377,6 @@
                 }
             }
 
-            // Buscar la línea a la que le falten menos números
             let mejorFaltantes = [];
             let menorFaltasCount = 99;
 
@@ -605,7 +603,7 @@
                     </div>
                     <div class="flex gap-2">
                         <button onclick="togglePaidCard(${id})" class="px-2.5 py-1 rounded-lg font-bold ${card.paid ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-400'}">${card.paid ? '💰 Pagado' : '⏳ Debe'}</button>
-                        <button onclick="liberarCarton(${id})" class="px-2 py-1 bg-red-600/30 text-red-300 rounded-lg font-bold">✕</button>
+                        <button onclick="liberarCarton(${id})" class="px-2 py-1 bg-red-600/30 text-red-300 rounded-lg font-bold" title="Liberar Cartón">✕</button>
                     </div>
                 `;
                 container.appendChild(div);
@@ -845,9 +843,17 @@
 
         function renderizarMercadoJugadora() {
             let container = document.getElementById('cards-market-grid');
+            let statusMsg = document.getElementById('market-status-msg');
             if (!container) return;
             container.innerHTML = '';
             let disponiblesCount = 0;
+            let juegoIniciado = drawnBalls.length > 0;
+
+            if (juegoIniciado) {
+                statusMsg.innerText = "🔒 Partida iniciada: El mercado está cerrado y los cartones no se pueden modificar.";
+            } else {
+                statusMsg.innerText = "Toca un cartón para apartarlo (si es tuyo y aún no empieza la partida, puedes volver a tocarlo para soltarlo).";
+            }
 
             for (let id in marketCards) {
                 let card = marketCards[id];
@@ -856,10 +862,19 @@
                 let div = document.createElement('div');
                 let esMio = card.ownerControl === currentUser.control;
                 
-                div.className = `p-2 rounded-xl text-center font-bold text-xs cursor-pointer border ${esMio ? 'bg-green-600/30 border-green-500 text-green-300' : card.owner ? 'bg-slate-900 border-slate-800 text-slate-600' : 'bg-slate-800 border-slate-700 text-yellow-300 hover:bg-slate-700'}`;
+                div.className = `p-2 rounded-xl text-center font-bold text-xs border ${esMio ? 'bg-green-600/30 border-green-500 text-green-300' : card.owner ? 'bg-slate-900 border-slate-800 text-slate-600' : 'bg-slate-800 border-slate-700 text-yellow-300'} ${!juegoIniciado && (!card.owner || esMio) ? 'cursor-pointer hover:bg-slate-700' : 'cursor-not-allowed opacity-80'}`;
                 div.innerText = `#${id}`;
                 
-                div.onclick = () => seleccionarCarton(id);
+                // REGLA: Si la partida ya empezó (drawnBalls.length > 0), nadie puede tocar nada.
+                // REGLA: Si la partida NO ha empezado, solo puedes apartar o soltar TUS propios cartones.
+                div.onclick = () => {
+                    if (juegoIniciado) {
+                        alert("⚠️ La partida ya comenzó. Ya no se pueden tomar ni soltar cartones.");
+                        return;
+                    }
+                    seleccionarCarton(id);
+                };
+
                 container.appendChild(div);
             }
             document.getElementById('available-count').innerText = disponiblesCount;
@@ -930,7 +945,9 @@
                 }
 
                 let cardDiv = document.createElement('div');
-                cardDiv.className = `bg-slate-900 border ${gano ? 'border-yellow-400 bg-yellow-500/10' : estaAUna ? 'border-pink-500 bg-pink-500/10' : 'border-slate-700'} p-3 rounded-2xl flex flex-col gap-2`;
+                // APLICAR CLASE DE TITILACIÓN SI ESTÁ A UNA
+                let estiloExtra = gano ? 'border-yellow-400 bg-yellow-500/10' : estaAUna ? 'card-one-away bg-pink-500/10' : 'border-slate-700';
+                cardDiv.className = `bg-slate-900 border ${estiloExtra} p-3 rounded-2xl flex flex-col gap-2`;
                 
                 let htmlGrid = '<div class="grid grid-cols-5 gap-1 text-center">';
                 for (let r = 0; r < 5; r++) {
@@ -946,18 +963,18 @@
 
                 cardDiv.innerHTML = `
                     <div class="flex justify-between items-center text-xs">
-                        <span class="font-bold text-yellow-300">Cartón #${card.id} ${gano ? '👑 ¡BINGO!' : estaAUna ? '🔥 ¡A UNA!' : ''}</span>
+                        <span class="font-bold text-yellow-300">Cartón #${card.id} ${gano ? '👑 ¡BINGO!' : estaAUna ? '🔥 ¡A UNA BOLITA!' : ''}</span>
                         <span class="text-[10px] text-slate-400">${card.paid ? '💰 Pagado' : '⏳ Por Pagar'}</span>
                     </div>
                     ${htmlGrid}
-                    <div class="text-[11px] bg-slate-950 p-2 rounded-xl border border-slate-800">
-                        <span class="text-slate-400">Le falta(n):</span> <span class="text-pink-400 font-bold">${analisis.count === 0 ? '¡Listo para cantar!' : faltantesStr}</span>
+                    <div class="text-[11px] bg-slate-950 p-2 rounded-xl border border-slate-800 flex justify-between items-center">
+                        <div><span class="text-slate-400">Le falta(n):</span> <span class="text-pink-400 font-bold">${analisis.count === 0 ? '¡Listo para cantar!' : faltantesStr}</span></div>
+                        ${estaAUna ? '<span class="text-[10px] bg-yellow-400 text-slate-950 px-2 py-0.5 rounded-full font-extrabold animate-bounce">¡CANTANDO!</span>' : ''}
                     </div>
                 `;
                 container.appendChild(cardDiv);
             });
 
-            // Activar o desactivar cartel superior "¡A una!"
             let alertAura = document.getElementById('player-one-away-alert');
             if (tieneUnoAprobado && !hasSpokenMyBingo) {
                 document.getElementById('player-one-away-text').innerHTML = `🔥 ¡ATENCIÓN! A tu(s) ${cartonesAUnaLista.join(' | ')} le(s) falta una bolita para BINGO! 🔥`;
