@@ -733,10 +733,11 @@
 
                 j.cards.forEach(card => {
                     if (!card.paid) todosPagados = false;
+                    // AQUÍ ESTÁ EL CAMBIO SOLICITADO: Cartones limpios con solo su número y un único botón al lado
                     listadoHorizontalHtml += `
                         <div class="flex items-center gap-1.5 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800 text-xs flex-shrink-0">
                             <span class="font-bold text-yellow-300">#${card.id}</span>
-                            <button onclick="togglePaidCard(${card.id})" class="px-2 py-0.5 rounded-lg font-bold text-[10px] ${card.paid ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300'}">${card.paid ? '💰 Pagado' : '⏳ Pagar'}</button>
+                            <button onclick="togglePaidCard(${card.id})" class="px-2 py-0.5 rounded-lg font-bold text-[10px] ${card.paid ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300'}">${card.paid ? 'Pagado' : 'Pagar'}</button>
                         </div>
                     `;
                 });
