@@ -231,10 +231,10 @@
             <div class="flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-yellow-300 text-lg">Tus Cartones en Juego</h3>
-                    <span class="text-xs text-slate-400">Los cartones más avanzados suben automáticamente</span>
+                    <span class="text-xs text-slate-400">Los cartones más avanzados suben automáticamente en filas de 2</span>
                 </div>
-                <!-- AQUÍ SE APLICÓ EL DISEÑO DE DOS COLUMNAS -->
-                <div id="player-my-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <!-- CLASE CORREGIDA A grid-cols-2 PARA QUE SALGAN DE DOS EN DOS -->
+                <div id="player-my-cards-container" class="grid grid-cols-2 gap-3">
                     <span class="text-slate-500 text-sm col-span-2">Aún no has seleccionado cartones.</span>
                 </div>
             </div>
@@ -917,7 +917,7 @@
                 return;
             }
 
-            // 🚀 ORDENAMIENTO AUTOMÁTICO: Los cartones con menos faltantes se colocan primeros
+            // Ordenar automáticamente para que los más avanzados salgan primero
             misCartones.sort((a, b) => a.analisis.count - b.analisis.count);
 
             misCartones.forEach(item => {
