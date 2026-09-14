@@ -162,13 +162,23 @@
                 </div>
             </div>
 
-            <!-- CONTROL Y PAGOS DE CARTONES AGRUPADO POR JUGADORA -->
+            <!-- CONTROL Y PAGOS DE CARTONES AGRUPADO POR JUGADORA (EN LÍNEA HORIZONTAL) -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-pink-400 text-lg">Control de Pagos por Jugadora (💰 Pagado / ✕ Liberar)</h3>
-                    <span class="text-xs text-slate-400">Resumen rápido por jugadora y sus cartones</span>
+                    <h3 class="font-bold text-pink-400 text-lg">Control de Pagos por Jugadora</h3>
+                    <span class="text-xs text-slate-400">Cartones en horizontal con botón directo de pago</span>
                 </div>
-                <div id="admin-cards-summary" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-64 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
+                <div id="admin-cards-summary" class="flex flex-col gap-3 max-h-64 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
+            </div>
+
+            <!-- SECCIÓN DE LIBERAR CARTONES -->
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
+                <h3 class="font-bold text-red-400 text-sm">🗑️ Sección para Liberar Cartones Ocupados</h3>
+                <p class="text-xs text-slate-400">Busca el número de cartón que deseas liberar de su dueña actual:</p>
+                <div class="flex gap-3 items-center">
+                    <select id="admin-liberar-select" class="flex-grow px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs font-bold"></select>
+                    <button onclick="liberarCartonSeleccionadoAdmin()" class="px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold text-xs shadow">Liberar Cartón</button>
+                </div>
             </div>
 
             <div class="bg-slate-800 p-6 rounded-3xl">
@@ -227,7 +237,7 @@
                 </div>
             </div>
 
-            <!-- ZONA DE TUS CARTONES EN JUEGO (DISPUESTOS DE DOS EN DOS) -->
+            <!-- ZONA DE TUS CARTONES EN JUEGO -->
             <div class="flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-yellow-300 text-lg">Tus Cartones en Juego</h3>
@@ -254,7 +264,6 @@
                 </div>
                 <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
                 
-                <!-- 📥 BOTÓN DE CARGAR CARTONES -->
                 <button onclick="cargarMisCartones()" class="w-full py-3.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-extrabold text-sm rounded-2xl shadow-lg transition transform active:scale-95">
                     📥 Cargar / Confirmar Mis Cartones
                 </button>
@@ -277,6 +286,17 @@
         let isAutoRunning = false;
         let adminSecretKey = 'June 2026';
         let hasSpokenMyBingo = false;
+
+        const nombresPatrones = {
+            'line': 'Línea (Horizontal o Vertical)',
+            'letter_l': 'Letra L',
+            'cross_x': 'La X (Cruz Grande)',
+            'four_corners': 'Cuatro Esquinas',
+            'diagonal': 'Diagonal',
+            'small_cross': 'Cruz Pequeña (Centro)',
+            'letter_o': 'Letra O (Marco Exterior)',
+            'full_card': 'Cartón Lleno (Apagón)'
+        };
 
         function obtenerClaseBolaColor(num) {
             if (num >= 1 && num <= 15) return 'bola-b';
@@ -343,11 +363,13 @@
             let lineasPosibles = [];
 
             if (patron === 'line') {
+                // Filas
                 for (let r = 0; r < 5; r++) {
                     let linea = [];
                     for (let c = 0; c < 5; c++) linea.push({r, c, num: grid[r][c]});
                     lineasPosibles.push(linea);
                 }
+                // Columnas
                 for (let c = 0; c < 5; c++) {
                     let linea = [];
                     for (let r = 0; r < 5; r++) linea.push({r, c, num: grid[r][c]});
@@ -360,16 +382,54 @@
                 }
                 lineasPosibles.push(linea);
             } else if (patron === 'four_corners') {
-                lineasPosibles.push([{r:0,c:0,num:grid[0][0]}, {r:0,c:4,num:grid[0][4]}, {r:4,c:0,num:grid[4][0]}, {r:4,c:4,num:grid[4][4]}]);
+                lineasPosibles.push([
+                    {r:0, c:0, num: grid[0][0]},
+                    {r:0, c:4, num: grid[0][4]},
+                    {r:4, c:0, num: grid[4][0]},
+                    {r:4, c:4, num: grid[4][4]}
+                ]);
             } else if (patron === 'diagonal') {
                 let diag1 = [], diag2 = [];
                 for (let i = 0; i < 5; i++) {
-                    diag1.push({r:i, c:i, num:grid[i][i]});
-                    diag2.push({r:i, c:4-i, num:grid[i][4-i]});
+                    diag1.push({r: i, c: i, num: grid[i][i]});
+                    diag2.push({r: i, c: 4 - i, num: grid[i][4 - i]});
                 }
                 lineasPosibles.push(diag1);
                 lineasPosibles.push(diag2);
+            } else if (patron === 'letter_l') {
+                // Columna izquierda (c=0) + Fila inferior (r=4)
+                let l = [];
+                for (let r = 0; r < 5; r++) l.push({r, c: 0, num: grid[r][0]});
+                for (let c = 1; c < 5; c++) l.push({r: 4, c, num: grid[4][c]});
+                lineasPosibles.push(l);
+            } else if (patron === 'cross_x') {
+                let cross = [];
+                for (let i = 0; i < 5; i++) {
+                    cross.push({r: i, c: i, num: grid[i][i]});
+                    cross.push({r: i, c: 4 - i, num: grid[i][4 - i]});
+                }
+                lineasPosibles.push(cross);
+            } else if (patron === 'small_cross') {
+                lineasPosibles.push([
+                    {r: 2, c: 2, num: grid[2][2]},
+                    {r: 1, c: 2, num: grid[1][2]},
+                    {r: 3, c: 2, num: grid[3][2]},
+                    {r: 2, c: 1, num: grid[2][1]},
+                    {r: 2, c: 3, num: grid[2][3]}
+                ]);
+            } else if (patron === 'letter_o') {
+                let marco = [];
+                for (let c = 0; c < 5; c++) {
+                    marco.push({r: 0, c, num: grid[0][c]});
+                    marco.push({r: 4, c, num: grid[4][c]});
+                }
+                for (let r = 1; r < 4; r++) {
+                    marco.push({r, c: 0, num: grid[r][0]});
+                    marco.push({r, c: 4, num: grid[r][4]});
+                }
+                lineasPosibles.push(marco);
             } else {
+                // Default a línea por seguridad
                 for (let r = 0; r < 5; r++) {
                     let linea = [];
                     for (let c = 0; c < 5; c++) linea.push({r, c, num: grid[r][c]});
@@ -483,6 +543,10 @@
                 gamePattern = data.gamePattern || 'line';
                 marketCards = data.marketCards || {};
 
+                // Actualizar select de patrón visual
+                let selectPattern = document.getElementById('game-pattern-select');
+                if (selectPattern) selectPattern.value = gamePattern;
+
                 if (drawnBalls.length === 0) {
                     document.getElementById('admin-winner-alert').classList.add('hidden');
                 }
@@ -500,6 +564,7 @@
                 renderizarHistorialAdmin();
                 renderizarTableroAdmin();
                 renderizarResumenCartonesAdmin();
+                renderizarSelectLiberarAdmin();
                 renderizarRadarAdmin();
                 renderizarJugadorasConectadasAdmin();
                 verificarGanadoresEnVivoAdmin();
@@ -520,7 +585,7 @@
                     document.getElementById('player-winner-notification').classList.add('hidden');
                 }
 
-                document.getElementById('player-pattern-label').innerText = gamePattern === 'line' ? 'Línea' : 'Cartón Lleno';
+                document.getElementById('player-pattern-label').innerText = nombresPatrones[gamePattern] || 'Línea';
 
                 let currentBallEl = document.getElementById('player-current-ball');
                 if (drawnBalls.length > 0) {
@@ -604,7 +669,6 @@
             if (!container) return;
             container.innerHTML = '';
             
-            // Agrupar cartones por jugadora (usando su número de control como clave única)
             let jugadorasMap = {};
             for (let id in marketCards) {
                 let card = marketCards[id];
@@ -622,52 +686,82 @@
 
             let controls = Object.keys(jugadorasMap);
             if (controls.length === 0) {
-                container.innerHTML = '<span class="text-slate-500 text-xs col-span-2 text-center py-4">No hay jugadoras con cartones seleccionados o cargados aún.</span>';
+                container.innerHTML = '<span class="text-slate-500 text-xs text-center py-4">No hay jugadoras con cartones seleccionados o cargados aún.</span>';
                 return;
             }
 
             controls.forEach(ctrl => {
                 let j = jugadorasMap[ctrl];
-                // Ordenar cartones de menor a mayor número
                 j.cards.sort((a, b) => a.id - b.id);
                 
-                let listadoCartonesHtml = '';
+                let listadoHorizontalHtml = '';
                 let todosPagados = true;
 
                 j.cards.forEach(card => {
                     if (!card.paid) todosPagados = false;
-                    listadoCartonesHtml += `
-                        <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl mb-1.5 border border-slate-800 text-xs">
-                            <div>
-                                <span class="font-bold text-yellow-300">Cartón #${card.id}</span>
-                                <span class="text-[10px] ml-2 ${card.loaded ? 'text-green-400 font-semibold' : 'text-amber-400'}">${card.loaded ? '[Cargado]' : '[Seleccionado]'}</span>
-                            </div>
-                            <div class="flex gap-2 items-center">
-                                <button onclick="togglePaidCard(${card.id})" class="px-2.5 py-1 rounded-lg font-bold text-[10px] ${card.paid ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300'}">${card.paid ? '💰 Pagado' : '⏳ Debe'}</button>
-                                <button onclick="liberarCarton(${card.id})" class="px-2 py-1 bg-red-600/30 hover:bg-red-600/50 text-red-300 rounded-lg font-bold text-[10px]" title="Liberar Cartón">✕</button>
-                            </div>
+                    listadoHorizontalHtml += `
+                        <div class="flex items-center gap-1.5 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800 text-xs">
+                            <span class="font-bold text-yellow-300">#${card.id}</span>
+                            <button onclick="togglePaidCard(${card.id})" class="px-2 py-0.5 rounded-lg font-bold text-[10px] ${card.paid ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300'}">${card.paid ? '💰 Pagado' : '⏳ Pagar'}</button>
                         </div>
                     `;
                 });
 
                 let div = document.createElement('div');
-                div.className = "bg-slate-900 p-4 rounded-2xl flex flex-col gap-2 border border-slate-700 shadow";
+                div.className = "bg-slate-900 p-3 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border border-slate-700 shadow";
                 div.innerHTML = `
-                    <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                        <div>
-                            <span class="font-bold text-pink-400 text-sm">${j.name}</span>
-                            <span class="text-xs text-slate-400 block">Control: ${j.control} (${j.cards.length} cartón${j.cards.length > 1 ? 'es' : ''})</span>
-                        </div>
-                        <button onclick="marcarTodosPagadosJugadora('${j.control}', ${!todosPagados})" class="px-3 py-1 rounded-xl font-bold text-[11px] ${todosPagados ? 'bg-green-600 text-white' : 'bg-slate-800 text-yellow-300 border border-yellow-500/50'}">
+                    <div class="flex flex-col">
+                        <span class="font-bold text-pink-400 text-sm">${j.name}</span>
+                        <span class="text-[10px] text-slate-400">Control: ${j.control}</span>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 flex-grow">
+                        ${listadoHorizontalHtml}
+                    </div>
+                    <div>
+                        <button onclick="marcarTodosPagadosJugadora('${j.control}', ${!todosPagados})" class="px-3 py-1.5 rounded-xl font-bold text-[11px] ${todosPagados ? 'bg-green-600 text-white' : 'bg-slate-800 text-yellow-300 border border-yellow-500/50'}">
                             ${todosPagados ? '✅ Todos Pagados' : '💰 Pagar Todos'}
                         </button>
-                    </div>
-                    <div class="flex flex-col max-h-40 overflow-y-auto pr-1">
-                        ${listadoCartonesHtml}
                     </div>
                 `;
                 container.appendChild(div);
             });
+        }
+
+        function renderizarSelectLiberarAdmin() {
+            let selectEl = document.getElementById('admin-liberar-select');
+            if (!selectEl) return;
+            selectEl.innerHTML = '';
+            
+            let ocupados = [];
+            for (let id in marketCards) {
+                if (marketCards[id].owner) {
+                    ocupados.push(marketCards[id]);
+                }
+            }
+
+            if (ocupados.length === 0) {
+                selectEl.innerHTML = '<option value="">-- No hay cartones ocupados --</option>';
+                return;
+            }
+
+            selectEl.innerHTML = '<option value="">-- Selecciona cartón a liberar --</option>';
+            ocupados.forEach(card => {
+                let opt = document.createElement('option');
+                opt.value = card.id;
+                opt.innerText = `Cartón #${card.id} (Dueña: ${card.owner} - Ctrl: ${card.ownerControl})`;
+                selectEl.appendChild(opt);
+            });
+        }
+
+        function liberarCartonSeleccionadoAdmin() {
+            let selectEl = document.getElementById('admin-liberar-select');
+            let id = selectEl.value;
+            if (!id) {
+                alert("Por favor selecciona un cartón de la lista para liberar.");
+                return;
+            }
+            db.ref(`room/marketCards/${id}`).update({ owner: null, ownerControl: null, loaded: false, paid: false });
+            alert(`¡Cartón #${id} liberado con éxito!`);
         }
 
         function marcarTodosPagadosJugadora(controlJugadora, estadoPago) {
@@ -900,10 +994,6 @@
         function togglePaidCard(id) {
             let currentPaid = marketCards[id].paid;
             db.ref(`room/marketCards/${id}/paid`).set(!currentPaid);
-        }
-
-        function liberarCarton(id) {
-            db.ref(`room/marketCards/${id}`).update({ owner: null, ownerControl: null, loaded: false, paid: false });
         }
 
         function updateGamePattern() {
