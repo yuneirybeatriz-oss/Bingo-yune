@@ -575,19 +575,6 @@
                 gamePattern = data.gamePattern || 'line';
                 marketCards = data.marketCards || {};
 
-                let sigoJugar = false;
-                for (let id in marketCards) {
-                    if (marketCards[id].ownerControl === currentUser.control && marketCards[id].loaded) {
-                        sigoJugar = true;
-                        break;
-                    }
-                }
-                if (!sigoJugar && currentUser.control) {
-                    alert("⚠️ Has sido sacada de la partida actual por la administradora.");
-                    backToHome();
-                    return;
-                }
-
                 if (drawnBalls.length === 0) {
                     hasSpokenMyBingo = false;
                     document.getElementById('player-winner-notification').classList.add('hidden');
@@ -750,7 +737,7 @@
                         });
                     }
                 }
-                alert(`¡${nombreJugadora} ha sido sacada de la partida con éxito!`);
+                alert(`¡${nombreJugadora} ha sido sacada de la partida con éxito y sus cartones liberados!`);
             }
         }
 
