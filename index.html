@@ -56,9 +56,12 @@
             box-shadow: 0 0 4px #22c55e;
         }
 
-        /* Sombreado especial para celdas que pertenecen a la figura activa en los cartones */
-        .cell-pattern-target {
-            box-shadow: inset 0 0 0 2px rgba(236, 72, 153, 0.6);
+        /* Estilo especial para resaltar las celdas de la figura ganadora en el modal de victoria */
+        .winning-pattern-cell {
+            background: #22c55e !important;
+            color: #0f172a !important;
+            box-shadow: 0 0 10px #22c55e;
+            border: 2px solid #ffffff;
         }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -177,7 +180,6 @@
                     </div>
                 </div>
 
-                <!-- SECCIÓN MEJORADA DE JUGADORAS CONECTADAS Y ACTIVIDAD -->
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
                     <div class="flex justify-between items-center">
                         <h3 class="font-bold text-yellow-300">Jugadoras Conectadas</h3>
@@ -485,7 +487,7 @@
         // --- VERIFICACIÓN DE CELDAS QUE PERTENECEN AL PATRON ACTIVO ---
         function esCeldaDelPatron(r, c, patron) {
             if (patron === 'full_card') return true;
-            if (patron === 'line') return r === 0 || c === 0; // Se resalta línea base principal por defecto
+            if (patron === 'line') return r === 0 || c === 0;
             if (patron === 'four_corners') return (r === 0 || r === 4) && (c === 0 || c === 4);
             if (patron === 'diagonal') return r === c || r === 4 - c;
             if (patron === 'letter_l') return c === 0 || r === 4;
@@ -1041,7 +1043,13 @@
                             for (let c = 0; c < 5; c++) {
                                 let num = card.grid[r][c];
                                 let marcado = num === 0 || drawnBalls.includes(num);
-                                winningGridContainer.innerHTML += `<div class="py-1 text-[10px] font-bold text-center rounded ${marcado ? 'bg-yellow-400 text-slate-950' : 'bg-slate-800 text-slate-300'}">${num === 0 ? '⭐' : num}</div>`;
+                                let esFiguraGanadora = esCeldaDelPatron(r, c, gamePattern);
+                                
+                                let claseColor = marcado ? 'bg-yellow-400 text-slate-950' : 'bg-slate-800 text-slate-300';
+                                if (esFiguraGanadora) {
+                                    claseColor = 'winning-pattern-cell'; // Resaltado especial de la figura ganadora
+                                }
+                                winningGridContainer.innerHTML += `<div class="py-1 text-[10px] font-bold text-center rounded ${claseColor}">${num === 0 ? '⭐' : num}</div>`;
                             }
                         }
                     }
@@ -1091,7 +1099,7 @@
                 clearInterval(autoDrawInterval);
                 isAutoRunning = false;
                 document.getElementById('auto-draw-btn').innerText = "▶ Iniciar Auto (Cada 3s)";
-                document.getElementById('auto-draw-btn').classList.replace('bg-slate-600', 'bg-pink-600');
+                document.getElementById('auto-draw-btn').classList.replace('bg-pink-600', 'bg-slate-600');
             } else {
                 isAutoRunning = true;
                 document.getElementById('auto-draw-btn').innerText = "⏸ Pausar Auto";
@@ -1368,7 +1376,13 @@
                         for (let c = 0; c < 5; c++) {
                             let num = card.grid[r][c];
                             let marcado = num === 0 || drawnBalls.includes(num);
-                            publicWinningGrid.innerHTML += `<div class="py-1 text-[10px] font-bold text-center rounded ${marcado ? 'bg-yellow-400 text-slate-950' : 'bg-slate-800 text-slate-300'}">${num === 0 ? '⭐' : num}</div>`;
+                            let esFiguraGanadora = esCeldaDelPatron(r, c, gamePattern);
+                            
+                            let claseColor = marcado ? 'bg-yellow-400 text-slate-950' : 'bg-slate-800 text-slate-300';
+                            if (esFiguraGanadora) {
+                                claseColor = 'winning-pattern-cell'; // Resaltado especial de la figura ganadora
+                            }
+                            publicWinningGrid.innerHTML += `<div class="py-1 text-[10px] font-bold text-center rounded ${claseColor}">${num === 0 ? '⭐' : num}</div>`;
                         }
                     }
 
