@@ -152,10 +152,14 @@
                     </div>
                 </div>
 
+                <!-- SECCIÓN MEJORADA DE JUGADORAS CONECTADAS Y ACTIVIDAD -->
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
-                    <h3 class="font-bold text-yellow-300">Jugadoras Conectadas</h3>
-                    <div class="flex-grow overflow-y-auto max-h-36 bg-slate-900/60 p-3 rounded-xl text-xs flex flex-col gap-2" id="admin-players-list">
-                        <span class="text-slate-500">Esperando...</span>
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-yellow-300">Jugadoras Conectadas</h3>
+                        <span id="admin-active-players-count" class="bg-yellow-400/20 text-yellow-300 px-2 py-0.5 rounded-full text-[10px] font-bold">0 activas</span>
+                    </div>
+                    <div class="flex-grow overflow-y-auto max-h-40 bg-slate-900/60 p-3 rounded-xl text-xs flex flex-col gap-2.5" id="admin-players-list">
+                        <span class="text-slate-500 text-center py-4">Esperando conexiones...</span>
                     </div>
                 </div>
             </div>
@@ -295,6 +299,7 @@
         let adminSecretKey = 'June 2026';
         let hasSpokenMyBingo = false;
         let lastSpokenBallCount = 0;
+        let presenceRef = null;
 
         const nombresPatrones = {
             'line': 'Línea (Horizontal o Vertical)',
@@ -317,7 +322,7 @@
                 let ampm = horas >= 12 ? 'PM' : 'AM';
 
                 horas = horas % 12;
-                horas = horas ? horas : 12; // La hora '0' se convierte en '12'
+                horas = horas ? horas : 12;
 
                 let horasStr = horas < 10 ? '0' + horas : horas;
                 let minutosStr = minutos < 10 ? '0' + minutos : minutos;
@@ -516,7 +521,7 @@
         }
 
         window.onload = function() {
-            iniciarRelojEnVivo(); // Arranca el reloj apenas abre la página
+            iniciarRelojEnVivo();
 
             let savedName = localStorage.getItem('bingo_player_name');
             let savedControl = localStorage.getItem('bingo_player_control');
@@ -540,6 +545,10 @@
         }
 
         function backToHome() {
+            if (presenceRef) {
+                presenceRef.remove();
+                presenceRef = null;
+            }
             document.getElementById('view-home').classList.remove('hidden');
             document.getElementById('view-admin-login').classList.add('hidden');
             document.getElementById('view-player-register').classList.add('hidden');
@@ -559,6 +568,17 @@
             } else {
                 alert("Clave incorrecta. Intenta de nuevo.");
             }
+        }
+
+        function registrarPresenciaJugadora(name, control) {
+            let safeControl = control.replace(/[.#$\/\[\]]/g, "_");
+            presenceRef = db.ref(`room/connectedPlayers/${safeControl}`);
+            presenceRef.set({
+                name: name,
+                control: control,
+                lastSeen: firebase.database.ServerValue.TIMESTAMP
+            });
+            presenceRef.onDisconnect().remove();
         }
 
         function registerPlayer() {
@@ -584,6 +604,8 @@
                 currentUser.name = name;
                 currentUser.control = control;
                 currentUser.isAdmin = false;
+
+                registrarPresenciaJugadora(name, control);
 
                 document.getElementById('view-player-register').classList.add('hidden');
                 document.getElementById('view-player-room').classList.remove('hidden');
@@ -633,7 +655,7 @@
                 renderizarResumenCartonesAdmin();
                 renderizarSelectLiberarAdmin();
                 renderizarRadarAdmin();
-                renderizarJugadorasConectadasAdmin();
+                renderizarJugadorasConectadasAdmin(data.connectedPlayers || {});
                 verificarGanadoresEnVivoAdmin();
             });
         }
@@ -763,7 +785,7 @@
                 let j = jugadorasMap[ctrl];
                 j.cards.sort((a, b) => a.id - b.id);
                 
-                let numerosCartonesStr = j.cards.map(c => c.id).join(',');
+                let numerosCartonesStr = j.cards.map(c => c.id).join(', ');
                 let todosPagados = true;
                 j.cards.forEach(c => { if (!c.paid) todosPagados = false; });
 
@@ -772,13 +794,13 @@
                 div.innerHTML = `
                     <div class="flex items-center gap-2 overflow-x-auto">
                         <strong class="text-pink-400 min-w-[70px]">${j.name}</strong>
-                        <span class="text-yellow-300 tracking-wide">${numerosCartonesStr}</span>
+                        <span class="text-yellow-300 tracking-wide">Cartones: [${numerosCartonesStr}]</span>
                     </div>
                     <div class="flex items-center gap-2 flex-shrink-0">
                         <button onclick="togglePaidAllJugadora('${j.control}', ${!todosPagados})" class="px-3 py-1 rounded-lg font-bold text-xs ${todosPagados ? 'bg-green-600 text-white' : 'bg-amber-600/30 text-amber-300 border border-amber-500/50'}">
                             ${todosPagados ? 'Pagado' : 'Pendiente'}
                         </button>
-                        <button onclick="eliminarJugadorSistema('${j.control}', '${j.name}')" class="px-2 py-1 bg-red-600/30 hover:bg-red-600 text-red-200 rounded-lg font-bold text-[10px]">❌</button>
+                        <button onclick="eliminarJugadorSistema('${j.control}', '${j.name}')" class="px-2 py-1 bg-red-600/30 hover:bg-red-600 text-red-200 rounded-lg font-bold text-[10px]" title="Liberar y expulsar">❌</button>
                     </div>
                 `;
                 container.appendChild(div);
@@ -800,6 +822,8 @@
                         db.ref(`room/marketCards/${id}`).update({ owner: null, ownerControl: null, loaded: false, paid: false });
                     }
                 }
+                let safeCtrl = controlJugadora.replace(/[.#$\/\[\]]/g, "_");
+                db.ref(`room/connectedPlayers/${safeCtrl}`).remove();
                 alert(`¡${nombreJugadora} ha sido sacada de la partida con éxito y sus cartones liberados!`);
             }
         }
@@ -839,33 +863,51 @@
             alert(`¡Cartón #${id} liberado con éxito!`);
         }
 
-        function renderizarJugadorasConectadasAdmin() {
+        // --- GESTIÓN VISUAL EN TIEMPO REAL DE JUGADORAS Y CARTONES ACTIVOS ---
+        function renderizarJugadorasConectadasAdmin(connectedPlayers) {
             let container = document.getElementById('admin-players-list');
+            let counterBadge = document.getElementById('admin-active-players-count');
             if (!container) return;
             container.innerHTML = '';
             
-            let jugadorasMap = {};
-            for (let id in marketCards) {
-                let card = marketCards[id];
-                if (card.owner && card.ownerControl && card.loaded) {
-                    if (!jugadorasMap[card.ownerControl]) {
-                        jugadorasMap[card.ownerControl] = { name: card.owner, count: 0 };
-                    }
-                    jugadorasMap[card.ownerControl].count++;
-                }
-            }
+            let listaConectadas = Object.values(connectedPlayers || {});
+            counterBadge.innerText = `${listaConectadas.length} activa(s)`;
 
-            let keys = Object.keys(jugadorasMap);
-            if (keys.length === 0) {
-                container.innerHTML = '<span class="text-slate-500">Ninguna jugadora ha cargado cartones aún.</span>';
+            if (listaConectadas.length === 0) {
+                container.innerHTML = '<span class="text-slate-500 text-center py-4">No hay jugadoras conectadas en este momento.</span>';
                 return;
             }
 
-            keys.forEach(ctrl => {
-                let j = jugadorasMap[ctrl];
+            listaConectadas.forEach(jugadora => {
+                // Buscar qué cartones tiene cargados y activos
+                let cartonesActivos = [];
+                for (let id in marketCards) {
+                    let c = marketCards[id];
+                    if (c.ownerControl === jugadora.control && c.loaded) {
+                        cartonesActivos.push(c.id);
+                    }
+                }
+
                 let div = document.createElement('div');
-                div.className = "flex justify-between items-center bg-slate-800 p-2 rounded-lg";
-                div.innerHTML = `<span><strong>${j.name}</strong> (Control: ${ctrl})</span> <span class="bg-pink-600 text-white px-2 py-0.5 rounded-full font-bold text-[10px]">${j.count} cartón(es)</span>`;
+                div.className = "bg-slate-800/90 border border-slate-700/80 p-2.5 rounded-xl flex flex-col gap-1.5 shadow-sm";
+                
+                let cartonesTexto = cartonesActivos.length > 0 
+                    ? `<span class="text-yellow-300 font-bold">Cartones activos: #${cartonesActivos.join(', #')}</span>` 
+                    : `<span class="text-slate-400 italic">Sin cartones cargados aún</span>`;
+
+                div.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <strong class="text-pink-300 text-sm">${jugadora.name}</strong>
+                        </div>
+                        <span class="text-[10px] bg-slate-900 px-2 py-0.5 rounded-md text-slate-400 font-mono">Control: ${jugadora.control}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-[11px] pl-4 border-l-2 border-pink-500/50 mt-0.5">
+                        ${cartonesTexto}
+                        <span class="text-pink-400 font-semibold">${cartonesActivos.length} en juego</span>
+                    </div>
+                `;
                 container.appendChild(div);
             });
         }
@@ -1047,6 +1089,7 @@
                     };
                 }
                 db.ref('room/marketCards').set(initialMarket);
+                db.ref('room/connectedPlayers').remove();
                 alert("¡Juego reiniciado por completo desde cero!");
             }
         }
