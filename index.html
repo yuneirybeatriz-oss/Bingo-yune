@@ -122,16 +122,10 @@
                 <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 text-xs rounded-xl">Salir</button>
             </div>
 
+            <!-- ALERTA DE GANADORES MÚLTIPLES ACTUALIZADA -->
             <div id="admin-winner-alert" class="hidden bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-950 p-6 rounded-3xl font-extrabold text-center text-xl shadow-xl alert-bingo flex flex-col gap-3">
                 <div>🎉 ¡BINGO VALIDADO! (Juego Detenido) 🎉</div>
-                <div id="admin-winner-text" class="text-base font-bold bg-white/20 py-2 px-4 rounded-xl">Ganador...</div>
-                <div class="bg-slate-900 text-white p-4 rounded-2xl max-w-xs mx-auto w-full flex flex-col gap-2">
-                    <span class="text-xs text-yellow-300 font-bold" id="admin-winner-card-title">Cartón Ganador</span>
-                    <div class="grid grid-cols-5 gap-1 text-[10px] text-pink-400 font-bold">
-                        <div class="bg-slate-800 py-1 rounded">B</div><div class="bg-slate-800 py-1 rounded">I</div><div class="bg-slate-800 py-1 rounded">N</div><div class="bg-slate-800 py-1 rounded">G</div><div class="bg-slate-800 py-1 rounded">O</div>
-                    </div>
-                    <div id="admin-winning-card-grid" class="grid grid-cols-5 gap-1"></div>
-                </div>
+                <div id="admin-winner-text" class="text-base font-bold bg-white/25 py-2.5 px-4 rounded-xl flex flex-col gap-1">Ganadores...</div>
                 <div class="flex gap-2 justify-center mt-2 flex-wrap">
                     <button onclick="clearWinnerAlert()" class="py-2 px-4 bg-slate-900 text-yellow-300 text-xs rounded-xl font-bold shadow">Cerrar Alerta</button>
                     <button onclick="reiniciarBalotasParaSiguienteFigura()" class="py-2 px-4 bg-pink-600 text-white text-xs rounded-xl font-bold shadow">🔄 Limpiar Balotas (Siguiente Figura)</button>
@@ -238,11 +232,9 @@
                     <p class="text-xs text-slate-400">Control ID: <span id="player-display-control">--</span></p>
                 </div>
                 <div class="flex flex-wrap gap-2 items-center">
-                    <!-- BOTÓN DE ACTIVAR / DESACTIVAR SONIDO -->
                     <button id="btn-toggle-audio" onclick="toggleAudioJugadora()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow flex items-center gap-1.5 transition">
                         🔊 Sonido Activado
                     </button>
-                    <!-- MINI DIAGRAMA VISUAL DE LA FIGURA ACTIVA -->
                     <div class="bg-slate-900/90 border border-pink-500/50 px-3 py-1.5 rounded-xl flex items-center gap-2">
                         <div id="mini-diagram-grid" class="mini-grid-pattern"></div>
                         <div class="flex flex-col">
@@ -311,7 +303,7 @@
                 </div>
             </div>
 
-            <!-- LISTA DE JUGADORAS CONECTADAS (VISIBLE PARA LAS JUGADORAS) -->
+            <!-- LISTA DE JUGADORAS CONECTADAS -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-yellow-300 text-sm">👥 Jugadoras en Línea en la Sala</h3>
@@ -393,7 +385,6 @@
             'rombo': 'Rombo Pequeño 💎'
         };
 
-        // --- RELOJ DIGITAL EN VIVO (12 Horas AM/PM) ---
         function iniciarRelojEnVivo() {
             function actualizarReloj() {
                 let ahora = new Date();
@@ -702,7 +693,6 @@
                 if (adminMsg) adminMsg.innerText = "🔑 Clave recordada automáticamente. ¡Solo presiona Ingresar!";
             }
 
-            // ESCUCHADOR GLOBAL DE ANUNCIOS DE VOZ (Activo para Administradora y Jugadoras)
             db.ref('room/announcement').on('value', (snap) => {
                 let anuncio = snap.val();
                 if (anuncio && anuncio.timestamp > lastAnnouncementId) {
@@ -1165,46 +1155,52 @@
             });
         }
 
+        // --- VERIFICACIÓN ACTUALIZADA PARA DETECTAR TODOS LOS GANADORES SIMULTÁNEOS ---
         function verificarGanadoresEnVivoAdmin() {
             let alertBox = document.getElementById('admin-winner-alert');
             let winnerText = document.getElementById('admin-winner-text');
-            let winningGridContainer = document.getElementById('admin-winning-card-grid');
 
-            let hayGanador = false;
-            let ganadorInfo = "";
+            let ganadoresEncontrados = [];
 
             for (let id in marketCards) {
                 let card = marketCards[id];
                 if (card.owner && card.loaded) {
                     let gano = verificarFiguraGanadora(card.grid, drawnBalls, gamePattern);
                     if (gano) {
-                        hayGanador = true;
-                        ganadorInfo = `¡Cartón #${card.id} de ${card.owner} (Control: ${card.ownerControl}) hizo BINGO!`;
-                        
-                        winnerText.innerText = ganadorInfo;
-                        winningGridContainer.innerHTML = '';
-                        for (let r = 0; r < 5; r++) {
-                            for (let c = 0; c < 5; c++) {
-                                let num = card.grid[r][c];
-                                let marcado = num === 0 || drawnBalls.includes(num);
-                                let esFiguraGanadora = esCeldaDelPatron(r, c, gamePattern);
-                                
-                                let claseColor = marcado ? 'bg-yellow-400 text-slate-950' : 'bg-slate-800 text-slate-300';
-                                if (esFiguraGanadora) {
-                                    claseColor = 'winning-pattern-cell';
-                                }
-                                winningGridContainer.innerHTML += `<div class="py-1 text-[10px] font-bold text-center rounded ${claseColor}">${num === 0 ? '⭐' : num}</div>`;
-                            }
-                        }
+                        ganadoresEncontrados.push(card);
                     }
                 }
             }
 
-            if (hayGanador) {
+            if (ganadoresEncontrados.length > 0) {
+                let htmlGanadores = `<div class="text-base text-yellow-300 font-extrabold mb-1">¡Se detectaron ${ganadoresEncontrados.length} ganador(es) simultáneo(s)!</div>`;
+                
+                ganadoresEncontrados.forEach(card => {
+                    htmlGanadores += `
+                        <div class="bg-slate-900/90 text-white p-3 rounded-2xl my-1 flex flex-col gap-1.5 border border-yellow-400 text-xs">
+                            <span class="font-bold text-yellow-300">Cartón #${card.id} &bull; ${card.owner} (Ctrl: ${card.ownerControl})</span>
+                            <div class="grid grid-cols-5 gap-1 max-w-[180px] mx-auto w-full">`;
+                    
+                    for (let r = 0; r < 5; r++) {
+                        for (let c = 0; c < 5; c++) {
+                            let num = card.grid[r][c];
+                            let marcado = num === 0 || drawnBalls.includes(num);
+                            let esFiguraGanadora = esCeldaDelPatron(r, c, gamePattern);
+                            let claseColor = marcado ? 'bg-yellow-400 text-slate-950' : 'bg-slate-800 text-slate-300';
+                            if (esFiguraGanadora) claseColor = 'winning-pattern-cell';
+                            htmlGanadores += `<div class="py-0.5 text-[9px] font-bold text-center rounded ${claseColor}">${num === 0 ? '⭐' : num}</div>`;
+                        }
+                    }
+                    htmlGanadores += `</div></div>`;
+                });
+
+                winnerText.innerHTML = htmlGanadores;
+
                 if (alertBox.classList.contains('hidden')) {
-                    cantarTextoVoz("¡Bingo! ¡Tenemos un cartón ganador en la sala!");
+                    cantarTextoVoz("¡Bingo! ¡Tenemos cartón ganador en la sala!");
                 }
                 alertBox.classList.remove('hidden');
+
                 if (isAutoRunning) {
                     clearInterval(autoDrawInterval);
                     isAutoRunning = false;
@@ -1220,7 +1216,7 @@
         function drawBallManually() {
             for (let id in marketCards) {
                 if (marketCards[id].owner && marketCards[id].loaded && verificarFiguraGanadora(marketCards[id].grid, drawnBalls, gamePattern)) {
-                    alert("⚠️ ¡Ya hay un cartón ganador en esta ronda! El juego está detenido.");
+                    alert("⚠️ ¡Ya hay cartón ganador en esta ronda! El juego está detenido.");
                     return;
                 }
             }
@@ -1479,7 +1475,7 @@
                 }
             }
             if (seleccionados > 0) {
-                alert("¡Cartones cargados con éxito! Ya quedaron fijos en tu cuenta. Si necesitas cambiarlos, escríbele a Yune.");
+                alert("¡Cartones cargados con éxito! Ya quedaron fijos en tu cuenta.");
             } else {
                 alert("No tienes cartones nuevos seleccionados para cargar.");
             }
@@ -1525,11 +1521,8 @@
                             let num = card.grid[r][c];
                             let marcado = num === 0 || drawnBalls.includes(num);
                             let esFiguraGanadora = esCeldaDelPatron(r, c, gamePattern);
-                            
                             let claseColor = marcado ? 'bg-yellow-400 text-slate-950' : 'bg-slate-800 text-slate-300';
-                            if (esFiguraGanadora) {
-                                claseColor = 'winning-pattern-cell';
-                            }
+                            if (esFiguraGanadora) claseColor = 'winning-pattern-cell';
                             publicWinningGrid.innerHTML += `<div class="py-1 text-[10px] font-bold text-center rounded ${claseColor}">${num === 0 ? '⭐' : num}</div>`;
                         }
                     }
@@ -1549,7 +1542,6 @@
                         let num = card.grid[r][c];
                         let marcado = num === 0 || drawnBalls.includes(num);
                         let esFigura = esCeldaDelPatron(r, c, gamePattern);
-                        
                         let clasesCasilla = `py-1 text-[10px] font-bold rounded relative ${marcado ? 'bg-yellow-400 text-slate-950' : 'bg-slate-800 text-slate-300'} ${esFigura ? 'cell-pattern-target border border-pink-400' : ''}`;
                         htmlGrid += `<div class="${clasesCasilla}">${num === 0 ? '⭐' : num}</div>`;
                     }
