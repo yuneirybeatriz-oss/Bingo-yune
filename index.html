@@ -214,6 +214,28 @@
                 </div>
             </div>
 
+            <!-- MODAL DE VISTA PREVIA DE CARTÓN A PANTALLA COMPLETA -->
+            <div id="modal-carton-fullscreen" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+                <div class="bg-slate-900 border border-pink-500/50 p-6 rounded-3xl shadow-2xl flex flex-col gap-4 max-w-sm w-full text-center relative">
+                    <button onclick="cerrarVistaPreviaFullscreen()" class="absolute top-4 right-4 bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white w-8 h-8 rounded-full font-bold flex items-center justify-center transition">✕</button>
+                    <div>
+                        <h3 id="modal-preview-title" class="text-xl font-bold text-yellow-300">Cartón #--</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">Inspección detallada antes de confirmar</p>
+                    </div>
+                    <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800">
+                        <div class="grid grid-cols-5 gap-1 text-[11px] text-pink-400 font-bold mb-1">
+                            <div class="bg-slate-900 py-1 rounded">B</div>
+                            <div class="bg-slate-900 py-1 rounded">I</div>
+                            <div class="bg-slate-900 py-1 rounded">N</div>
+                            <div class="bg-slate-900 py-1 rounded">G</div>
+                            <div class="bg-slate-900 py-1 rounded">O</div>
+                        </div>
+                        <div id="modal-preview-grid" class="grid grid-cols-5 gap-1.5"></div>
+                    </div>
+                    <button onclick="cerrarVistaPreviaFullscreen()" class="w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white font-bold text-xs rounded-xl shadow">Cerrar Inspección</button>
+                </div>
+            </div>
+
             <!-- MODAL DE VICTORIA DE LA JUGADORA -->
             <div id="player-winner-notification" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
                 <div class="flash-winner text-slate-950 p-6 md:p-8 rounded-3xl font-extrabold text-center shadow-2xl alert-bingo flex flex-col gap-4 max-w-lg w-full">
@@ -253,7 +275,7 @@
             <div class="flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-yellow-300 text-lg">Tus Cartones en Juego</h3>
-                    <span class="text-xs text-slate-400">Los cartones más avanzados suben automáticamente</span>
+                    <span class="text-xs text-slate-400">Toca cualquier cartón tuyo para inspeccionarlo en grande</span>
                 </div>
                 <div id="player-my-cards-container" class="grid grid-cols-2 gap-3">
                     <span class="text-slate-500 text-sm col-span-2">Aún no has seleccionado cartones.</span>
@@ -271,7 +293,7 @@
                 <div class="flex justify-between items-center">
                     <div>
                         <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (<span id="available-count">100</span> Disponibles)</h3>
-                        <p id="market-status-msg" class="text-xs text-slate-400">Toca los cartones que deseas y luego presiona cargar.</p>
+                        <p id="market-status-msg" class="text-xs text-slate-400">Toca el número para seleccionarlo, o mantén presionado / toca el botón de vista previa para inspeccionarlo.</p>
                     </div>
                 </div>
                 <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
@@ -879,7 +901,6 @@
             }
 
             listaConectadas.forEach(jugadora => {
-                // Buscar qué cartones tiene cargados y activos
                 let cartonesActivos = [];
                 for (let id in marketCards) {
                     let c = marketCards[id];
@@ -1115,6 +1136,30 @@
             }
         }
 
+        // --- FUNCIONES DE VISTA PREVIA A PANTALLA COMPLETA (MODAL) ---
+        function abrirVistaPreviaFullscreen(cardId) {
+            let card = marketCards[cardId];
+            if (!card) return;
+
+            document.getElementById('modal-preview-title').innerText = `Cartón #${card.id}`;
+            let gridContainer = document.getElementById('modal-preview-grid');
+            gridContainer.innerHTML = '';
+
+            for (let r = 0; r < 5; r++) {
+                for (let c = 0; c < 5; c++) {
+                    let num = card.grid[r][c];
+                    let marcado = num === 0 || drawnBalls.includes(num);
+                    gridContainer.innerHTML += `<div class="py-2.5 text-xs font-bold text-center rounded ${marcado ? 'bg-yellow-400 text-slate-950 shadow' : 'bg-slate-800 text-slate-200'}">${num === 0 ? '⭐' : num}</div>`;
+                }
+            }
+
+            document.getElementById('modal-carton-fullscreen').classList.remove('hidden');
+        }
+
+        function cerrarVistaPreviaFullscreen() {
+            document.getElementById('modal-carton-fullscreen').classList.add('hidden');
+        }
+
         function renderizarMercadoJugadora() {
             let container = document.getElementById('cards-market-grid');
             let statusMsg = document.getElementById('market-status-msg');
@@ -1126,7 +1171,7 @@
             if (juegoIniciado) {
                 statusMsg.innerText = "🔒 Partida iniciada: El mercado está cerrado y los cartones en juego no se pueden modificar.";
             } else {
-                statusMsg.innerText = "Toca los cartones que deseas y presiona cargar. Una vez cargados, no podrás quitarlos; debes escribirle a Yune si necesitas liberarlos.";
+                statusMsg.innerText = "Toca un cartón para seleccionarlo/quitarlo. Toca el botón 🔍 para inspeccionarlo en pantalla completa.";
             }
 
             for (let id in marketCards) {
@@ -1137,20 +1182,12 @@
                 let esMio = card.ownerControl === currentUser.control;
                 let estaCargadoMio = esMio && card.loaded;
                 
-                div.className = `p-2 rounded-xl text-center font-bold text-xs border ${estaCargadoMio ? 'bg-pink-600/40 border-pink-500 text-pink-200 cursor-not-allowed opacity-90' : esMio ? 'bg-green-600/30 border-green-500 text-green-300 cursor-pointer hover:bg-slate-700' : card.owner ? 'bg-slate-900 border-slate-800 text-slate-600 cursor-not-allowed opacity-80' : 'bg-slate-800 border-slate-700 text-yellow-300 cursor-pointer hover:bg-slate-700'}`;
-                div.innerText = `#${id}`;
+                div.className = `p-2 rounded-xl text-center font-bold text-xs border flex flex-col items-center justify-between gap-1.5 ${estaCargadoMio ? 'bg-pink-600/40 border-pink-500 text-pink-200' : esMio ? 'bg-green-600/30 border-green-500 text-green-300' : card.owner ? 'bg-slate-900 border-slate-800 text-slate-600 opacity-80' : 'bg-slate-800 border-slate-700 text-yellow-300 hover:bg-slate-700'}`;
                 
-                div.onclick = () => {
-                    if (juegoIniciado) {
-                        alert("⚠️ La partida ya comenzó. Nadie puede agarrar ni quitar cartones.");
-                        return;
-                    }
-                    if (estaCargadoMio) {
-                        alert("🔒 Este cartón ya fue cargado y confirmado. Si necesitas liberarlo o cambiarlo, debes escribirle a la administradora (Yune).");
-                        return;
-                    }
-                    seleccionarCarton(id);
-                };
+                div.innerHTML = `
+                    <span class="cursor-pointer w-full py-1" onclick="seleccionarCarton(${id})">#${id}</span>
+                    <button onclick="event.stopPropagation(); abrirVistaPreviaFullscreen(${id})" class="w-full bg-slate-900/80 hover:bg-slate-900 text-slate-300 hover:text-white py-1 rounded text-[10px] flex items-center justify-center gap-1 shadow">🔍 Ver</button>
+                `;
 
                 container.appendChild(div);
             }
@@ -1253,8 +1290,11 @@
 
                 let cardDiv = document.createElement('div');
                 let estiloExtra = gano ? 'border-yellow-400 bg-yellow-500/10' : estaAUna ? 'card-one-away bg-pink-500/10' : 'border-slate-700';
-                cardDiv.className = `bg-slate-900 border ${estiloExtra} p-3 rounded-2xl flex flex-col gap-2`;
+                cardDiv.className = `bg-slate-900 border ${estiloExtra} p-3 rounded-2xl flex flex-col gap-2 cursor-pointer hover:border-pink-500 transition`;
                 
+                // Permitir que al hacer clic en sus propios cartones también se abran en pantalla completa para inspeccionar
+                cardDiv.onclick = () => abrirVistaPreviaFullscreen(card.id);
+
                 let htmlGrid = '<div class="grid grid-cols-5 gap-1 text-center">';
                 for (let r = 0; r < 5; r++) {
                     for (let c = 0; c < 5; c++) {
