@@ -372,6 +372,7 @@
         let adminSecretKey = 'June 2026';
         let hasSpokenMyBingo = false;
         let lastSpokenBallCount = 0;
+        let lastAnnouncementId = 0;
         let presenceRef = null;
         let audioHabilitado = true;
 
@@ -454,7 +455,11 @@
         }
 
         function probarVoz() {
-            cantarTextoVoz("¡Bienvenidos al Bingo Lineal Yune! Damos inicio a la ronda. ¡Comenzamos, mucha suerte para todas!");
+            let mensajeAnuncio = "¡Bienvenidos al Bingo Lineal Yune! Damos inicio a la ronda. ¡Comenzamos, mucha suerte para todas!";
+            db.ref('room/announcement').set({
+                text: mensajeAnuncio,
+                timestamp: Date.now()
+            });
         }
 
         function obtenerLetraYNumeroVoz(num) {
@@ -696,6 +701,15 @@
                 let adminMsg = document.getElementById('admin-login-msg');
                 if (adminMsg) adminMsg.innerText = "🔑 Clave recordada automáticamente. ¡Solo presiona Ingresar!";
             }
+
+            // ESCUCHADOR GLOBAL DE ANUNCIOS DE VOZ (Activo para Administradora y Jugadoras)
+            db.ref('room/announcement').on('value', (snap) => {
+                let anuncio = snap.val();
+                if (anuncio && anuncio.timestamp > lastAnnouncementId) {
+                    lastAnnouncementId = anuncio.timestamp;
+                    cantarTextoVoz(anuncio.text);
+                }
+            });
         };
 
         function showPlayerLogin() {
