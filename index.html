@@ -122,13 +122,28 @@
                 <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 text-xs rounded-xl">Salir</button>
             </div>
 
-            <!-- ALERTA DE GANADORES MÚLTIPLES ACTUALIZADA -->
+            <!-- ALERTA DE GANADORES MÚLTIPLES -->
             <div id="admin-winner-alert" class="hidden bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-950 p-6 rounded-3xl font-extrabold text-center text-xl shadow-xl alert-bingo flex flex-col gap-3">
                 <div>🎉 ¡BINGO VALIDADO! (Juego Detenido) 🎉</div>
                 <div id="admin-winner-text" class="text-base font-bold bg-white/25 py-2.5 px-4 rounded-xl flex flex-col gap-1">Ganadores...</div>
                 <div class="flex gap-2 justify-center mt-2 flex-wrap">
                     <button onclick="clearWinnerAlert()" class="py-2 px-4 bg-slate-900 text-yellow-300 text-xs rounded-xl font-bold shadow">Cerrar Alerta</button>
                     <button onclick="reiniciarBalotasParaSiguienteFigura()" class="py-2 px-4 bg-pink-600 text-white text-xs rounded-xl font-bold shadow">🔄 Limpiar Balotas (Siguiente Figura)</button>
+                </div>
+            </div>
+
+            <!-- 🌟 NUEVA SECCIÓN: VENTANITA DE CARTONES PAGADOS EN JUEGO -->
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-emerald-500/40 shadow-lg">
+                <div class="flex justify-between items-center flex-wrap gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl">💰</span>
+                        <h3 class="font-bold text-emerald-400 text-lg">Cartones Pagados en Juego</h3>
+                    </div>
+                    <span id="admin-paid-count-badge" class="bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full text-xs font-bold">0 cartones pagados</span>
+                </div>
+                <p class="text-xs text-slate-400">Aquí puedes ver en tiempo real qué jugadoras ya pagaron y cuáles cartones exactos están habilitados para participar en la ronda.</p>
+                <div id="admin-paid-cards-window" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-56 overflow-y-auto p-3 bg-slate-900/80 rounded-2xl border border-slate-700/60">
+                    <span class="text-slate-500 text-xs col-span-2 text-center py-4">Esperando confirmación de pagos...</span>
                 </div>
             </div>
 
@@ -828,6 +843,7 @@
                 renderizarHistorialAdmin();
                 renderizarTableroAdmin();
                 renderizarResumenCartonesAdmin();
+                renderizarVentanaCartonesPagadosAdmin(); // 🌟 Renderiza la nueva ventanita de pagados
                 renderizarSelectLiberarAdmin();
                 renderizarRadarAdmin();
                 renderizarJugadorasConectadasAdmin(data.connectedPlayers || {});
@@ -934,6 +950,55 @@
                 div.innerText = i;
                 gridEl.appendChild(div);
             }
+        }
+
+        // 🌟 NUEVA FUNCIÓN: Generar la vista de cartones pagados en juego para la administradora
+        function renderizarVentanaCartonesPagadosAdmin() {
+            let container = document.getElementById('admin-paid-cards-window');
+            let badgeCount = document.getElementById('admin-paid-count-badge');
+            if (!container) return;
+            container.innerHTML = '';
+
+            let jugadorasMap = {};
+            let totalCartonesPagados = 0;
+
+            for (let id in marketCards) {
+                let card = marketCards[id];
+                if (card.owner && card.ownerControl && card.paid) {
+                    totalCartonesPagados++;
+                    if (!jugadorasMap[card.ownerControl]) {
+                        jugadorasMap[card.ownerControl] = { name: card.owner, control: card.ownerControl, cards: [] };
+                    }
+                    jugadorasMap[card.ownerControl].cards.push(card.id);
+                }
+            }
+
+            badgeCount.innerText = `${totalCartonesPagados} cartón(es) pagado(s)`;
+
+            let controls = Object.keys(jugadorasMap);
+            if (controls.length === 0) {
+                container.innerHTML = '<span class="text-slate-500 text-xs col-span-2 text-center py-4">No hay cartones marcados como "Pagado" todavía.</span>';
+                return;
+            }
+
+            controls.forEach(ctrl => {
+                let j = jugadorasMap[ctrl];
+                j.cards.sort((a, b) => a - b);
+
+                let div = document.createElement('div');
+                div.className = "bg-slate-950 p-3 rounded-xl flex flex-col gap-1.5 border border-emerald-500/30 text-xs";
+                div.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <strong class="text-pink-300 text-sm">${j.name}</strong>
+                        <span class="text-[10px] bg-slate-900 px-2 py-0.5 rounded text-slate-400 font-mono">Control: ${j.control}</span>
+                    </div>
+                    <div class="text-emerald-300 font-bold flex items-center gap-1.5">
+                        <span>✅ Cartones en juego:</span> 
+                        <span class="tracking-wide">#${j.cards.join(', #')}</span>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
         }
 
         function renderizarResumenCartonesAdmin() {
@@ -1155,7 +1220,6 @@
             });
         }
 
-        // --- VERIFICACIÓN ACTUALIZADA PARA DETECTAR TODOS LOS GANADORES SIMULTÁNEOS ---
         function verificarGanadoresEnVivoAdmin() {
             let alertBox = document.getElementById('admin-winner-alert');
             let winnerText = document.getElementById('admin-winner-text');
@@ -1558,7 +1622,7 @@
                     ${htmlGrid}
                     <div class="text-[11px] bg-slate-950 p-2 rounded-xl border border-slate-800 flex justify-between items-center">
                         <div><span class="text-slate-400">Le falta(n):</span> <span class="text-pink-400 font-bold">${analisis.count === 0 ? '¡Listo!' : faltantesStr}</span></div>
-                        ${estaAUna ? '<span class="text-[10px] bg-yellow-400 text-slate-950 px-2 py-0.5 rounded-full font-extrabold animate-bounce">¡CANTANDO!</span>' : ''}
+                        ${estaAUna ? '<span class="text-[10px] bg-yellow-400 text-slate-950 px-2 py-0.5 rounded-full font-extrabold animate-bounce">⏱️ ¡CANTANDO!</span>' : ''}
                     </div>
                 `;
                 container.appendChild(cardDiv);
