@@ -132,7 +132,25 @@
                 </div>
             </div>
 
-            <!-- SECCIÓN: VENTANITA DE CARTONES PAGADOS EN JUEGO -->
+            <!-- SECCIÓN: VALOR DEL CARTÓN Y CÓDIGO DE SALA -->
+            <div class="bg-slate-800 p-6 rounded-3xl grid grid-cols-1 md:grid-cols-2 gap-4 border-2 border-yellow-500/40 shadow-lg">
+                <div>
+                    <label class="text-xs text-yellow-300 font-bold block mb-1">💵 Valor de Cada Cartón (Bs / $):</label>
+                    <div class="flex gap-2">
+                        <input type="number" id="admin-card-price-input" placeholder="Ej: 300" class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-center">
+                        <button onclick="updateCardPrice()" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-extrabold text-xs rounded-xl shadow">Guardar</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs text-pink-400 font-bold block mb-1">🔑 Código de Acceso para Jugadoras:</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="admin-room-code" placeholder="Ej: BINGO2026" class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-center">
+                        <button onclick="updateRoomCode()" class="px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white font-bold text-xs rounded-xl shadow">Guardar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN: CARTONES PAGADOS EN JUEGO -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-emerald-500/40 shadow-lg">
                 <div class="flex justify-between items-center flex-wrap gap-2">
                     <div class="flex items-center gap-2">
@@ -141,21 +159,20 @@
                     </div>
                     <span id="admin-paid-count-badge" class="bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full text-xs font-bold">0 cartones pagados</span>
                 </div>
-                <p class="text-xs text-slate-400">Aquí puedes ver en tiempo real qué jugadoras ya pagaron y cuáles cartones exactos están habilitados para participar.</p>
                 <div id="admin-paid-cards-window" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-56 overflow-y-auto p-3 bg-slate-900/80 rounded-2xl border border-slate-700/60">
                     <span class="text-slate-500 text-xs col-span-2 text-center py-4">Esperando confirmación de pagos...</span>
                 </div>
             </div>
 
-            <!-- BILLETERAS DE JUGADORAS (PANEL ADMIN) -->
+            <!-- BILLETERAS Y CRÉDITOS EXCLUSIVOS (PANEL ADMIN) -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-purple-500/40 shadow-lg">
                 <div class="flex justify-between items-center flex-wrap gap-2">
                     <div class="flex items-center gap-2">
                         <span class="text-2xl">💳</span>
-                        <h3 class="font-bold text-purple-300 text-lg">Control de Billeteras y Créditos</h3>
+                        <h3 class="font-bold text-purple-300 text-lg">Control de Billeteras y Créditos Exclusivos</h3>
                     </div>
                 </div>
-                <p class="text-xs text-slate-400">Visualiza el nombre y número de control de cada jugadora para agregarles saldo positivo o reiniciar en cero.</p>
+                <p class="text-xs text-slate-400">Asigna saldo o activa el **Crédito Exclusivo** solo a las jugadoras de tu confianza para que puedan jugar sin saldo.</p>
                 <div id="admin-wallets-list" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto p-3 bg-slate-900/80 rounded-2xl border border-slate-700/60">
                     <span class="text-slate-500 text-xs col-span-2 text-center py-4">Cargando billeteras...</span>
                 </div>
@@ -201,10 +218,6 @@
                         <option value="plane">El Avión ✈️</option>
                         <option value="rombo">Rombo Pequeño 💎</option>
                     </select>
-                    <div class="mt-2">
-                        <label class="text-xs text-slate-400 block mb-1">🔑 Código de Acceso para Jugadoras:</label>
-                        <input type="text" id="admin-room-code" onchange="updateRoomCode()" placeholder="Ej: BINGO2026" class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-center">
-                    </div>
                 </div>
 
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
@@ -264,8 +277,8 @@
                     <!-- WIDGET BILLETERA VIRTUAL JUGADORA -->
                     <div id="player-wallet-widget" class="bg-slate-900 border border-emerald-500/40 px-4 py-2 rounded-2xl flex items-center gap-3 shadow">
                         <div>
-                            <span id="wallet-label" class="text-[9px] text-slate-400 uppercase tracking-wider block font-bold">Mi Saldo Positivo</span>
-                            <span id="wallet-balance-display" class="text-lg font-black text-emerald-400">$0.00</span>
+                            <span id="wallet-label" class="text-[9px] text-slate-400 uppercase tracking-wider block font-bold">Mi Saldo</span>
+                            <span id="wallet-balance-display" class="text-lg font-black text-emerald-400">0</span>
                         </div>
                     </div>
 
@@ -378,8 +391,8 @@
                 </div>
                 <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
                 
-                <button onclick="cargarMisCartones()" class="w-full py-3.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-extrabold text-sm rounded-2xl shadow-lg transition transform active:scale-95">
-                    📥 Cargar / Confirmar Mis Cartones ($1,000 c/u)
+                <button onclick="cargarMisCartones()" id="btn-cargar-cartones" class="w-full py-3.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-extrabold text-sm rounded-2xl shadow-lg transition transform active:scale-95">
+                    📥 Cargar / Confirmar Mis Cartones
                 </button>
             </div>
         </div>
@@ -396,6 +409,7 @@
         let drawnBalls = [];
         let gamePattern = 'line';
         let marketCards = {}; 
+        let cardPrice = 300;
         let autoDrawInterval = null;
         let isAutoRunning = false;
         let adminSecretKey = 'June 2026';
@@ -819,7 +833,6 @@
 
                 registrarPresenciaJugadora(name, control);
 
-                // Inicializar billetera en Firebase si no existe
                 db.ref(`users/${control}`).once('value').then((userSnap) => {
                     if (!userSnap.exists()) {
                         db.ref(`users/${control}`).set({
@@ -850,6 +863,7 @@
                 drawnBalls = data.drawnBalls || [];
                 gamePattern = data.gamePattern || 'line';
                 marketCards = data.marketCards || {};
+                cardPrice = data.cardPrice || 300;
 
                 let selectPattern = document.getElementById('game-pattern-select');
                 if (selectPattern) selectPattern.value = gamePattern;
@@ -857,6 +871,11 @@
                 let roomCodeInput = document.getElementById('admin-room-code');
                 if (roomCodeInput && data.roomCode && !roomCodeInput.value) {
                     roomCodeInput.value = data.roomCode;
+                }
+
+                let priceInput = document.getElementById('admin-card-price-input');
+                if (priceInput && document.activeElement !== priceInput) {
+                    priceInput.value = cardPrice;
                 }
 
                 if (drawnBalls.length === 0) {
@@ -900,6 +919,10 @@
                 drawnBalls = data.drawnBalls || [];
                 gamePattern = data.gamePattern || 'line';
                 marketCards = data.marketCards || {};
+                cardPrice = data.cardPrice || 300;
+
+                let btnCargar = document.getElementById('btn-cargar-cartones');
+                if (btnCargar) btnCargar.innerText = `📥 Cargar / Confirmar Mis Cartones ($${cardPrice.toLocaleString()} c/u)`;
 
                 if (drawnBalls.length === 0) {
                     hasSpokenMyBingo = false;
@@ -939,13 +962,13 @@
 
                 let balanceEl = document.getElementById('wallet-balance-display');
                 let labelEl = document.getElementById('wallet-label');
-                if (balanceEl) balanceEl.innerText = `$${balance.toLocaleString()}`;
+                if (balanceEl) balanceEl.innerText = balance.toLocaleString();
                 if (labelEl) {
                     if (isCredit) {
-                        labelEl.innerText = "Línea de Crédito";
+                        labelEl.innerText = "Crédito Exclusivo 🌟";
                         balanceEl.className = "text-lg font-black text-amber-400";
                     } else {
-                        labelEl.innerText = "Mi Saldo Positivo";
+                        labelEl.innerText = "Mi Saldo";
                         balanceEl.className = "text-lg font-black text-emerald-400";
                     }
                 }
@@ -1060,7 +1083,6 @@
             });
         }
 
-        // CONTROL DE BILLETERAS EN EL PANEL ADMIN
         function renderizarAdminWallets() {
             let container = document.getElementById('admin-wallets-list');
             if (!container) return;
@@ -1078,7 +1100,7 @@
                     let balance = user.balance || 0;
                     let isCredit = user.isCredit || false;
                     let balanceColor = isCredit ? 'text-amber-400' : 'text-emerald-400';
-                    let badgeText = isCredit ? '<span class="text-[9px] bg-amber-950 text-amber-300 px-1.5 py-0.5 rounded border border-amber-800">Crédito</span>' : '<span class="text-[9px] bg-emerald-950 text-emerald-300 px-1.5 py-0.5 rounded border border-emerald-800">Saldo</span>';
+                    let badgeText = isCredit ? '<span class="text-[9px] bg-amber-950 text-amber-300 px-1.5 py-0.5 rounded border border-amber-800">Crédito Activo 🌟</span>' : '<span class="text-[9px] bg-emerald-950 text-emerald-300 px-1.5 py-0.5 rounded border border-emerald-800">Saldo Normal</span>';
 
                     let div = document.createElement('div');
                     div.className = "bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center gap-2 text-xs";
@@ -1091,10 +1113,10 @@
                             <span class="text-slate-400 font-mono text-[10px]">Control: ${code}</span>
                         </div>
                         <div class="text-right">
-                            <span class="${balanceColor} font-bold block text-sm">$${balance.toLocaleString()}</span>
+                            <span class="${balanceColor} font-bold block text-sm">${balance.toLocaleString()}</span>
                             <div class="mt-1.5 flex gap-1 justify-end flex-wrap">
                                 <button onclick="setPositiveBalanceAdmin('${code}', '${user.name}')" class="text-[9px] bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-0.5 rounded font-semibold">＋ Saldo</button>
-                                <button onclick="setCreditAdmin('${code}', '${user.name}')" class="text-[9px] bg-amber-600 hover:bg-amber-500 text-white px-2 py-0.5 rounded font-semibold">Crédito</button>
+                                <button onclick="toggleCreditAdmin('${code}', '${user.name}', ${!isCredit})" class="text-[9px] ${isCredit ? 'bg-amber-700' : 'bg-slate-700 hover:bg-amber-600'} text-white px-2 py-0.5 rounded font-semibold">${isCredit ? 'Quitar Crédito' : 'Dar Crédito'}</button>
                                 <button onclick="resetBalanceAdmin('${code}', '${user.name}')" class="text-[9px] bg-red-600/80 hover:bg-red-600 text-white px-2 py-0.5 rounded font-semibold">En Cero</button>
                             </div>
                         </div>
@@ -1105,27 +1127,26 @@
         }
 
         function setPositiveBalanceAdmin(code, name) {
-            let monto = prompt(`Ingresa el saldo positivo para ${name} (Control: ${code}):`);
+            let monto = prompt(`Ingresa el saldo para ${name} (Control: ${code}):`);
             if (monto !== null && !isNaN(monto)) {
                 db.ref(`users/${code}`).update({
-                    balance: parseFloat(monto),
-                    isCredit: false
+                    balance: parseFloat(monto)
                 });
-                alert(`¡Saldo de ${name} actualizado a $${parseFloat(monto).toLocaleString()}!`);
+                alert(`¡Saldo de ${name} actualizado a ${parseFloat(monto).toLocaleString()}!`);
                 renderizarAdminWallets();
             }
         }
 
-        function setCreditAdmin(code, name) {
-            let montoCredito = prompt(`Ingresa el monto de crédito autorizado para ${name} (Control: ${code}):`);
-            if (montoCredito !== null && !isNaN(montoCredito)) {
-                db.ref(`users/${code}`).update({
-                    balance: parseFloat(montoCredito),
-                    isCredit: true
-                });
-                alert(`¡Crédito configurado para ${name} por $${parseFloat(montoCredito).toLocaleString()}!`);
-                renderizarAdminWallets();
+        function toggleCreditAdmin(code, name, activarCredito) {
+            db.ref(`users/${code}`).update({
+                isCredit: activarCredito
+            });
+            if (activarCredito) {
+                alert(`¡Crédito exclusivo activado para ${name}! Ahora podrá jugar sin restricción de saldo.`);
+            } else {
+                alert(`¡Crédito desactivado para ${name}! Ahora dependerá de su saldo.`);
             }
+            renderizarAdminWallets();
         }
 
         function resetBalanceAdmin(code, name) {
@@ -1530,6 +1551,16 @@
             }
         }
 
+        function updateCardPrice() {
+            let price = parseFloat(document.getElementById('admin-card-price-input').value);
+            if (!isNaN(price) && price >= 0) {
+                db.ref('room/cardPrice').set(price);
+                alert(`¡Valor de cada cartón actualizado a ${price.toLocaleString()}!`);
+            } else {
+                alert("Por favor ingresa un número válido.");
+            }
+        }
+
         function inicializarMiniDiagrama() {
             let gridContainer = document.getElementById('mini-diagram-grid');
             if (!gridContainer) return;
@@ -1686,24 +1717,29 @@
                     return;
                 }
 
-                let costoTotal = cartonesNuevos * 1000;
+                let costoTotal = cartonesNuevos * cardPrice;
 
+                // Si NO tiene crédito activo, validamos estrictamente su saldo
                 if (!isCredit && balance < costoTotal) {
-                    alert(`Saldo insuficiente en tu billetera. Necesitas $${costoTotal.toLocaleString()} y tienes $${balance.toLocaleString()}. Comunícate con Yune para recargar.`);
+                    alert(`Saldo insuficiente. Necesitas ${costoTotal.toLocaleString()} y tienes ${balance.toLocaleString()}. Comunícate con Yune para recargar.`);
                     return;
                 }
 
                 let nuevoSaldo = balance - costoTotal;
-                db.ref(`users/${currentUser.control}/balance`).set(nuevoSaldo);
+                
+                // Si tiene crédito activo, permitimos que juegue sin restar de su saldo
+                if (!isCredit) {
+                    db.ref(`users/${currentUser.control}/balance`).set(nuevoSaldo);
+                }
 
                 for (let id in marketCards) {
                     let card = marketCards[id];
                     if (card.ownerControl === currentUser.control && !card.loaded) {
-                        db.ref(`room/marketCards/${id}`).update({ loaded: true, paid: !isCredit });
+                        db.ref(`room/marketCards/${id}`).update({ loaded: true, paid: true });
                     }
                 }
 
-                alert(`¡${cartonesNuevos} cartón(es) cargado(s) con éxito por un valor de $${costoTotal.toLocaleString()}!`);
+                alert(`¡${cartonesNuevos} cartón(es) cargado(s) con éxito por un valor total de ${costoTotal.toLocaleString()}!`);
             });
         }
 
