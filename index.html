@@ -155,7 +155,7 @@
                         <h3 class="font-bold text-purple-300 text-lg">Control de Billeteras y Créditos</h3>
                     </div>
                 </div>
-                <p class="text-xs text-slate-400">Asigna saldo positivo por transferencias o abre líneas de crédito para tus jugadoras fieles.</p>
+                <p class="text-xs text-slate-400">Visualiza el nombre y número de control de cada jugadora para agregarles saldo positivo o reiniciar en cero.</p>
                 <div id="admin-wallets-list" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto p-3 bg-slate-900/80 rounded-2xl border border-slate-700/60">
                     <span class="text-slate-500 text-xs col-span-2 text-center py-4">Cargando billeteras...</span>
                 </div>
@@ -932,7 +932,6 @@
                 renderizarJugadorasConectadasJugadora(data.connectedPlayers || {});
             });
 
-            // Sincronizar billetera de la jugadora actual en tiempo real
             db.ref(`users/${currentUser.control}`).on('value', (snap) => {
                 let userData = snap.val() || { balance: 0, isCredit: false };
                 let balance = userData.balance || 0;
@@ -1061,16 +1060,15 @@
             });
         }
 
-        // FUNCIONES DE CONTROL DE BILLETERAS EN EL PANEL ADMIN
+        // CONTROL DE BILLETERAS EN EL PANEL ADMIN
         function renderizarAdminWallets() {
             let container = document.getElementById('admin-wallets-list');
             if (!container) return;
-            container.innerHTML = '';
 
             db.ref('users').once('value', (snapshot) => {
                 let users = snapshot.val();
                 if (!users) {
-                    container.innerHTML = '<span class="text-slate-500 text-xs col-span-2 text-center py-4">No hay billeteras registradas aún.</span>';
+                    container.innerHTML = '<span class="text-slate-500 text-xs col-span-2 text-center py-4">No hay jugadoras registradas aún.</span>';
                     return;
                 }
 
@@ -1080,7 +1078,7 @@
                     let balance = user.balance || 0;
                     let isCredit = user.isCredit || false;
                     let balanceColor = isCredit ? 'text-amber-400' : 'text-emerald-400';
-                    let badgeText = isCredit ? '<span class="text-[9px] bg-amber-950 text-amber-300 px-1.5 py-0.5 rounded border border-amber-800">Crédito</span>' : '<span class="text-[9px] bg-emerald-950 text-emerald-300 px-1.5 py-0.5 rounded border border-emerald-800">Positivo</span>';
+                    let badgeText = isCredit ? '<span class="text-[9px] bg-amber-950 text-amber-300 px-1.5 py-0.5 rounded border border-amber-800">Crédito</span>' : '<span class="text-[9px] bg-emerald-950 text-emerald-300 px-1.5 py-0.5 rounded border border-emerald-800">Saldo</span>';
 
                     let div = document.createElement('div');
                     div.className = "bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center gap-2 text-xs";
@@ -1090,7 +1088,7 @@
                                 <strong class="text-slate-200 text-sm">${user.name}</strong>
                                 ${badgeText}
                             </div>
-                            <span class="text-slate-400 font-mono text-[10px]">Ctrl: ${code}</span>
+                            <span class="text-slate-400 font-mono text-[10px]">Control: ${code}</span>
                         </div>
                         <div class="text-right">
                             <span class="${balanceColor} font-bold block text-sm">$${balance.toLocaleString()}</span>
@@ -1107,31 +1105,31 @@
         }
 
         function setPositiveBalanceAdmin(code, name) {
-            let monto = prompt(`Ingresa el saldo positivo (lo que te transfirió) para ${name}:`);
+            let monto = prompt(`Ingresa el saldo positivo para ${name} (Control: ${code}):`);
             if (monto !== null && !isNaN(monto)) {
                 db.ref(`users/${code}`).update({
                     balance: parseFloat(monto),
                     isCredit: false
                 });
-                alert(`¡Billetera de ${name} actualizada con saldo positivo de $${parseFloat(monto).toLocaleString()}!`);
+                alert(`¡Saldo de ${name} actualizado a $${parseFloat(monto).toLocaleString()}!`);
                 renderizarAdminWallets();
             }
         }
 
         function setCreditAdmin(code, name) {
-            let montoCredito = prompt(`Ingresa el monto de crédito o espacio libre para tu jugadora fiel ${name}:`);
+            let montoCredito = prompt(`Ingresa el monto de crédito autorizado para ${name} (Control: ${code}):`);
             if (montoCredito !== null && !isNaN(montoCredito)) {
                 db.ref(`users/${code}`).update({
                     balance: parseFloat(montoCredito),
                     isCredit: true
                 });
-                alert(`¡Línea de crédito configurada para ${name} por $${parseFloat(montoCredito).toLocaleString()}!`);
+                alert(`¡Crédito configurado para ${name} por $${parseFloat(montoCredito).toLocaleString()}!`);
                 renderizarAdminWallets();
             }
         }
 
         function resetBalanceAdmin(code, name) {
-            if (confirm(`¿Estás segura de poner en cero la billetera de ${name}?`)) {
+            if (confirm(`¿Estás segura de reiniciar en cero el saldo de ${name}?`)) {
                 db.ref(`users/${code}`).update({
                     balance: 0,
                     isCredit: false
@@ -1670,13 +1668,11 @@
                 return;
             }
 
-            // Validar saldo o crédito en la billetera antes de permitir cargar cartones ($1000 c/u)
             db.ref(`users/${currentUser.control}`).once('value').then((snap) => {
                 let userData = snap.val() || { balance: 0, isCredit: false };
                 let balance = userData.balance || 0;
                 let isCredit = userData.isCredit || false;
 
-                // Contar cuántos cartones nuevos va a cargar
                 let cartonesNuevos = 0;
                 for (let id in marketCards) {
                     let card = marketCards[id];
@@ -1697,11 +1693,9 @@
                     return;
                 }
 
-                // Descontar saldo si no es crédito ilimitado/especial
                 let nuevoSaldo = balance - costoTotal;
                 db.ref(`users/${currentUser.control}/balance`).set(nuevoSaldo);
 
-                // Cargar cartones
                 for (let id in marketCards) {
                     let card = marketCards[id];
                     if (card.ownerControl === currentUser.control && !card.loaded) {
