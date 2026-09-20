@@ -1943,6 +1943,23 @@
             const contenedor = document.getElementById('lista-historial-guardado');
             if (!contenedor) return;
 
+                <script>
+        const CLAVE_STORAGE = "bingo_historial_rondas_7dias";
+
+        function limpiarHistorialAntiguo(historial) {
+            const ahora = new Date().getTime();
+            const sieteDiasMs = 7 * 24 * 60 * 60 * 1000;
+            return historial.filter(item => (ahora - item.timestamp) < sieteDiasMs);
+        }
+
+        function cargarHistorialEnPantalla() {
+            let historialGuardado = JSON.parse(localStorage.getItem(CLAVE_STORAGE)) || [];
+            historialGuardado = limpiarHistorialAntiguo(historialGuardado);
+            localStorage.setItem(CLAVE_STORAGE, JSON.stringify(historialGuardado));
+
+            const contenedor = document.getElementById('lista-historial-guardado');
+            if (!contenedor) return;
+
             if (historialGuardado.length === 0) {
                 contenedor.innerHTML = '<p style="color: #666; font-size: 12px;">No hay registros recientes (se guardan por 7 días).</p>';
                 return;
@@ -2017,7 +2034,6 @@
             window.open(url, '_blank');
         }
 
-        // Ejecutar al cargar la página
         cargarHistorialEnPantalla();
     </script>
 
@@ -2025,12 +2041,10 @@
     <div id="panel-chat-jugadora" style="background: #1a1a1a; padding: 15px; border-radius: 10px; margin-top: 20px; color: #fff;">
         <h3 style="margin-bottom: 10px; font-size: 14px; color: #ffc107;">💬 Chat de la Sala</h3>
         
-        <!-- Caja donde se muestran los mensajes -->
         <div id="caja-chat-jugadoras" style="background: #111; height: 120px; overflow-y: auto; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 12px; border: 1px solid #333;">
             <p style="color: #888; text-align: center;">¡Bienvenidos al chat de la sala!</p>
         </div>
 
-        <!-- Input para escribir y botón de enviar -->
         <div style="display: flex; gap: 8px;">
             <input type="text" id="input-mensaje-jugadora" placeholder="Escribe tu mensaje..." style="flex: 1; background: #222; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 6px; font-size: 12px;" onkeypress="if(event.key === 'Enter') enviarMensajeChat()">
             <button onclick="enviarMensajeChat()" style="background: #db2777; color: white; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">Enviar</button>
@@ -2057,3 +2071,5 @@
     </script>
 </body>
 </html>
+
+        
