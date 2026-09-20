@@ -1947,60 +1947,7 @@ i<!DOCTYPE html>
     <!-- === SECCIÓN DE CHAT EN VIVO Y WHATSAPP === -->
 <div id="panel-admin-whatsapp" style="background: #111; padding: 15px; border-radius: 10px; margin-top: 20px; color: #fff;">
     <h3 style="margin-bottom: 10px;">💬 Chat en Vivo y Resumen para WhatsApp</h3>
-    
-    <!-- Ventana del Chat -->
-    <div id="caja-chat-jugadoras" style="background: #222; border: 1px solid #444; border-radius: 8px; padding: 10px; height: 150px; overflow-y: scroll; margin-bottom: 10px; font-size: 13px;">
-        <p style="color: #888; text-align: center;">Esperando mensajes de las jugadoras...</p>
-    </div>
-    
-    <!-- Botón para Limpiar el Chat -->
-    <button onclick="eliminarChatEnVivo()" style="background: #d9534f; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; margin-right: 10px; margin-bottom: 10px;">
-        🗑️ Eliminar Chat
-    </button>
-
-    <hr style="border-color: #444; margin: 10px 0;">
-
-    <!-- === SCRIPTS DEL CHAT Y WHATSAPP === -->
-<script>
-    // Función para limpiar/eliminar el chat en vivo
-    function eliminarChatEnVivo() {
-        const cajaChat = document.getElementById('caja-chat-jugadoras');
-        if (cajaChat) {
-            cajaChat.innerHTML = '<p style="color: #888; text-align: center;">Chat eliminado. Esperando nuevos mensajes...</p>';
-            // Si usas Firebase, aquí puedes agregar la línea para borrarlo de la base de datos si lo deseas
-        }
-    }
-</script>
-
-    // Función para copiar los cartones activos al portapapeles para WhatsApp
-    function copiarCartonesParaWhatsApp() {
-        let textoParaWhatsApp = "📋 *RESUMEN DE CARTONES EN JUEGO - BINGO* 📋\n\n";
-        
-        // Buscamos los elementos de las jugadoras o cartones activos en tu pantalla
-        // (Esto se adapta automáticamente a la estructura que ya tiene tu sistema de bingo)
-        const cartonesActivos = document.querySelectorAll('.tarjeta-jugadora, .carton-jugador, [id*="carton"]');
-        
-        if (cartonesActivos.length === 0) {
-            // Plan de respaldo por si las clases tienen otro nombre exacto en tu código
-            textoParaWhatsApp += "¡Partida activa en proceso! Revisa el tablero principal.\n";
-        } else {
-            cartonesActivos.forEach((carton, index) => {
-                textoParaWhatsApp += `👤 Jugador/Cartón #${index + 1}\n`;
-            });
-        }
-        
-        textoParaWhatsApp += "\n¡Suerte a todos en la jugada! 🍀";
-
-        // Copiar al portapapeles del teléfono
-        navigator.clipboard.writeText(textoParaWhatsApp).then(() => {
-            alert("¡Lista de cartones copiada con éxito! Ya puedes pegarla en WhatsApp.");
-        }).catch(err => {
-            alert("Hubo un error al copiar, intenta de nuevo.");
-            console.error(err);
-        });
-    }
-</script>
-<!-- === ZONA EXCLUSIVA PARA LA ADMINISTRADORA (TOTALMENTE BLINDADA) === -->
+<!-- === ZONA EXCLUSIVA PARA LA ADMINISTRACIÓN (TOTALMENTE BLINDADA) === -->
 <div id="admin-panel-container" style="display: none;">
 
     <!-- === SECCIÓN DE CHAT EN VIVO Y WHATSAPP === -->
