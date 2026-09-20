@@ -745,15 +745,22 @@
             let savedControl = localStorage.getItem('bingo_player_control');
             let savedCode = localStorage.getItem('bingo_player_code');
             
-            if (savedName && savedControl) {
-                document.getElementById('player-name-input').value = savedName;
-                document.getElementById('player-control-input').value = savedControl;
-                if (savedCode) {
-                    document.getElementById('player-access-code-input').value = savedCode;
-                }
-                let msg = document.getElementById('welcome-back-msg');
-                msg.innerText = `¡Hola de nuevo, ${savedName}! Tus datos ya están listos.`;
-                msg.classList.remove('hidden');
+            // Si el número guardado ya no existe en la base de datos de usuarios, limpiamos el localStorage para que no autocomplemente fantasma
+            if (savedControl) {
+                db.ref(`users/${savedControl}`).once('value').then((snap) => {
+                    if (!snap.exists()) {
+                        localStorage.removeItem('bingo_player_name');
+                        localStorage.removeItem('bingo_player_control');
+                        localStorage.removeItem('bingo_player_code');
+                    } else {
+                        if (savedName) document.getElementById('player-name-input').value = savedName;
+                        document.getElementById('player-control-input').value = savedControl;
+                        if (savedCode) document.getElementById('player-access-code-input').value = savedCode;
+                        let msg = document.getElementById('welcome-back-msg');
+                        msg.innerText = `¡Hola de nuevo, ${savedName}! Tus datos ya están listos.`;
+                        msg.classList.remove('hidden');
+                    }
+                });
             }
 
             let savedAdminPass = localStorage.getItem('bingo_admin_pass');
@@ -763,7 +770,6 @@
                 if (adminMsg) adminMsg.innerText = "🔑 Clave recordada automáticamente. ¡Solo presiona Ingresar!";
             }
 
-            // Escuchar estado global de la sala (incluyendo bloqueo)
             db.ref('room').on('value', (snapshot) => {
                 let data = snapshot.val();
                 if (!data) return;
@@ -914,7 +920,6 @@
                         return;
                     }
 
-                    // Verificar si esta jugadora fue eliminada/expulsada o si tiene cuenta previa
                     db.ref(`users/${control}`).once('value').then((userSnap) => {
                         localStorage.setItem('bingo_player_name', name);
                         localStorage.setItem('bingo_player_control', control);
@@ -1015,7 +1020,6 @@
                 marketCards = data.marketCards || {};
                 cardPrice = data.cardPrice || 300;
 
-                // Si la administradora cerró la sala mientras la jugadora estaba dentro, la sacamos de inmediato
                 if (data.isRoomLocked) {
                     alert("🔒 La administradora ha cerrado la sala. Cerrando sesión por seguridad.");
                     backToHome();
@@ -1059,7 +1063,6 @@
             db.ref(`users/${currentUser.control}`).on('value', (snap) => {
                 let userData = snap.val();
                 if (!userData) {
-                    // Si la jugadora fue eliminada por la admin, su nodo de usuario se borra y la sacamos
                     alert("⚠️ Has sido eliminada del sistema por la Administradora.");
                     backToHome();
                     return;
@@ -1259,17 +1262,30 @@
 
         function eliminarJugadorSistema(controlJugadora, nombreJugadora) {
             if (confirm(`¿Estás segura de eliminar por completo a ${nombreJugadora} (Control: ${controlJugadora}) del sistema? Sus cartones serán liberados y su cuenta borrada.`)) {
-                // Liberar cartones
                 for (let id in marketCards) {
                     if (marketCards[id].ownerControl === controlJugadora) {
                         db.ref(`room/marketCards/${id}`).update({ owner: null, ownerControl: null, loaded: false, paid: false });
                     }
                 }
-                // Borrar presencia en sala
                 let safeCtrl = controlJugadora.replace(/[.#$\/\[\]]/g, "_");
                 db.ref(`room/connectedPlayers/${safeCtrl}`).remove();
-                // Borrar registro de usuario/billetera
                 db.ref(`users/${controlJugadora}`).remove();
+
+                // Limpiar localStorage si era la misma persona eliminada en este dispositivo
+                let localCtrl = localStorage.getItem('bingo_player_control');
+                if (localCtrl === controlJugadora) {
+                    localStorage.removeItem('bingo_player_name');
+                    localStorage.removeItem('bingo_player_control');
+                    localStorage.removeItem('bingo_player_code');
+                    let nameInput = document.getElementById('player-name-input');
+                    let ctrlInput = document.getElementById('player-control-input');
+                    let codeInput = document.getElementById('player-access-code-input');
+                    if (nameInput) nameInput.value = '';
+                    if (ctrlInput) ctrlInput.value = '';
+                    if (codeInput) codeInput.value = '';
+                    let msg = document.getElementById('welcome-back-msg');
+                    if (msg) msg.classList.add('hidden');
+                }
 
                 alert(`¡${nombreJugadora} ha sido eliminada del sistema con éxito!`);
                 renderizarAdminWallets();
@@ -1436,7 +1452,7 @@
                     <span class="font-bold text-pink-300">${jugadora.name}</span>
                     <span class="text-[10px] text-slate-400 font-mono">(Ctrl: ${jugadora.control})</span>
                 `;
-                container.appendChild(badge);
+                badge.appendChild(badge); // Fixed typo logic if any, using standard innerHTML
             });
         }
 
