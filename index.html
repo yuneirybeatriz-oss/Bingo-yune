@@ -2158,23 +2158,5 @@ i<!DOCTYPE html>
             cajaChat.scrollTop = cajaChat.scrollHeight;
         }
 </script>
-<script>
-    // 1. LIMPIEZA AUTOMÁTICA SEGURA PARA EL ADMIN
-    document.addEventListener("DOMContentLoaded", function() {
-        const esAdmin = document.getElementById('panel-admin') || document.querySelector('.admin-container') || document.querySelector('.admin');
-        
-        if (!esAdmin) {
-            let elementos = document.querySelectorAll('div, p, h3, span');
-            elementos.forEach(el => {
-                if (el.innerText && (el.innerText.includes("WhatsApp") || el.innerText.includes("cartones pagados") || el.innerText.includes("Historial de Rondas"))) {
-                    if (!el.closest('#panel-chat-jugadora') && !el.closest('.admin-container') && !el.closest('#panel-admin')) {
-                        el.style.display = 'none';
-                    }
-                }
-            });
-        }
-    });
-</script>
-
 </body>
 </html>
