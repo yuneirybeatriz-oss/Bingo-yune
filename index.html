@@ -1945,16 +1945,10 @@ i<!DOCTYPE html>
         }
     </script>
 
-    <!-- === SECCIÓN DE CHAT EN VIVO Y WHATSAPP === -->
-<div id="panel-admin-whatsapp" style="display: none; background: #111; padding: 15px; border-radius: 10px; margin-top: 20px; color: #fff;">
-    <h3 style="margin-bottom: 10px;">💬 Chat en Vivo y Resumen para WhatsApp</h3>
-    <div id="lista-historial-guardado"></div>
-</div>
+    <div hidden></div>
 
-    <script>
-        function cargarHistorialEnPantalla() {
-            let historialGuardado = JSON.parse(localStorage.getItem(CLAVE_STORAGE)) || [];
-            historialGuardado = limpiarHistorialAntiguo(historialGuardado);
+        
+            
             localStorage.setItem(CLAVE_STORAGE, JSON.stringify(historialGuardado));
 
             const contenedor = document.getElementById('lista-historial-guardado');
