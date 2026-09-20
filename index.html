@@ -2005,7 +2005,7 @@ i<!DOCTYPE html>
         });
     }
 </script>
-<!-- === ZONA EXCLUSIVA PARA LA ADMINISTRADORA (BLOQUEADA PARA JUGADORAS) === -->
+<!-- === ZONA EXCLUSIVA PARA LA ADMINISTRADORA (TODO PROTEGIDO Y OCULTO PARA JUGADORAS) === -->
 <div id="admin-panel-container" style="display: none;">
 
     <!-- === SECCIÓN DE CHAT EN VIVO Y WHATSAPP === -->
@@ -2017,14 +2017,14 @@ i<!DOCTYPE html>
             <p style="color: #888; text-align: center;">Esperando mensajes de las jugadoras...</p>
         </div>
         
-        <!-- Botón para Limpiar el Chat -->
+        <!-- Botón para Limpiar el Chat (SOLO ADMIN) -->
         <button onclick="eliminarChatEnVivo()" style="background: #d9534f; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; margin-right: 10px; margin-bottom: 10px;">
             🗑️ Eliminar Chat
         </button>
 
         <hr style="border-color: #444; margin: 10px 0;">
 
-        <!-- Botón Maestro para Copiar la Lista a WhatsApp -->
+        <!-- Botón Maestro para Copiar la Lista a WhatsApp (SOLO ADMIN) -->
         <button onclick="copiarCartonesParaWhatsApp()" style="background: #25d366; color: white; border: none; padding: 12px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; font-size: 15px;">
             📋 Copiar Cartones en Juego para WhatsApp
         </button>
@@ -2056,13 +2056,12 @@ i<!DOCTYPE html>
 </div>
 <!-- === FIN DE LA ZONA DE ADMINISTRACIÓN === -->
 
-<!-- === SCRIPTS DE CONTROL === -->
+<!-- === SCRIPTS DE CONTROL Y SEGURIDAD === -->
 <script>
-    // Mostrar el panel solo si es la administración
+    // Bloqueo estricto: Oculta todo el panel si no es la administración
     document.addEventListener("DOMContentLoaded", function() {
         const adminPanel = document.getElementById("admin-panel-container");
         if (adminPanel) {
-            // Revisa si estamos en la vista de administración o si hay una sesión activa de admin
             const esAdmin = window.location.href.includes("admin") || localStorage.getItem("esAdminActivo") === "true";
             if (esAdmin) {
                 adminPanel.style.display = "flex";
