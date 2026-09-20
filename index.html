@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+i<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -1943,68 +1943,6 @@
                 container.appendChild(cardDiv);
             });
         }
-        <!-- === SECCIÓN DE CHAT EN VIVO Y COPIA DE CARTONES (BINGO LINEAL YUNE) === -->
-<div id="panel-admin-whatsapp" style="background: #111; color: #fff; padding: 15px; border-radius: 10px; margin-top: 20px; font-family: sans-serif;">
-    <h3>💬 Chat en Vivo y Resumen para WhatsApp</h3>
-    
-    <!-- Ventana del Chat -->
-    <div id="caja-chat-jugadoras" style="height: 150px; background: #222; border: 1px solid #444; border-radius: 5px; overflow-y: scroll; padding: 10px; margin-bottom: 10px; font-size: 14px;">
-        <p style="color: #888; text-align: center;">Cargando mensajes del chat...</p>
-    </div>
-
-    <!-- Botón para Eliminar/Limpiar el Chat -->
-    <button onclick="eliminarChatEnVivo()" style="background: #ff4d4d; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 15px;">
-        🗑️ Eliminar Chat
-    </button>
-
-    <hr style="border-color: #444; margin-bottom: 15px;">
-
-    <!-- Botón Maestro para Copiar la Lista Completa de Cartones al WhatsApp -->
-    <button onclick="copiarCartonesParaWhatsApp()" style="background: #25D366; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 16px; width: 100%;">
-        📋 Copiar Cartones en Juego para WhatsApp
-    </button>
-</div>
-
-<!-- Lógica JavaScript para que el sistema haga todo el trabajo -->
-<script>
-    // 1. Función para limpiar/eliminar el chat
-    function eliminarChatEnVivo() {
-        if (confirm("¿Estás segura de que quieres borrar todos los mensajes del chat?")) {
-            // Si usas Firebase, aquí se conectaría a borrar los datos. 
-            // Esto limpia la cajita visualmente de inmediato:
-            document.getElementById('caja-chat-jugadoras').innerHTML = '<p style="color: #888; text-align: center;">El chat ha sido limpiado.</p>';
-        }
-    }
-
-    // 2. Función para recopilar TODOS los cartones y copiarlos al portapapeles
-    function copiarCartonesParaWhatsApp() {
-        // Aquí el sistema recorre todos los cartones activos de la partida sin importar que estén ocultos
-        let textoParaWhatsApp = "🔥 *CARTONES EN JUEGO - BINGO LINEAL YUNE* 🔥\n\n";
-        
-        // Buscamos los elementos de los cartones en tu pantalla (esto extrae toda la data completa)
-        let cartonesActivos = document.querySelectorAll('.carton-item, .jugadora-carton'); // (Ajusta la clase si es distinta en tu código)
-        
-        if (cartonesActivos.length === 0) {
-            // Si no encuentra una clase específica, simula la extracción de los datos actuales del sistema
-            textoParaWhatsApp += "¡Atención jugadoras, la partida está en curso y los cartones ya están activos!\n";
-        } else {
-            cartonesActivos.forEach((item, index) => {
-                textoParaWhatsApp += `• ${item.innerText}\n`;
-            });
-        }
-
-        textoParaWhatsApp += "\n✨ ¡Mucha suerte a todas!";
-
-        // Copia automática al portapapeles del teléfono
-        navigator.clipboard.writeText(textoParaWhatsApp).then(() => {
-            alert("¡Copiado con éxito! Ahora solo ve a WhatsApp y pégalo en el grupo.");
-        }).catch(err => {
-            alert("Error al copiar automáticamente. Selecciona el texto manualmente si es necesario.");
-        });
-    }
-</script>
-<!-- ================================================================= -->
-
     </script>
 </body>
 </html>
