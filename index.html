@@ -2005,6 +2005,109 @@ i<!DOCTYPE html>
         });
     }
 </script>
+<!-- === MÓDULO DE HISTORIAL, RONDAS Y CIERRE DE 7 DÍAS === -->
+<div id="panel-historial-rondas" style="background: #1a1a1a; padding: 15px; border-radius: 10px; margin-top: 20px; color: #fff; border: 1px solid #333;">
+    <h3 style="margin-bottom: 10px; color: #ffc107;">📊 Control de Rondas y Cierre del Día</h3>
+    
+    <!-- Botones de Control -->
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+        <button onclick="cerrarRondaYLimpiar()" style="background: #ffc107; color: #000; border: none; padding: 10px 15px; border-radius: 5px; font-weight: bold; cursor: pointer;">
+            🔄 Cerrar Ronda (Nueva Ronda y Chat Limpio)
+        </button>
+        <button onclick="cerrarYGuardarDia()" style="background: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 5px; font-weight: bold; cursor: pointer;">
+            🔒 Cerrar y Guardar Día (Resumen Final)
+        </button>
+    </div>
+
+    <!-- Visor de Historial Guardado -->
+    <div style="background: #111; padding: 10px; border-radius: 8px; border: 1px solid #444; max-height: 200px; overflow-y: auto;">
+        <h4 style="margin-top: 0; font-size: 14px; color: #aaa;">Resumen de los últimos 7 días:</h4>
+        <div id="lista-historial-guardado" style="font-size: 12px; color: #ddd;">
+            <p style="color: #666;">No hay rondas guardadas aún para hoy.</p>
+        </div>
+    </div>
+</div>
+
+<!-- === SCRIPTS PARA EL MANEJO DE RONDAS Y RESUMEN === -->
+<script>
+    const CLAVE_STORAGE = "bingo_historial_dias_v2";
+
+    // Limpiar días mayores a 7
+    function limpiarHistorialAntiguo(historial) {
+        const ahora = new Date().getTime();
+        const sieteDiasMs = 7 * 24 * 60 * 60 * 1000;
+        return historial.filter(item => (ahora - item.timestamp) < sieteDiasMs);
+    }
+
+    // Cargar y mostrar el historial en pantalla
+    function cargarHistorialEnPantalla() {
+        let historialGuardado = JSON.parse(localStorage.getItem(CLAVE_STORAGE)) || [];
+        historialGuardado = limpiarHistorialAntiguo(historialGuardado);
+        localStorage.setItem(CLAVE_STORAGE, JSON.stringify(historialGuardado));
+
+        const contenedor = document.getElementById('lista-historial-guardado');
+        if (!contenedor) return;
+
+        if (historialGuardado.length === 0) {
+            contenedor.innerHTML = '<p style="color: #666;">No hay registros recientes (se guardan por 7 días).</p>';
+            return;
+        }
+
+        let html = "";
+        historialGuardado.forEach((dia) => {
+            html += `<div style="border-bottom: 1px solid #333; padding: 8px 0;">
+                <strong>📅 Fecha: ${dia.fecha}</strong><br>
+                🎯 Total de rondas jugadas: <span style="color: #ffc107; font-weight: bold;">${dia.totalRondas}</span>
+            </div>`;
+        });
+        contenedor.innerHTML = html;
+    }
+
+    // Función para cerrar la ronda actual: guarda en el contador, limpia el chat y avisa
+    function cerrarRondaYLimpiar() {
+        if (!confirm("¿Deseas cerrar esta ronda, limpiar el chat y preparar el sistema para la siguiente?")) return;
+
+        let historial = JSON.parse(localStorage.getItem(CLAVE_STORAGE)) || [];
+        const hoyStr = new Date().toLocaleDateString();
+        
+        let diaActual = historial.find(d => d.fecha === hoyStr);
+        if (!diaActual) {
+            diaActual = { fecha: hoyStr, timestamp: new Date().getTime(), totalRondas: 0 };
+            historial.push(diaActual);
+        }
+
+        // Sumamos una ronda más al contador del día
+        diaActual.totalRondas++;
+
+        localStorage.setItem(CLAVE_STORAGE, JSON.stringify(historial));
+
+        // Limpiamos el chat en vivo automáticamente si existe la caja en pantalla
+        const cajaChat = document.getElementById('caja-chat-jugadoras');
+        if (cajaChat) {
+            cajaChat.innerHTML = '<p style="color: #888; text-align: center;">Nueva ronda iniciada. Chat limpio.</p>';
+        }
+
+        cargarHistorialEnPantalla();
+        alert(`¡Ronda cerrada con éxito! Rondas acumuladas hoy: ${diaActual.totalRondas}`);
+    }
+
+    // Cerrar el día oficialmente con su resumen de cuentas
+    function cerrarYGuardarDia() {
+        let historial = JSON.parse(localStorage.getItem(CLAVE_STORAGE)) || [];
+        const hoyStr = new Date().toLocaleDateString();
+        let diaActual = historial.find(d => d.fecha === hoyStr);
+
+        let totalRondasHoy = diaActual ? diaActual.totalRondas : 0;
+
+        if (confirm(`=== RESUMEN DE CIERRE ===\nFecha: ${hoyStr}\nTotal de rondas jugadas hoy: ${totalRondasHoy}\n\n¿Deseas sellar y guardar la jornada de hoy?`)) {
+            alert(`¡Jornada cerrada correctamente!\n\nTus ${totalRondasHoy} rondas quedaron respaldadas en el historial por 7 días para que saques tus cuentas tranquilas.`);
+        }
+    }
+
+    window.onload = function() {
+        cargarHistorialEnPantalla();
+    };
+</script>
 
 </body>
 </html>
