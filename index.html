@@ -2005,7 +2005,7 @@ i<!DOCTYPE html>
         });
     }
 </script>
-<!-- === ZONA EXCLUSIVA PARA LA ADMINISTRADORA (TODO PROTEGIDO Y OCULTO PARA JUGADORAS) === -->
+<!-- === ZONA EXCLUSIVA PARA LA ADMINISTRADORA (TOTALMENTE BLINDADA) === -->
 <div id="admin-panel-container" style="display: none;">
 
     <!-- === SECCIÓN DE CHAT EN VIVO Y WHATSAPP === -->
@@ -2058,7 +2058,7 @@ i<!DOCTYPE html>
 
 <!-- === SCRIPTS DE CONTROL Y SEGURIDAD === -->
 <script>
-    // Bloqueo estricto: Oculta todo el panel si no es la administración
+    // Sistema de seguridad: Oculta el panel por defecto a menos que sea la admin
     document.addEventListener("DOMContentLoaded", function() {
         const adminPanel = document.getElementById("admin-panel-container");
         if (adminPanel) {
@@ -2172,3 +2172,4 @@ i<!DOCTYPE html>
 
 </body>
 </html>
+
