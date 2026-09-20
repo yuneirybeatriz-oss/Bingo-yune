@@ -85,6 +85,11 @@
         <!-- PANTALLA INICIAL -->
         <div id="view-home" class="w-full bg-slate-800/80 backdrop-blur border border-slate-700 p-6 md:p-8 rounded-3xl card-shadow flex flex-col items-center gap-6 max-w-md">
             <h2 class="text-2xl font-bold text-yellow-300">¡Bienvenida a la Diversión!</h2>
+            
+            <div id="home-room-status-badge" class="w-full text-center py-2 px-4 rounded-xl text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                🟢 Sala Abierta a Jugadoras
+            </div>
+
             <button onclick="showPlayerLogin()" class="w-full py-4 bg-gradient-to-r from-pink-600 to-purple-600 font-bold text-lg rounded-2xl shadow-lg">🎮 Entrar como Jugadora</button>
             <button onclick="showAdminLogin()" class="w-full py-3 bg-slate-700 text-slate-300 font-semibold text-sm rounded-2xl">🔐 Acceso Administradora</button>
         </div>
@@ -104,22 +109,35 @@
         <div id="view-player-register" class="w-full bg-slate-800/80 p-6 rounded-3xl card-shadow flex flex-col items-center gap-6 max-w-md hidden">
             <h2 class="text-2xl font-bold text-yellow-300 text-center">Registro de Jugadora</h2>
             <div id="welcome-back-msg" class="text-green-400 font-semibold text-center hidden"></div>
-            <div class="w-full flex flex-col gap-4">
+            
+            <!-- AVISO DE SALA CERRADA -->
+            <div id="room-closed-warning" class="hidden w-full bg-red-950/80 border border-red-600 text-red-200 p-4 rounded-2xl text-center font-bold text-xs flex flex-col gap-1">
+                <span>🔒 ¡La sala de juego está cerrada por la Administradora en este momento!</span>
+                <span class="text-[10px] text-slate-300 font-normal">No se permiten nuevos ingresos ni accesos hasta nuevo aviso.</span>
+            </div>
+
+            <div class="w-full flex flex-col gap-4" id="player-register-form-fields">
                 <input type="text" id="player-name-input" placeholder="Tu Nombre o Apodo" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white">
                 <input type="text" id="player-control-input" maxlength="10" placeholder="Número de Control (10 dígitos)" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono">
                 <input type="password" id="player-access-code-input" placeholder="🔑 Código de Acceso de Sala" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-center text-white tracking-widest font-bold">
             </div>
             <div class="flex gap-3 w-full">
                 <button onclick="backToHome()" class="w-1/2 py-3 bg-slate-700 rounded-xl font-semibold">Volver</button>
-                <button onclick="registerPlayer()" class="w-1/2 py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-bold">Entrar al Juego</button>
+                <button id="btn-submit-player-login" onclick="registerPlayer()" class="w-1/2 py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-bold">Entrar al Juego</button>
             </div>
         </div>
 
         <!-- PANEL ADMIN -->
         <div id="view-admin-panel" class="w-full flex flex-col gap-6 hidden">
-            <div class="bg-slate-800 p-6 rounded-3xl flex justify-between items-center">
+            <div class="bg-slate-800 p-6 rounded-3xl flex justify-between items-center flex-wrap gap-3">
                 <h2 class="text-2xl font-bold text-pink-400">Torre de Control</h2>
-                <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 text-xs rounded-xl">Salir</button>
+                <div class="flex gap-2 items-center">
+                    <!-- BOTÓN MAESTRO DE CIERRE DE SALA -->
+                    <button id="admin-toggle-room-btn" onclick="toggleRoomLockAdmin()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow transition">
+                        🟢 Sala Abierta (Cerrar)
+                    </button>
+                    <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 text-xs rounded-xl">Salir</button>
+                </div>
             </div>
 
             <!-- ALERTA DE GANADORES MÚLTIPLES -->
@@ -169,10 +187,10 @@
                 <div class="flex justify-between items-center flex-wrap gap-2">
                     <div class="flex items-center gap-2">
                         <span class="text-2xl">💳</span>
-                        <h3 class="font-bold text-purple-300 text-lg">Control de Billeteras y Créditos Exclusivos</h3>
+                        <h3 class="font-bold text-purple-300 text-lg">Control de Billeteras, Créditos y Exclusión</h3>
                     </div>
                 </div>
-                <p class="text-xs text-slate-400">Asigna saldo o activa el **Crédito Exclusivo** solo a las jugadoras de tu confianza para que puedan jugar sin saldo.</p>
+                <p class="text-xs text-slate-400">Asigna saldo, activa crédito exclusivo o **elimina del sistema** a cualquier jugadora con un solo toque.</p>
                 <div id="admin-wallets-list" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto p-3 bg-slate-900/80 rounded-2xl border border-slate-700/60">
                     <span class="text-slate-500 text-xs col-span-2 text-center py-4">Cargando billeteras...</span>
                 </div>
@@ -410,6 +428,7 @@
         let gamePattern = 'line';
         let marketCards = {}; 
         let cardPrice = 300;
+        let isRoomLocked = false;
         let autoDrawInterval = null;
         let isAutoRunning = false;
         let adminSecretKey = 'June 2026';
@@ -744,6 +763,15 @@
                 if (adminMsg) adminMsg.innerText = "🔑 Clave recordada automáticamente. ¡Solo presiona Ingresar!";
             }
 
+            // Escuchar estado global de la sala (incluyendo bloqueo)
+            db.ref('room').on('value', (snapshot) => {
+                let data = snapshot.val();
+                if (!data) return;
+
+                isRoomLocked = data.isRoomLocked || false;
+                actualizarEstadoBloqueoUI(isRoomLocked);
+            });
+
             db.ref('room/announcement').on('value', (snap) => {
                 let anuncio = snap.val();
                 if (anuncio && anuncio.timestamp > lastAnnouncementId) {
@@ -753,9 +781,66 @@
             });
         };
 
+        function actualizarEstadoBloqueoUI(cerrado) {
+            let badgeHome = document.getElementById('home-room-status-badge');
+            let warningReg = document.getElementById('room-closed-warning');
+            let formFields = document.getElementById('player-register-form-fields');
+            let submitBtn = document.getElementById('btn-submit-player-login');
+            let adminToggleBtn = document.getElementById('admin-toggle-room-btn');
+
+            if (cerrado) {
+                if (badgeHome) {
+                    badgeHome.className = "w-full text-center py-2 px-4 rounded-xl text-xs font-bold bg-red-500/20 text-red-300 border border-red-500/40";
+                    badgeHome.innerText = "🔒 Sala Cerrada por la Administradora";
+                }
+                if (warningReg) warningReg.classList.remove('hidden');
+                if (formFields) formFields.classList.add('opacity-40', 'pointer-events-none');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+                if (adminToggleBtn) {
+                    adminToggleBtn.className = "px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-xl shadow transition";
+                    adminToggleBtn.innerText = "🔒 Sala Cerrada (Abrir)";
+                }
+            } else {
+                if (badgeHome) {
+                    badgeHome.className = "w-full text-center py-2 px-4 rounded-xl text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40";
+                    badgeHome.innerText = "🟢 Sala Abierta a Jugadoras";
+                }
+                if (warningReg) warningReg.classList.add('hidden');
+                if (formFields) formFields.classList.remove('opacity-40', 'pointer-events-none');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+                if (adminToggleBtn) {
+                    adminToggleBtn.className = "px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow transition";
+                    adminToggleBtn.innerText = "🟢 Sala Abierta (Cerrar)";
+                }
+            }
+        }
+
+        function toggleRoomLockAdmin() {
+            let nuevoEstado = !isRoomLocked;
+            db.ref('room/isRoomLocked').set(nuevoEstado).then(() => {
+                if (nuevoEstado) {
+                    alert("🔒 ¡Sala cerrada con éxito! Ninguna jugadora podrá entrar al sistema hasta que la vuelvas a abrir.");
+                } else {
+                    alert("🟢 ¡Sala abierta! Las jugadoras ya pueden ingresar nuevamente.");
+                }
+            });
+        }
+
         function showPlayerLogin() {
-            document.getElementById('view-home').classList.add('hidden');
-            document.getElementById('view-player-register').classList.remove('hidden');
+            db.ref('room/isRoomLocked').once('value', (snap) => {
+                if (snap.val() === true) {
+                    alert("🔒 La sala está cerrada temporalmente por la Administradora. No hay acceso en este momento.");
+                    return;
+                }
+                document.getElementById('view-home').classList.add('hidden');
+                document.getElementById('view-player-register').classList.remove('hidden');
+            });
         }
 
         function showAdminLogin() {
@@ -802,56 +887,64 @@
         }
 
         function registerPlayer() {
-            let name = document.getElementById('player-name-input').value.trim();
-            let control = document.getElementById('player-control-input').value.trim();
-            let code = document.getElementById('player-access-code-input').value.trim();
-
-            if (!name || !control || !code) {
-                alert("Por favor completa todos los campos.");
-                return;
-            }
-
-            if (control.length !== 10) {
-                alert("El número de control debe tener exactamente 10 dígitos (cédula o teléfono).");
-                return;
-            }
-
-            db.ref('room/roomCode').once('value', (snap) => {
-                let currentRoomCode = snap.val() || 'BINGO2026';
-                if (code !== currentRoomCode) {
-                    alert("El código de sala es incorrecto.");
+            db.ref('room/isRoomLocked').once('value', (snapLock) => {
+                if (snapLock.val() === true) {
+                    alert("🔒 La sala está cerrada. Acceso denegado.");
                     return;
                 }
 
-                localStorage.setItem('bingo_player_name', name);
-                localStorage.setItem('bingo_player_control', control);
-                localStorage.setItem('bingo_player_code', code);
+                let name = document.getElementById('player-name-input').value.trim();
+                let control = document.getElementById('player-control-input').value.trim();
+                let code = document.getElementById('player-access-code-input').value.trim();
 
-                currentUser.name = name;
-                currentUser.control = control;
-                currentUser.isAdmin = false;
+                if (!name || !control || !code) {
+                    alert("Por favor completa todos los campos.");
+                    return;
+                }
 
-                registrarPresenciaJugadora(name, control);
+                if (control.length !== 10) {
+                    alert("El número de control debe tener exactamente 10 dígitos (cédula o teléfono).");
+                    return;
+                }
 
-                db.ref(`users/${control}`).once('value').then((userSnap) => {
-                    if (!userSnap.exists()) {
-                        db.ref(`users/${control}`).set({
-                            name: name,
-                            balance: 0.00,
-                            isCredit: false
-                        });
-                    } else {
-                        db.ref(`users/${control}/name`).set(name);
+                db.ref('room/roomCode').once('value', (snap) => {
+                    let currentRoomCode = snap.val() || 'BINGO2026';
+                    if (code !== currentRoomCode) {
+                        alert("El código de sala es incorrecto.");
+                        return;
                     }
+
+                    // Verificar si esta jugadora fue eliminada/expulsada o si tiene cuenta previa
+                    db.ref(`users/${control}`).once('value').then((userSnap) => {
+                        localStorage.setItem('bingo_player_name', name);
+                        localStorage.setItem('bingo_player_control', control);
+                        localStorage.setItem('bingo_player_code', code);
+
+                        currentUser.name = name;
+                        currentUser.control = control;
+                        currentUser.isAdmin = false;
+
+                        registrarPresenciaJugadora(name, control);
+
+                        if (!userSnap.exists()) {
+                            db.ref(`users/${control}`).set({
+                                name: name,
+                                balance: 0.00,
+                                isCredit: false
+                            });
+                        } else {
+                            db.ref(`users/${control}/name`).set(name);
+                        }
+
+                        document.getElementById('view-player-register').classList.add('hidden');
+                        document.getElementById('view-player-room').classList.remove('hidden');
+
+                        document.getElementById('player-display-name').innerText = name;
+                        document.getElementById('player-display-control').innerText = control;
+
+                        sincronizarDatosJugadora();
+                    });
                 });
-
-                document.getElementById('view-player-register').classList.add('hidden');
-                document.getElementById('view-player-room').classList.remove('hidden');
-
-                document.getElementById('player-display-name').innerText = name;
-                document.getElementById('player-display-control').innerText = control;
-
-                sincronizarDatosJugadora();
             });
         }
 
@@ -864,6 +957,7 @@
                 gamePattern = data.gamePattern || 'line';
                 marketCards = data.marketCards || {};
                 cardPrice = data.cardPrice || 300;
+                isRoomLocked = data.isRoomLocked || false;
 
                 let selectPattern = document.getElementById('game-pattern-select');
                 if (selectPattern) selectPattern.value = gamePattern;
@@ -921,6 +1015,13 @@
                 marketCards = data.marketCards || {};
                 cardPrice = data.cardPrice || 300;
 
+                // Si la administradora cerró la sala mientras la jugadora estaba dentro, la sacamos de inmediato
+                if (data.isRoomLocked) {
+                    alert("🔒 La administradora ha cerrado la sala. Cerrando sesión por seguridad.");
+                    backToHome();
+                    return;
+                }
+
                 let btnCargar = document.getElementById('btn-cargar-cartones');
                 if (btnCargar) btnCargar.innerText = `📥 Cargar / Confirmar Mis Cartones ($${cardPrice.toLocaleString()} c/u)`;
 
@@ -956,7 +1057,14 @@
             });
 
             db.ref(`users/${currentUser.control}`).on('value', (snap) => {
-                let userData = snap.val() || { balance: 0, isCredit: false };
+                let userData = snap.val();
+                if (!userData) {
+                    // Si la jugadora fue eliminada por la admin, su nodo de usuario se borra y la sacamos
+                    alert("⚠️ Has sido eliminada del sistema por la Administradora.");
+                    backToHome();
+                    return;
+                }
+
                 let balance = userData.balance || 0;
                 let isCredit = userData.isCredit || false;
 
@@ -1117,7 +1225,7 @@
                             <div class="mt-1.5 flex gap-1 justify-end flex-wrap">
                                 <button onclick="setPositiveBalanceAdmin('${code}', '${user.name}')" class="text-[9px] bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-0.5 rounded font-semibold">＋ Saldo</button>
                                 <button onclick="toggleCreditAdmin('${code}', '${user.name}', ${!isCredit})" class="text-[9px] ${isCredit ? 'bg-amber-700' : 'bg-slate-700 hover:bg-amber-600'} text-white px-2 py-0.5 rounded font-semibold">${isCredit ? 'Quitar Crédito' : 'Dar Crédito'}</button>
-                                <button onclick="resetBalanceAdmin('${code}', '${user.name}')" class="text-[9px] bg-red-600/80 hover:bg-red-600 text-white px-2 py-0.5 rounded font-semibold">En Cero</button>
+                                <button onclick="eliminarJugadorSistema('${code}', '${user.name}')" class="text-[9px] bg-red-600 hover:bg-red-500 text-white px-2 py-0.5 rounded font-semibold">🗑️ Eliminar</button>
                             </div>
                         </div>
                     `;
@@ -1149,13 +1257,21 @@
             renderizarAdminWallets();
         }
 
-        function resetBalanceAdmin(code, name) {
-            if (confirm(`¿Estás segura de reiniciar en cero el saldo de ${name}?`)) {
-                db.ref(`users/${code}`).update({
-                    balance: 0,
-                    isCredit: false
-                });
-                alert(`¡Listo! El saldo de ${name} ha quedado en cero.`);
+        function eliminarJugadorSistema(controlJugadora, nombreJugadora) {
+            if (confirm(`¿Estás segura de eliminar por completo a ${nombreJugadora} (Control: ${controlJugadora}) del sistema? Sus cartones serán liberados y su cuenta borrada.`)) {
+                // Liberar cartones
+                for (let id in marketCards) {
+                    if (marketCards[id].ownerControl === controlJugadora) {
+                        db.ref(`room/marketCards/${id}`).update({ owner: null, ownerControl: null, loaded: false, paid: false });
+                    }
+                }
+                // Borrar presencia en sala
+                let safeCtrl = controlJugadora.replace(/[.#$\/\[\]]/g, "_");
+                db.ref(`room/connectedPlayers/${safeCtrl}`).remove();
+                // Borrar registro de usuario/billetera
+                db.ref(`users/${controlJugadora}`).remove();
+
+                alert(`¡${nombreJugadora} ha sido eliminada del sistema con éxito!`);
                 renderizarAdminWallets();
             }
         }
@@ -1201,7 +1317,7 @@
                         <button onclick="togglePaidAllJugadora('${j.control}', ${!todosPagados})" class="px-3 py-1 rounded-lg font-bold text-xs ${todosPagados ? 'bg-green-600 text-white' : 'bg-amber-600/30 text-amber-300 border border-amber-500/50'}">
                             ${todosPagados ? 'Pagado' : 'Pendiente'}
                         </button>
-                        <button onclick="eliminarJugadorSistema('${j.control}', '${j.name}')" class="px-2 py-1 bg-red-600/30 hover:bg-red-600 text-red-200 rounded-lg font-bold text-[10px]" title="Liberar y expulsar">❌</button>
+                        <button onclick="eliminarJugadorSistema('${j.control}', '${j.name}')" class="px-2 py-1 bg-red-600/30 hover:bg-red-600 text-red-200 rounded-lg font-bold text-[10px]" title="Eliminar del sistema">❌</button>
                     </div>
                 `;
                 container.appendChild(div);
@@ -1213,19 +1329,6 @@
                 if (marketCards[id].ownerControl === controlJugadora) {
                     db.ref(`room/marketCards/${id}/paid`).set(nuevoEstado);
                 }
-            }
-        }
-
-        function eliminarJugadorSistema(controlJugadora, nombreJugadora) {
-            if (confirm(`¿Estás segura de sacar a ${nombreJugadora} (Control: ${controlJugadora}) de la partida? Sus cartones serán liberados.`)) {
-                for (let id in marketCards) {
-                    if (marketCards[id].ownerControl === controlJugadora) {
-                        db.ref(`room/marketCards/${id}`).update({ owner: null, ownerControl: null, loaded: false, paid: false });
-                    }
-                }
-                let safeCtrl = controlJugadora.replace(/[.#$\/\[\]]/g, "_");
-                db.ref(`room/connectedPlayers/${safeCtrl}`).remove();
-                alert(`¡${nombreJugadora} ha sido sacada de la partida con éxito y sus cartones liberados!`);
             }
         }
 
@@ -1304,7 +1407,7 @@
                     </div>
                     <div class="flex justify-between items-center text-[11px] pl-4 border-l-2 border-pink-500/50 mt-0.5">
                         ${cartonesTexto}
-                        <span class="text-pink-400 font-semibold">${cartonesActivos.length} en juego</span>
+                        <button onclick="eliminarJugadorSistema('${jugadora.control}', '${jugadora.name}')" class="text-[10px] bg-red-600 hover:bg-red-500 text-white px-2 py-0.5 rounded font-bold">🗑️ Expulsar</button>
                     </div>
                 `;
                 container.appendChild(div);
@@ -1719,7 +1822,6 @@
 
                 let costoTotal = cartonesNuevos * cardPrice;
 
-                // Si NO tiene crédito activo, validamos estrictamente su saldo
                 if (!isCredit && balance < costoTotal) {
                     alert(`Saldo insuficiente. Necesitas ${costoTotal.toLocaleString()} y tienes ${balance.toLocaleString()}. Comunícate con Yune para recargar.`);
                     return;
@@ -1727,7 +1829,6 @@
 
                 let nuevoSaldo = balance - costoTotal;
                 
-                // Si tiene crédito activo, permitimos que juegue sin restar de su saldo
                 if (!isCredit) {
                     db.ref(`users/${currentUser.control}/balance`).set(nuevoSaldo);
                 }
