@@ -1,4 +1,7 @@
-<!DOCTYPE html>
+
+Yuneiry Melendez <yuneirybeatriz@gmail.com>	20 de septiembre de 2026 a las 12:51
+Para: erickparedes717@gmail.com
+i<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -1926,15 +1929,32 @@
                     }
                 }
                 htmlGrid += '</div>';
-    <script>
-        const CLAVE_STORAGE = "bingo_historial_rondas_7dias";
 
-        function limpiarHistorialAntiguo(historial) {
-            const ahora = new Date().getTime();
-            const sieteDiasMs = 7 * 24 * 60 * 60 * 1000;
-            return historial.filter(item => (ahora - item.timestamp) < sieteDiasMs);
+                let faltantesStr = analisis.faltantes.map(n => n === 0 ? '⭐' : '#' + n).join(', ');
+
+                cardDiv.innerHTML = `
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-bold text-yellow-300">Cartón #${card.id} ${gano ? '👑 ¡BINGO!' : estaAUna ? '🔥 ¡A UNA BOLITA!' : ''}</span>
+                        <span class="text-[10px] text-slate-400">${card.paid ? '💰 Pagado' : '⏳ Por Pagar'}</span>
+                    </div>
+                    ${htmlGrid}
+                    <div class="text-[11px] bg-slate-950 p-2 rounded-xl border border-slate-800 flex justify-between items-center">
+                        <div><span class="text-slate-400">Le falta(n):</span> <span class="text-pink-400 font-bold">${analisis.count === 0 ? '¡Listo!' : faltantesStr}</span></div>
+                        ${estaAUna ? '<span class="text-[10px] bg-yellow-400 text-slate-950 px-2 py-0.5 rounded-full font-extrabold animate-bounce">⏱️ ¡CANTANDO!</span>' : ''}
+                    </div>
+                `;
+                container.appendChild(cardDiv);
+            });
         }
+    </script>
 
+    <!-- === SECCIÓN DE CHAT EN VIVO Y WHATSAPP === -->
+    <div id="panel-admin-whatsapp" style="background: #111; padding: 15px; border-radius: 10px; margin-top: 20px; color: #fff;">
+        <h3 style="margin-bottom: 10px;">💬 Chat en Vivo y Resumen para WhatsApp</h3>
+        <div id="lista-historial-guardado"></div>
+    </div>
+
+    <script>
         function cargarHistorialEnPantalla() {
             let historialGuardado = JSON.parse(localStorage.getItem(CLAVE_STORAGE)) || [];
             historialGuardado = limpiarHistorialAntiguo(historialGuardado);
@@ -1943,7 +1963,75 @@
             const contenedor = document.getElementById('lista-historial-guardado');
             if (!contenedor) return;
 
-                <script>
+            if (historialGuardado.length === 0) {
+                contenedor.innerHTML = '<p style="color: #666;">No hay registros recientes (se guardan por 7 días).</p>';
+                return;
+            }
+
+            let html = "";
+            historialGuardado.forEach((dia) => {
+                html += `<div style="border-bottom: 1px solid #333; padding: 8px 0;">
+                    <strong>📅 Fecha: ${dia.fecha}</strong><br>
+                    🎯 Total de rondas jugadas: <span style="color: #ffc107; font-weight: bold;">${dia.totalRondas}</span>
+                </div>`;
+            });
+            contenedor.innerHTML = html;
+        }
+
+        function cerrarRondaYLimpiar() {
+            if (!confirm("¿Deseas cerrar esta ronda, limpiar el chat y preparar el sistema para la siguiente?")) return;
+
+            let historial = JSON.parse(localStorage.getItem(CLAVE_STORAGE)) || [];
+            const hoyStr = new Date().toLocaleDateString();
+            
+            let diaActual = historial.find(d => d.fecha === hoyStr);
+            if (!diaActual) {
+                diaActual = { fecha: hoyStr, timestamp: new Date().getTime(), totalRondas: 0 };
+                historial.push(diaActual);
+            }
+
+            diaActual.totalRondas++;
+            localStorage.setItem(CLAVE_STORAGE, JSON.stringify(historial));
+
+            const cajaChat = document.getElementById('caja-chat-jugadoras');
+            if (cajaChat) {
+                cajaChat.innerHTML = '<p style="color: #888; text-align: center;">Nueva ronda iniciada. Chat limpio.</p>';
+            }
+
+            cargarHistorialEnPantalla();
+            alert(`¡Ronda cerrada con éxito! Rondas acumuladas hoy: ${diaActual.totalRondas}`);
+        }
+
+        function cerrarYGuardarDia() {
+            let historial = JSON.parse(localStorage.getItem(CLAVE_STORAGE)) || [];
+            const hoyStr = new Date().toLocaleDateString();
+            let diaActual = historial.find(d => d.fecha === hoyStr);
+
+            let totalRondasHoy = diaActual ? diaActual.totalRondas : 0;
+
+            if (confirm(`=== RESUMEN DE CIERRE ===\nFecha: ${hoyStr}\nTotal de rondas jugadas hoy: ${totalRondasHoy}\n\n¿Deseas sellar y guardar la jornada de hoy?`)) {
+                alert(`¡Jornada cerrada correctamente!\n\nTus ${totalRondasHoy} rondas quedaron respaldadas en el historial por 7 días para que saques tus cuentas tranquilas.`);
+            }
+        }
+
+        cargarHistorialEnPantalla();
+    </script>
+    <!-- === SECCIÓN DE CHAT EN VIVO, WHATSAPP E HISTORIAL (7 DÍAS) === -->
+    <div id="panel-admin-whatsapp" style="background: #111; padding: 15px; border-radius: 10px; margin-top: 20px; color: #fff;">
+        <h3 style="margin-bottom: 10px;">💬 Chat en Vivo, WhatsApp y Resumen</h3>
+        
+        <!-- Botón para enviar lista de cartones pagados a WhatsApp -->
+        <button onclick="enviarListaWhatsApp()" style="background: #25D366; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 15px; width: 100%;">
+            📱 Enviar Lista de Cartones Pagados a WhatsApp
+        </button>
+
+        <div style="margin-top: 10px; border-top: 1px solid #333; padding-top: 10px;">
+            <h4 style="font-size: 14px; color: #ffc107; margin-bottom: 5px;">📅 Historial de Rondas (Guardado por 7 días)</h4>
+            <div id="lista-historial-guardado"></div>
+        </div>
+    </div>
+
+    <script>
         const CLAVE_STORAGE = "bingo_historial_rondas_7dias";
 
         function limpiarHistorialAntiguo(historial) {
@@ -2034,42 +2122,44 @@
             window.open(url, '_blank');
         }
 
+        // Ejecutar al cargar la página
         cargarHistorialEnPantalla();
     </script>
-
-    <!-- === SECCIÓN DE CHAT EN VIVO PARA LAS JUGADORAS === -->
-    <div id="panel-chat-jugadora" style="background: #1a1a1a; padding: 15px; border-radius: 10px; margin-top: 20px; color: #fff;">
-        <h3 style="margin-bottom: 10px; font-size: 14px; color: #ffc107;">💬 Chat de la Sala</h3>
-        
-        <div id="caja-chat-jugadoras" style="background: #111; height: 120px; overflow-y: auto; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 12px; border: 1px solid #333;">
-            <p style="color: #888; text-align: center;">¡Bienvenidos al chat de la sala!</p>
-        </div>
-
-        <div style="display: flex; gap: 8px;">
-            <input type="text" id="input-mensaje-jugadora" placeholder="Escribe tu mensaje..." style="flex: 1; background: #222; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 6px; font-size: 12px;" onkeypress="if(event.key === 'Enter') enviarMensajeChat()">
-            <button onclick="enviarMensajeChat()" style="background: #db2777; color: white; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">Enviar</button>
-        </div>
+<!-- === SECCIÓN DE CHAT EN VIVO PARA LAS JUGADORAS === -->
+<div id="panel-chat-jugadora" style="background: #1a1a1a; padding: 15px; border-radius: 10px; margin-top: 20px; color: #fff;">
+    <h3 style="margin-bottom: 10px; font-size: 14px; color: #ffc107;">💬 Chat de la Sala</h3>
+    
+    <!-- Caja donde se muestran los mensajes -->
+    <div id="caja-chat-jugadoras" style="background: #111; height: 120px; overflow-y: auto; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 12px; border: 1px solid #333;">
+        <p style="color: #888; text-align: center;">¡Bienvenidos al chat de la sala!</p>
     </div>
 
-    <script>
-        function enviarMensajeChat() {
-            let input = document.getElementById('input-mensaje-jugadora');
-            let mensajeTexto = input.value.trim();
-            
-            if (mensajeTexto === "") return;
+    <!-- Input para escribir y botón de enviar -->
+    <div style="display: flex; gap: 8px;">
+        <input type="text" id="input-mensaje-jugadora" placeholder="Escribe tu mensaje..." style="flex: 1; background: #222; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 6px; font-size: 12px;" onkeypress="if(event.key === 'Enter') enviarMensajeChat()">
+        <button onclick="enviarMensajeChat()" style="background: #db2777; color: white; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">Enviar</button>
+    </div>
+</div>
 
-            let cajaChat = document.getElementById('caja-chat-jugadoras');
-            if (cajaChat) {
-                if (cajaChat.innerHTML.includes("Bienvenidos")) {
-                    cajaChat.innerHTML = "";
-                }
-                cajaChat.innerHTML += `<div style="margin-bottom: 5px;"><strong>${currentUser ? currentUser.name : 'Jugadora'}</strong>: ${mensajeTexto}</div>`;
-                cajaChat.scrollTop = cajaChat.scrollHeight;
+<script>
+    function enviarMensajeChat() {
+        let input = document.getElementById('input-mensaje-jugadora');
+        let mensajeTexto = input.value.trim();
+        
+        if (mensajeTexto === "") return;
+
+        // Aquí puedes conectar con tu base de datos de Firebase si usas una ruta de chat, por ejemplo:
+        // db.ref('room/chat').push({ name: currentUser.name, text: mensajeTexto, timestamp: Date.now() });
+
+        // Simulación local para que vean su mensaje de inmediato en pantalla:
+        let cajaChat = document.getElementById('caja-chat-jugadoras');
+        if (cajaChat) {
+            if (cajaChat.innerHTML.includes("Bienvenidos")) {
+                cajaChat.innerHTML = ""; // Limpia el mensaje de bienvenida inicial
             }
-            input.value = "";
+            cajaChat.innerHTML += `<div style="margin-bottom: 5px;"><strong>${currentUser ? currentUser.name : 'Jugadora'}</strong>: ${mensajeTexto}</div>`;
+            cajaChat.scrollTop = cajaChat.scrollHeight;
         }
-    </script>
+</script>
 </body>
 </html>
-
-        
