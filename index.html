@@ -2013,6 +2013,115 @@ i<!DOCTYPE html>
 
         cargarHistorialEnPantalla();
     </script>
+    <!-- === SECCIÓN DE CHAT EN VIVO, WHATSAPP E HISTORIAL (7 DÍAS) === -->
+    <div id="panel-admin-whatsapp" style="background: #111; padding: 15px; border-radius: 10px; margin-top: 20px; color: #fff;">
+        <h3 style="margin-bottom: 10px;">💬 Chat en Vivo, WhatsApp y Resumen</h3>
+        
+        <!-- Botón para enviar lista de cartones pagados a WhatsApp -->
+        <button onclick="enviarListaWhatsApp()" style="background: #25D366; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 15px; width: 100%;">
+            📱 Enviar Lista de Cartones Pagados a WhatsApp
+        </button>
+
+        <div style="margin-top: 10px; border-top: 1px solid #333; padding-top: 10px;">
+            <h4 style="font-size: 14px; color: #ffc107; margin-bottom: 5px;">📅 Historial de Rondas (Guardado por 7 días)</h4>
+            <div id="lista-historial-guardado"></div>
+        </div>
+    </div>
+
+    <script>
+        const CLAVE_STORAGE = "bingo_historial_rondas_7dias";
+
+        function limpiarHistorialAntiguo(historial) {
+            const ahora = new Date().getTime();
+            const sieteDiasMs = 7 * 24 * 60 * 60 * 1000;
+            return historial.filter(item => (ahora - item.timestamp) < sieteDiasMs);
+        }
+
+        function cargarHistorialEnPantalla() {
+            let historialGuardado = JSON.parse(localStorage.getItem(CLAVE_STORAGE)) || [];
+            historialGuardado = limpiarHistorialAntiguo(historialGuardado);
+            localStorage.setItem(CLAVE_STORAGE, JSON.stringify(historialGuardado));
+
+            const contenedor = document.getElementById('lista-historial-guardado');
+            if (!contenedor) return;
+
+            if (historialGuardado.length === 0) {
+                contenedor.innerHTML = '<p style="color: #666; font-size: 12px;">No hay registros recientes (se guardan por 7 días).</p>';
+                return;
+            }
+
+            let html = "";
+            historialGuardado.forEach((dia) => {
+                html += `<div style="border-bottom: 1px solid #333; padding: 6px 0; font-size: 12px;">
+                    <strong>📅 Fecha: ${dia.fecha}</strong><br>
+                    🎯 Total de rondas jugadas: <span style="color: #ffc107; font-weight: bold;">${dia.totalRondas}</span>
+                </div>`;
+            });
+            contenedor.innerHTML = html;
+        }
+
+        function cerrarRondaYLimpiar() {
+            if (!confirm("¿Deseas cerrar esta ronda, limpiar el chat y preparar el sistema para la siguiente?")) return;
+
+            let historial = JSON.parse(localStorage.getItem(CLAVE_STORAGE)) || [];
+            const hoyStr = new Date().toLocaleDateString();
+            
+            let diaActual = historial.find(d => d.fecha === hoyStr);
+            if (!diaActual) {
+                diaActual = { fecha: hoyStr, timestamp: new Date().getTime(), totalRondas: 0 };
+                historial.push(diaActual);
+            }
+
+            diaActual.totalRondas++;
+            localStorage.setItem(CLAVE_STORAGE, JSON.stringify(historial));
+
+            const cajaChat = document.getElementById('caja-chat-jugadoras');
+            if (cajaChat) {
+                cajaChat.innerHTML = '<p style="color: #888; text-align: center;">Nueva ronda iniciada. Chat limpio.</p>';
+            }
+
+            cargarHistorialEnPantalla();
+            alert(`¡Ronda cerrada con éxito! Rondas acumuladas hoy: ${diaActual.totalRondas}`);
+        }
+
+        function cerrarYGuardarDia() {
+            let historial = JSON.parse(localStorage.getItem(CLAVE_STORAGE)) || [];
+            const hoyStr = new Date().toLocaleDateString();
+            let diaActual = historial.find(d => d.fecha === hoyStr);
+
+            let totalRondasHoy = diaActual ? diaActual.totalRondas : 0;
+
+            if (confirm(`=== RESUMEN DE CIERRE ===\nFecha: ${hoyStr}\nTotal de rondas jugadas hoy: ${totalRondasHoy}\n\n¿Deseas sellar y guardar la jornada de hoy?`)) {
+                alert(`¡Jornada cerrada correctamente!\n\nTus ${totalRondasHoy} rondas quedaron respaldadas en el historial por 7 días para que saques tus cuentas tranquilas.`);
+            }
+        }
+
+        function enviarListaWhatsApp() {
+            let mensaje = "📋 *LISTA DE CARTONES PAGADOS - BINGO LINEAL YUNE* 📋\n\n";
+            let count = 0;
+
+            for (let id in marketCards) {
+                let card = marketCards[id];
+                if (card.owner && card.loaded) {
+                    mensaje += `• Cartón #${card.id} - ${card.owner}\n`;
+                    count++;
+                }
+            }
+
+            if (count === 0) {
+                alert("No hay cartones pagados en este momento.");
+                return;
+            }
+
+            mensaje += `\n🎯 *Total de cartones en juego:* ${count}`;
+            
+            let url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
+            window.open(url, '_blank');
+        }
+
+        // Ejecutar al cargar la página
+        cargarHistorialEnPantalla();
+    </script>
 
 </body>
 </html>
