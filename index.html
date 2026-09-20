@@ -2161,6 +2161,21 @@ i<!DOCTYPE html>
         input.value = "";
     }
 </script>
+<script>
+    // 1. LIMPIEZA AUTOMÁTICA: Esto borra cualquier texto de WhatsApp o admin que aparezca por error en la jugadora
+    document.addEventListener("DOMContentLoaded", function() {
+        // Buscamos y ocultamos/eliminamos elementos que tengan que ver con WhatsApp o listas de pago en la vista de jugadora
+        let elementos = document.querySelectorAll('div, p, h3, span');
+        elementos.forEach(el => {
+            if (el.innerText && (el.innerText.includes("WhatsApp") || el.innerText.includes("cartones pagados") || el.innerText.includes("Historial de Rondas"))) {
+                // Si no es el chat principal, lo eliminamos de la pantalla de la jugadora
+                if (!el.closest('#panel-chat-jugadora')) {
+                    el.style.display = 'none';
+                }
+            }
+        });
+    });
+</script>
 
 </body>
 </html>
