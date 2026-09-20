@@ -2005,8 +2005,8 @@ i<!DOCTYPE html>
         });
     }
 </script>
-<!-- === INICIO ZONA EXCLUSIVA DE LA ADMINISTRADORA === -->
-<div id="view-admin-panel" class="w-full flex flex-col gap-6">
+<!-- === ZONA EXCLUSIVA PARA LA ADMINISTRADORA (BLOQUEADA PARA JUGADORAS) === -->
+<div id="admin-panel-container" style="display: none;">
 
     <!-- === SECCIÓN DE CHAT EN VIVO Y WHATSAPP === -->
     <div id="panel-admin-whatsapp" style="background: #111; padding: 15px; border-radius: 10px; margin-top: 20px; color: #fff;">
@@ -2054,11 +2054,24 @@ i<!DOCTYPE html>
     </div>
 
 </div>
-<!-- === FIN ZONA EXCLUSIVA DE LA ADMINISTRADORA === -->
+<!-- === FIN DE LA ZONA DE ADMINISTRACIÓN === -->
 
-<!-- === SCRIPTS DEL CHAT, WHATSAPP Y RONDAS === -->
+<!-- === SCRIPTS DE CONTROL === -->
 <script>
-    // Función para limpiar/eliminar el chat en vivo
+    // Mostrar el panel solo si es la administración
+    document.addEventListener("DOMContentLoaded", function() {
+        const adminPanel = document.getElementById("admin-panel-container");
+        if (adminPanel) {
+            // Revisa si estamos en la vista de administración o si hay una sesión activa de admin
+            const esAdmin = window.location.href.includes("admin") || localStorage.getItem("esAdminActivo") === "true";
+            if (esAdmin) {
+                adminPanel.style.display = "flex";
+            } else {
+                adminPanel.style.display = "none";
+            }
+        }
+    });
+
     function eliminarChatEnVivo() {
         const cajaChat = document.getElementById('caja-chat-jugadoras');
         if (cajaChat) {
@@ -2066,7 +2079,6 @@ i<!DOCTYPE html>
         }
     }
 
-    // Función para copiar los cartones activos al portapapeles para WhatsApp
     function copiarCartonesParaWhatsApp() {
         let textoParaWhatsApp = "📋 *RESUMEN DE CARTONES EN JUEGO - BINGO* 📋\n\n";
         const cartonesActivos = document.querySelectorAll('.tarjeta-jugadora, .carton-jugador, [id*="carton"]');
@@ -2156,15 +2168,8 @@ i<!DOCTYPE html>
         }
     }
 
-    window.onload = function() {
-        cargarHistorialEnPantalla();
-    };
+    cargarHistorialEnPantalla();
 </script>
 
 </body>
 </html>
-
-    
-    
-    
-    
