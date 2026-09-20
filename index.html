@@ -2122,6 +2122,45 @@ i<!DOCTYPE html>
         // Ejecutar al cargar la página
         cargarHistorialEnPantalla();
     </script>
+<!-- === SECCIÓN DE CHAT EN VIVO PARA LAS JUGADORAS === -->
+<div id="panel-chat-jugadora" style="background: #1a1a1a; padding: 15px; border-radius: 10px; margin-top: 20px; color: #fff;">
+    <h3 style="margin-bottom: 10px; font-size: 14px; color: #ffc107;">💬 Chat de la Sala</h3>
+    
+    <!-- Caja donde se muestran los mensajes -->
+    <div id="caja-chat-jugadoras" style="background: #111; height: 120px; overflow-y: auto; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 12px; border: 1px solid #333;">
+        <p style="color: #888; text-align: center;">¡Bienvenidos al chat de la sala!</p>
+    </div>
+
+    <!-- Input para escribir y botón de enviar -->
+    <div style="display: flex; gap: 8px;">
+        <input type="text" id="input-mensaje-jugadora" placeholder="Escribe tu mensaje..." style="flex: 1; background: #222; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 6px; font-size: 12px;" onkeypress="if(event.key === 'Enter') enviarMensajeChat()">
+        <button onclick="enviarMensajeChat()" style="background: #db2777; color: white; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">Enviar</button>
+    </div>
+</div>
+
+<script>
+    function enviarMensajeChat() {
+        let input = document.getElementById('input-mensaje-jugadora');
+        let mensajeTexto = input.value.trim();
+        
+        if (mensajeTexto === "") return;
+
+        // Aquí puedes conectar con tu base de datos de Firebase si usas una ruta de chat, por ejemplo:
+        // db.ref('room/chat').push({ name: currentUser.name, text: mensajeTexto, timestamp: Date.now() });
+
+        // Simulación local para que vean su mensaje de inmediato en pantalla:
+        let cajaChat = document.getElementById('caja-chat-jugadoras');
+        if (cajaChat) {
+            if (cajaChat.innerHTML.includes("Bienvenidos")) {
+                cajaChat.innerHTML = ""; // Limpia el mensaje de bienvenida inicial
+            }
+            cajaChat.innerHTML += `<div style="margin-bottom: 5px;"><strong>${currentUser ? currentUser.name : 'Jugadora'}</strong>: ${mensajeTexto}</div>`;
+            cajaChat.scrollTop = cajaChat.scrollHeight;
+        }
+
+        input.value = "";
+    }
+</script>
 
 </body>
 </html>
