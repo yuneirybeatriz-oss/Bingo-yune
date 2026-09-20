@@ -2158,5 +2158,20 @@ i<!DOCTYPE html>
             cajaChat.scrollTop = cajaChat.scrollHeight;
         }
 </script>
+    <script>
+    // Ocultar elementos de administración solo a las jugadoras
+    document.addEventListener("DOMContentLoaded", function() {
+        const esAdmin = document.getElementById('panel-admin') || document.querySelector('.admin-container');
+        if (!esAdmin) {
+            let elementos = document.querySelectorAll('div, p, h3, span, a');
+            elementos.forEach(el => {
+                if (el.innerText && (el.innerText.includes("WhatsApp") || el.innerText.includes("cartones pagados") || el.innerText.includes("Historial de Rondas"))) {
+                    el.style.display = 'none';
+                }
+            });
+        }
+    });
+</script>
+
 </body>
 </html>
