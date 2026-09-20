@@ -2159,13 +2159,14 @@ i<!DOCTYPE html>
         }
 
         input.value = "";
-    }
+      
+    input.value = "";
+}
 </script>
+
 <script>
     // 1. LIMPIEZA AUTOMÁTICA: Solo actúa si estamos en la vista de la jugadora
     document.addEventListener("DOMContentLoaded", function() {
-        // Verificamos primero si existe el panel de admin en esta pantalla. 
-        // Si el panel de admin está presente, NO ejecutamos esta limpieza para no borrar nada del administrador.
         const esAdmin = document.getElementById('panel-admin') || document.querySelector('.admin-container');
         
         if (!esAdmin) {
@@ -2181,9 +2182,5 @@ i<!DOCTYPE html>
     });
 </script>
 
-</script
-
 </body>
 </html>
-
-                    
