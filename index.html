@@ -1944,71 +1944,77 @@ i<!DOCTYPE html>
             });
         }
     </script>
+
     <!-- === SECCIÓN DE CHAT EN VIVO Y WHATSAPP === -->
-<div id="panel-admin-whatsapp" style="background: #111; padding: 15px; border-radius: 10px; margin-top: 20px; color: #fff;">
-    <h3 style="margin-bottom: 10px;">💬 Chat en Vivo y Resumen para WhatsApp</h3>
+    <div id="panel-admin-whatsapp" style="background: #111; padding: 15px; border-radius: 10px; margin-top: 20px; color: #fff;">
+        <h3 style="margin-bottom: 10px;">💬 Chat en Vivo y Resumen para WhatsApp</h3>
+        <div id="lista-historial-guardado"></div>
+    </div>
 
-    function cargarHistorialEnPantalla() {
-        let historialGuardado = JSON.parse(localStorage.getItem(CLAVE_STORAGE)) || [];
-        historialGuardado = limpiarHistorialAntiguo(historialGuardado);
-        localStorage.setItem(CLAVE_STORAGE, JSON.stringify(historialGuardado));
+    <script>
+        function cargarHistorialEnPantalla() {
+            let historialGuardado = JSON.parse(localStorage.getItem(CLAVE_STORAGE)) || [];
+            historialGuardado = limpiarHistorialAntiguo(historialGuardado);
+            localStorage.setItem(CLAVE_STORAGE, JSON.stringify(historialGuardado));
 
-        const contenedor = document.getElementById('lista-historial-guardado');
-        if (!contenedor) return;
+            const contenedor = document.getElementById('lista-historial-guardado');
+            if (!contenedor) return;
 
-        if (historialGuardado.length === 0) {
-            contenedor.innerHTML = '<p style="color: #666;">No hay registros recientes (se guardan por 7 días).</p>';
-            return;
+            if (historialGuardado.length === 0) {
+                contenedor.innerHTML = '<p style="color: #666;">No hay registros recientes (se guardan por 7 días).</p>';
+                return;
+            }
+
+            let html = "";
+            historialGuardado.forEach((dia) => {
+                html += `<div style="border-bottom: 1px solid #333; padding: 8px 0;">
+                    <strong>📅 Fecha: ${dia.fecha}</strong><br>
+                    🎯 Total de rondas jugadas: <span style="color: #ffc107; font-weight: bold;">${dia.totalRondas}</span>
+                </div>`;
+            });
+            contenedor.innerHTML = html;
         }
 
-        let html = "";
-        historialGuardado.forEach((dia) => {
-            html += `<div style="border-bottom: 1px solid #333; padding: 8px 0;">
-                <strong>📅 Fecha: ${dia.fecha}</strong><br>
-                🎯 Total de rondas jugadas: <span style="color: #ffc107; font-weight: bold;">${dia.totalRondas}</span>
-            </div>`;
-        });
-        contenedor.innerHTML = html;
-    }
+        function cerrarRondaYLimpiar() {
+            if (!confirm("¿Deseas cerrar esta ronda, limpiar el chat y preparar el sistema para la siguiente?")) return;
 
-    function cerrarRondaYLimpiar() {
-        if (!confirm("¿Deseas cerrar esta ronda, limpiar el chat y preparar el sistema para la siguiente?")) return;
+            let historial = JSON.parse(localStorage.getItem(CLAVE_STORAGE)) || [];
+            const hoyStr = new Date().toLocaleDateString();
+            
+            let diaActual = historial.find(d => d.fecha === hoyStr);
+            if (!diaActual) {
+                diaActual = { fecha: hoyStr, timestamp: new Date().getTime(), totalRondas: 0 };
+                historial.push(diaActual);
+            }
 
-        let historial = JSON.parse(localStorage.getItem(CLAVE_STORAGE)) || [];
-        const hoyStr = new Date().toLocaleDateString();
-        
-        let diaActual = historial.find(d => d.fecha === hoyStr);
-        if (!diaActual) {
-            diaActual = { fecha: hoyStr, timestamp: new Date().getTime(), totalRondas: 0 };
-            historial.push(diaActual);
+            diaActual.totalRondas++;
+            localStorage.setItem(CLAVE_STORAGE, JSON.stringify(historial));
+
+            const cajaChat = document.getElementById('caja-chat-jugadoras');
+            if (cajaChat) {
+                cajaChat.innerHTML = '<p style="color: #888; text-align: center;">Nueva ronda iniciada. Chat limpio.</p>';
+            }
+
+            cargarHistorialEnPantalla();
+            alert(`¡Ronda cerrada con éxito! Rondas acumuladas hoy: ${diaActual.totalRondas}`);
         }
 
-        diaActual.totalRondas++;
-        localStorage.setItem(CLAVE_STORAGE, JSON.stringify(historial));
+        function cerrarYGuardarDia() {
+            let historial = JSON.parse(localStorage.getItem(CLAVE_STORAGE)) || [];
+            const hoyStr = new Date().toLocaleDateString();
+            let diaActual = historial.find(d => d.fecha === hoyStr);
 
-        const cajaChat = document.getElementById('caja-chat-jugadoras');
-        if (cajaChat) {
-            cajaChat.innerHTML = '<p style="color: #888; text-align: center;">Nueva ronda iniciada. Chat limpio.</p>';
+            let totalRondasHoy = diaActual ? diaActual.totalRondas : 0;
+
+            if (confirm(`=== RESUMEN DE CIERRE ===\nFecha: ${hoyStr}\nTotal de rondas jugadas hoy: ${totalRondasHoy}\n\n¿Deseas sellar y guardar la jornada de hoy?`)) {
+                alert(`¡Jornada cerrada correctamente!\n\nTus ${totalRondasHoy} rondas quedaron respaldadas en el historial por 7 días para que saques tus cuentas tranquilas.`);
+            }
         }
 
         cargarHistorialEnPantalla();
-        alert(`¡Ronda cerrada con éxito! Rondas acumuladas hoy: ${diaActual.totalRondas}`);
-    }
-
-    function cerrarYGuardarDia() {
-        let historial = JSON.parse(localStorage.getItem(CLAVE_STORAGE)) || [];
-        const hoyStr = new Date().toLocaleDateString();
-        let diaActual = historial.find(d => d.fecha === hoyStr);
-
-        let totalRondasHoy = diaActual ? diaActual.totalRondas : 0;
-
-        if (confirm(`=== RESUMEN DE CIERRE ===\nFecha: ${hoyStr}\nTotal de rondas jugadas hoy: ${totalRondasHoy}\n\n¿Deseas sellar y guardar la jornada de hoy?`)) {
-            alert(`¡Jornada cerrada correctamente!\n\nTus ${totalRondasHoy} rondas quedaron respaldadas en el historial por 7 días para que saques tus cuentas tranquilas.`);
-        }
-    }
-
-    cargarHistorialEnPantalla();
-</script>
+    </script>
 
 </body>
 </html>
+
+                    
