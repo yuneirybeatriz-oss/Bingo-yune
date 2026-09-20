@@ -2162,19 +2162,26 @@ i<!DOCTYPE html>
     }
 </script>
 <script>
- // 1. LIMPIEZA AUTOMÁTICA: Esto borra cualquier texto de WhatsApp o admin que aparezca por error en la jugadora
+<script>
+    // 1. LIMPIEZA AUTOMÁTICA: Solo actúa si estamos en la vista de la jugadora
     document.addEventListener("DOMContentLoaded", function() {
-        // Buscamos y ocultamos/eliminamos elementos que tengan que ver con WhatsApp o listas de pago en la vista de jugadora
-        let elementos = document.querySelectorAll('div, p, h3, span');
-        elementos.forEach(el => {
-            if (el.innerText && (el.innerText.includes("WhatsApp") || el.innerText.includes("cartones pagados") || el.innerText.includes("Historial de Rondas"))) {
-                // Si no es el chat principal, lo eliminamos de la pantalla de la jugadora
-                if (!el.closest('#panel-chat-jugadora')) {
-                    el.style.display = 'none';
+        // Verificamos primero si existe el panel de admin en esta pantalla. 
+        // Si el panel de admin está presente, NO ejecutamos esta limpieza para no borrar nada del administrador.
+        const esAdmin = document.getElementById('panel-admin') || document.querySelector('.admin-container');
+        
+        if (!esAdmin) {
+            let elementos = document.querySelectorAll('div, p, h3, span');
+            elementos.forEach(el => {
+                if (el.innerText && (el.innerText.includes("WhatsApp") || el.innerText.includes("cartones pagados") || el.innerText.includes("Historial de Rondas"))) {
+                    if (!el.closest('#panel-chat-jugadora')) {
+                        el.style.display = 'none';
+                    }
                 }
-            }
-        });
+            });
+        }
     });
+</script>
+
 </script>
 
 </body>
