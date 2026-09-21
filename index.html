@@ -127,6 +127,7 @@
             </div>
         </div>
 
+
         <!-- PANEL ADMIN -->
         <div id="view-admin-panel" class="w-full flex flex-col gap-6 hidden">
             <div class="bg-slate-800 p-6 rounded-3xl flex justify-between items-center flex-wrap gap-3">
@@ -139,7 +140,6 @@
                     <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 text-xs rounded-xl">Salir</button>
                 </div>
             </div>
-
             <!-- ALERTA DE GANADORES MÚLTIPLES -->
             <div id="admin-winner-alert" class="hidden bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-950 p-6 rounded-3xl font-extrabold text-center text-xl shadow-xl alert-bingo flex flex-col gap-3">
                 <div>🎉 ¡BINGO VALIDADO! (Juego Detenido) 🎉</div>
@@ -2013,21 +2013,7 @@
 
         cargarHistorialEnPantalla();
     </script>
-    <!-- === SECCIÓN DE CHAT EN VIVO, WHATSAPP E HISTORIAL (7 DÍAS) === -->
-    <div id="panel-admin-whatsapp" style="background: #111; padding: 15px; border-radius: 10px; margin-top: 20px; color: #fff;">
-        <h3 style="margin-bottom: 10px;">💬 Chat en Vivo, WhatsApp y Resumen</h3>
-        
-        <!-- Botón para enviar lista de cartones pagados a WhatsApp -->
-        <button onclick="enviarListaWhatsApp()" style="background: #25D366; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 15px; width: 100%;">
-            📱 Enviar Lista de Cartones Pagados a WhatsApp
-        </button>
-
-        <div style="margin-top: 10px; border-top: 1px solid #333; padding-top: 10px;">
-            <h4 style="font-size: 14px; color: #ffc107; margin-bottom: 5px;">📅 Historial de Rondas (Guardado por 7 días)</h4>
-            <div id="lista-historial-guardado"></div>
-        </div>
-    </div>
-
+    
     <script>
         const CLAVE_STORAGE = "bingo_historial_rondas_7dias";
 
