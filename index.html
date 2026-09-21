@@ -1949,53 +1949,6 @@
         }
     </script>
 
-        function cargarHistorialEnPantalla() {
-            let historialGuardado = JSON.parse(localStorage.getItem(CLAVE_STORAGE)) || [];
-            historialGuardado = limpiarHistorialAntiguo(historialGuardado);
-            localStorage.setItem(CLAVE_STORAGE, JSON.stringify(historialGuardado));
-
-            const contenedor = document.getElementById('lista-historial-guardado');
-            if (!contenedor) return;
-
-            if (historialGuardado.length === 0) {
-                contenedor.innerHTML = '<p style="color: #666; font-size: 12px;">No hay registros recientes (se guardan por 7 días).</p>';
-                return;
-            }
-
-            let html = "";
-            historialGuardado.forEach((dia) => {
-                html += `<div style="border-bottom: 1px solid #333; padding: 6px 0; font-size: 12px;">
-                    <strong>📅 Fecha: ${dia.fecha}</strong><br>
-                    🎯 Total de rondas jugadas: <span style="color: #ffc107; font-weight: bold;">${dia.totalRondas}</span>
-                </div>`;
-            });
-            contenedor.innerHTML = html;
-        }
-
-        function cerrarRondaYLimpiar() {
-            if (!confirm("¿Deseas cerrar esta ronda, limpiar el chat y preparar el sistema para la siguiente?")) return;
-
-            let historial = JSON.parse(localStorage.getItem(CLAVE_STORAGE)) || [];
-            const hoyStr = new Date().toLocaleDateString();
-            
-            let diaActual = historial.find(d => d.fecha === hoyStr);
-            if (!diaActual) {
-                diaActual = { fecha: hoyStr, timestamp: new Date().getTime(), totalRondas: 0 };
-                historial.push(diaActual);
-            }
-
-            diaActual.totalRondas++;
-            localStorage.setItem(CLAVE_STORAGE, JSON.stringify(historial));
-
-            const cajaChat = document.getElementById('caja-chat-jugadoras');
-            if (cajaChat) {
-                cajaChat.innerHTML = '<p style="color: #888; text-align: center;">Nueva ronda iniciada. Chat limpio.</p>';
-            }
-
-            cargarHistorialEnPantalla();
-            alert(`¡Ronda cerrada con éxito! Rondas acumuladas hoy: ${diaActual.totalRondas}`);
-        }
-
 
 </body>
 </html>
