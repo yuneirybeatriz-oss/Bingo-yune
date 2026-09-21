@@ -2008,36 +2008,6 @@
             }
         }
 
-        function enviarListaWhatsApp() {
-            let mensaje = "📋 *LISTA DE CARTONES PAGADOS - BINGO LINEAL YUNE* 📋\n\n";
-            let count = 0;
-
-            for (let id in marketCards) {
-                let card = marketCards[id];
-                if (card.owner && card.loaded) {
-                    mensaje += `• Cartón #${card.id} - ${card.owner}\n`;
-                    count++;
-                }
-            }
-
-            if (count === 0) {
-                alert("No hay cartones pagados en este momento.");
-                return;
-            }
-
-            mensaje += `\n🎯 *Total de cartones en juego:* ${count}`;
-            
-            let url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
-            window.open(url, '_blank');
-        }
-
-        // Ejecutar al cargar la página
-        cargarHistorialEnPantalla();
-    </script>
-
-
-
-    <script>
         // Función para enviar el mensaje directo a Firebase y que llegue a todos los teléfonos
         function enviarMensajeChat() {
             let input = document.getElementById('input-mensaje-jugadora');
