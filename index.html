@@ -1624,12 +1624,12 @@
             alert("¡Balotas reiniciadas! Los cartones cargados se mantienen para la siguiente figura.");
         }
 
-                function resetGame() {
-            if (confirm("¿Estás segura de reiniciar TODO el juego completo? Se borrarán todos los cartones.")) {
+                             function resetGame() {
+            if (confirm("¿Estás segura de reiniciar TODO el juego completo? Se borrarán todos los cartones y el chat.")) {
                 db.ref('room/drawnBalls').set([]);
                 
-                // 🧹 LÍNEA NUEVA: Limpia y borra automáticamente todo el historial del chat en Firebase
-                db.ref('room/chat').remove();
+                // 🧹 Limpieza correcta del chat en Firebase para que se borre de verdad
+                db.ref('chatSala').remove();
 
                 document.getElementById('admin-winner-alert').classList.add('hidden');
                 document.getElementById('player-winner-notification').classList.add('hidden');
@@ -1652,9 +1652,6 @@
                 alert("¡Juego reiniciado por completo desde cero y chat limpiado!");
             }
         }
-        // Limpiamos el chat dejándolo como un objeto vacío en Firebase
-        db.ref('chatSala').set({});
-
 
         function clearWinnerAlert() {
             document.getElementById('admin-winner-alert').classList.add('hidden');
@@ -1959,69 +1956,6 @@
     </div>
 
     <script>
-        function cargarHistorialEnPantalla() {
-            let historialGuardado = JSON.parse(localStorage.getItem(CLAVE_STORAGE)) || [];
-            historialGuardado = limpiarHistorialAntiguo(historialGuardado);
-            localStorage.setItem(CLAVE_STORAGE, JSON.stringify(historialGuardado));
-
-            const contenedor = document.getElementById('lista-historial-guardado');
-            if (!contenedor) return;
-
-            if (historialGuardado.length === 0) {
-                contenedor.innerHTML = '<p style="color: #666;">No hay registros recientes (se guardan por 7 días).</p>';
-                return;
-            }
-
-            let html = "";
-            historialGuardado.forEach((dia) => {
-                html += `<div style="border-bottom: 1px solid #333; padding: 8px 0;">
-                    <strong>📅 Fecha: ${dia.fecha}</strong><br>
-                    🎯 Total de rondas jugadas: <span style="color: #ffc107; font-weight: bold;">${dia.totalRondas}</span>
-                </div>`;
-            });
-            contenedor.innerHTML = html;
-        }
-
-        function cerrarRondaYLimpiar() {
-            if (!confirm("¿Deseas cerrar esta ronda, limpiar el chat y preparar el sistema para la siguiente?")) return;
-
-            let historial = JSON.parse(localStorage.getItem(CLAVE_STORAGE)) || [];
-            const hoyStr = new Date().toLocaleDateString();
-            
-            let diaActual = historial.find(d => d.fecha === hoyStr);
-            if (!diaActual) {
-                diaActual = { fecha: hoyStr, timestamp: new Date().getTime(), totalRondas: 0 };
-                historial.push(diaActual);
-            }
-
-            diaActual.totalRondas++;
-            localStorage.setItem(CLAVE_STORAGE, JSON.stringify(historial));
-
-            const cajaChat = document.getElementById('caja-chat-jugadoras');
-            if (cajaChat) {
-                cajaChat.innerHTML = '<p style="color: #888; text-align: center;">Nueva ronda iniciada. Chat limpio.</p>';
-            }
-
-            cargarHistorialEnPantalla();
-            alert(`¡Ronda cerrada con éxito! Rondas acumuladas hoy: ${diaActual.totalRondas}`);
-        }
-
-        function cerrarYGuardarDia() {
-            let historial = JSON.parse(localStorage.getItem(CLAVE_STORAGE)) || [];
-            const hoyStr = new Date().toLocaleDateString();
-            let diaActual = historial.find(d => d.fecha === hoyStr);
-
-            let totalRondasHoy = diaActual ? diaActual.totalRondas : 0;
-
-            if (confirm(`=== RESUMEN DE CIERRE ===\nFecha: ${hoyStr}\nTotal de rondas jugadas hoy: ${totalRondasHoy}\n\n¿Deseas sellar y guardar la jornada de hoy?`)) {
-                alert(`¡Jornada cerrada correctamente!\n\nTus ${totalRondasHoy} rondas quedaron respaldadas en el historial por 7 días para que saques tus cuentas tranquilas.`);
-            }
-        }
-
-        cargarHistorialEnPantalla();
-    </script>
-    
-    <script>
         const CLAVE_STORAGE = "bingo_historial_rondas_7dias";
 
         function limpiarHistorialAntiguo(historial) {
@@ -2115,53 +2049,81 @@
         // Ejecutar al cargar la página
         cargarHistorialEnPantalla();
     </script>
-<!-- === SECCIÓN DE CHAT EN VIVO PARA LAS JUGADORAS Y ADMIN === -->
-<div id="panel-chat-jugadora" style="background: #1a1a1a; padding: 15px; border-radius: 10px; margin-top: 20px; color: #fff;">
-    <h3 style="margin-bottom: 10px; font-size: 14px; color: #ffc107;">💬 Chat de la Sala</h3>
-    
-    <!-- Caja donde se muestran los mensajes en tiempo real -->
-    <div id="caja-chat-jugadoras" style="background: #111; height: 120px; overflow-y: auto; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 12px; border: 1px solid #333; text-align: left;">
-        <p style="color: #888; text-align: center;">Conectando al chat en vivo...</p>
-    </div>
 
-    <!-- Input para escribir y botón de enviar -->
-    <div style="display: flex; gap: 8px;">
-        <input type="text" id="input-mensaje-jugadora" placeholder="Escribe tu mensaje..." style="flex: 1; background: #222; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 6px; font-size: 12px;" onkeypress="if(event.key === 'Enter') enviarMensajeChat()">
-        <button onclick="enviarMensajeChat()" style="background: #db2777; color: white; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">Enviar</button>
-    </div>
-</div>
-
-<script>
-    // Función para enviar el mensaje directo a Firebase y que llegue a todos los teléfonos
-    function enviarMensajeChat() {
-        let input = document.getElementById('input-mensaje-jugadora');
-        if (!input) return;
+    <!-- === SECCIÓN DE CHAT EN VIVO PARA LAS JUGADORAS Y ADMIN === -->
+    <div id="panel-chat-jugadora" style="background: #1a1a1a; padding: 15px; border-radius: 10px; margin-top: 20px; color: #fff;">
+        <h3 style="margin-bottom: 10px; font-size: 14px; color: #ffc107;">💬 Chat de la Sala</h3>
         
-        let mensajeTexto = input.value.trim();
-        if (mensajeTexto === "") return;
+        <!-- Caja donde se muestran los mensajes en tiempo real -->
+        <div id="caja-chat-jugadoras" style="background: #111; height: 120px; overflow-y: auto; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 12px; border: 1px solid #333; text-align: left;">
+            <p style="color: #888; text-align: center;">Conectando al chat en vivo...</p>
+        </div>
 
-        let nombreRemitente = "Administradora";
-        if (typeof currentUser !== 'undefined' && !currentUser.isAdmin && currentUser.name) {
-            nombreRemitente = currentUser.name;
+        <!-- Input para escribir y botón de enviar -->
+        <div style="display: flex; gap: 8px;">
+            <input type="text" id="input-mensaje-jugadora" placeholder="Escribe tu mensaje..." style="flex: 1; background: #222; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 6px; font-size: 12px;" onkeypress="if(event.key === 'Enter') enviarMensajeChat()">
+            <button onclick="enviarMensajeChat()" style="background: #db2777; color: white; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">Enviar</button>
+        </div>
+    </div>
+
+    <script>
+        // Función para enviar el mensaje directo a Firebase y que llegue a todos los teléfonos
+        function enviarMensajeChat() {
+            let input = document.getElementById('input-mensaje-jugadora');
+            if (!input) return;
+            
+            let mensajeTexto = input.value.trim();
+            if (mensajeTexto === "") return;
+
+            let nombreRemitente = "Administradora";
+            if (typeof currentUser !== 'undefined' && !currentUser.isAdmin && currentUser.name) {
+                nombreRemitente = currentUser.name;
+            }
+
+            // Enviamos el mensaje a la base de datos en tiempo real de Firebase
+            db.ref('chatSala').push({
+                nombre: nombreRemitente,
+                mensaje: mensajeTexto,
+                tiempo: Date.now()
+            }, function(error) {
+                if (!error) {
+                    input.value = ""; // Limpiamos el campo si se envió con éxito
+                }
+            });
         }
 
-        // Enviamos el mensaje a la base de datos en tiempo real de Firebase
-        db.ref('chatSala').push({
-            nombre: nombreRemitente,
-            mensaje: mensajeTexto,
-            tiempo: Date.now()
-        }, function(error) {
-            if (!error) {
-                input.value = ""; // Limpiamos el campo si se envió con éxito
-            }
-        });
-    }
+        // Escuchar los mensajes en vivo desde Firebase para que aparezcan en todos los teléfonos
+        function escucharChatEnVivo() {
+            db.ref('chatSala').on('value', function(snapshot) {
+                let cajaChat = document.getElementById('caja-chat-jugadoras');
+                if (!cajaChat) return;
 
-    // Escuchar los mensajes en vivo desde Firebase para que aparezcan en todos los teléfonos
-    
-    // Activamos el escucha del chat al cargar
-    escucharChatEnVivo();
-</script>
+                // Si Firebase no tiene datos (fue borrado al reiniciar), limpiamos la pantalla de inmediato
+                if (!snapshot.exists()) {
+                    cajaChat.innerHTML = '<p style="color: #888; text-align: center;">¡Escribe el primer mensaje para saludar!</p>';
+                    return;
+                }
+
+                let htmlMensajes = "";
+                snapshot.forEach(function(childSnapshot) {
+                    let data = childSnapshot.val();
+                    if (data && data.nombre && data.mensaje) {
+                        htmlMensajes += `<div style="margin-bottom: 6px; text-align: left;"><strong>${data.nombre}</strong>: ${data.mensaje}</div>`;
+                    }
+                });
+
+                cajaChat.innerHTML = htmlMensajes;
+                cajaChat.scrollTop = cajaChat.scrollHeight; // Mantiene el chat abajo viendo lo más reciente
+            });
+        }
+
+        // Activamos el escucha del chat al cargar
+        escucharChatEnVivo();
+    </script>
 
 </body>
 </html>
+                  
+                
+
+                                        
