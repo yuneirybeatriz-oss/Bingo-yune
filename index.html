@@ -1652,6 +1652,8 @@
                 alert("¡Juego reiniciado por completo desde cero y chat limpiado!");
             }
         }
+        // Limpiamos el chat dejándolo como un objeto vacío en Firebase
+        db.ref('chatSala').set({});
 
 
         function clearWinnerAlert() {
