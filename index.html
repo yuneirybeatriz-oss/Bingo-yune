@@ -282,6 +282,22 @@
                 <h3 class="font-bold text-yellow-300 mb-4">Tablero General (1-75)</h3>
                 <div id="admin-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1.5"></div>
             </div>
+
+            <!-- ================= CHAT DE LA SALA EN VIVO (INTEGRADO EN EL PANEL ADMIN) ================= -->
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-pink-500/40 shadow-lg">
+                <h3 class="font-bold text-pink-400 text-lg flex items-center gap-2">💬 Chat de la Sala en Vivo (Admin)</h3>
+                
+                <!-- Caja de mensajes -->
+                <div id="caja-chat-admin" class="bg-slate-900 h-36 overflow-y-auto p-3 rounded-xl border border-slate-700 text-xs text-left space-y-1.5">
+                    <p class="text-slate-500 text-center">Conectando al chat en vivo...</p>
+                </div>
+
+                <!-- Input y botón de enviar -->
+                <div class="flex gap-2">
+                    <input type="text" id="input-mensaje-admin" placeholder="Escribe tu mensaje como Administradora..." class="flex-1 px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs" onkeypress="if(event.key === 'Enter') enviarMensajeChatAdmin()">
+                    <button onclick="enviarMensajeChatAdmin()" class="px-5 py-2 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl text-xs shadow transition">Enviar</button>
+                </div>
+            </div>
         </div>
 
         <!-- SALA JUGADORA -->
@@ -399,7 +415,7 @@
                 <div id="player-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1"></div>
             </div>
 
-            <!-- ================= CHAT DE LA SALA EN VIVO (INTEGRADO AQUÍ ADENTRO) ================= -->
+            <!-- ================= CHAT DE LA SALA EN VIVO (INTEGRADO EN LA VISTA JUGADORA) ================= -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-pink-500/40 shadow-lg">
                 <h3 class="font-bold text-pink-400 text-lg flex items-center gap-2">💬 Chat de la Sala en Vivo</h3>
                 
@@ -410,8 +426,8 @@
 
                 <!-- Input y botón de enviar -->
                 <div class="flex gap-2">
-                    <input type="text" id="input-mensaje-jugadora" placeholder="Escribe tu mensaje..." class="flex-1 px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs" onkeypress="if(event.key === 'Enter') enviarMensajeChat()">
-                    <button onclick="enviarMensajeChat()" class="px-5 py-2 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl text-xs shadow transition">Enviar</button>
+                    <input type="text" id="input-mensaje-jugadora" placeholder="Escribe tu mensaje..." class="flex-1 px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs" onkeypress="if(event.key === 'Enter') enviarMensajeChatJugadora()">
+                    <button onclick="enviarMensajeChatJugadora()" class="px-5 py-2 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl text-xs shadow transition">Enviar</button>
                 </div>
             </div>
 
@@ -887,10 +903,13 @@
             let pass = document.getElementById('admin-password-input').value;
             if (pass === adminSecretKey) {
                 localStorage.setItem('bingo_admin_pass', pass);
+                currentUser.isAdmin = true;
+                currentUser.name = "Administradora";
                 document.getElementById('view-admin-login').classList.add('hidden');
                 document.getElementById('view-admin-panel').classList.remove('hidden');
                 inicializarMercadoCartones();
                 sincronizarDatosAdmin();
+                escucharChatEnVivo();
             } else {
                 alert("Clave incorrecta. Intenta de nuevo.");
             }
@@ -1961,8 +1980,8 @@
             });
         }
 
-        // --- FUNCIONES DEL CHAT EN VIVO INTEGRADO ---
-        function enviarMensajeChat() {
+        // --- FUNCIONES DEL CHAT EN VIVO COMPARTIDO (ADMIN Y JUGADORAS) ---
+        function enviarMensajeChatJugadora() {
             let input = document.getElementById('input-mensaje-jugadora');
             if (!input) return;
             
@@ -1970,7 +1989,6 @@
             if (mensajeTexto === "") return;
 
             let remitente = currentUser.name || "Jugadora";
-            if (currentUser.isAdmin) remitente = "Administradora ⭐";
 
             db.ref('chatSala').push({
                 nombre: remitente,
@@ -1983,13 +2001,33 @@
             });
         }
 
+        function enviarMensajeChatAdmin() {
+            let input = document.getElementById('input-mensaje-admin');
+            if (!input) return;
+            
+            let mensajeTexto = input.value.trim();
+            if (mensajeTexto === "") return;
+
+            db.ref('chatSala').push({
+                nombre: "Administradora ⭐",
+                mensaje: mensajeTexto,
+                tiempo: Date.now()
+            }, function(error) {
+                if (!error) {
+                    input.value = "";
+                }
+            });
+        }
+
         function escucharChatEnVivo() {
             db.ref('chatSala').on('value', function(snapshot) {
-                let cajaChat = document.getElementById('caja-chat-jugadoras');
-                if (!cajaChat) return;
+                let cajaChatJugadoras = document.getElementById('caja-chat-jugadoras');
+                let cajaChatAdmin = document.getElementById('caja-chat-admin');
 
                 if (!snapshot.exists()) {
-                    cajaChat.innerHTML = '<p class="text-slate-500 text-center">¡Sé la primera en escribir en el chat de la sala!</p>';
+                    let mensajeVacio = '<p class="text-slate-500 text-center">¡Sé la primera en escribir en el chat!</p>';
+                    if (cajaChatJugadoras) cajaChatJugadoras.innerHTML = mensajeVacio;
+                    if (cajaChatAdmin) cajaChatAdmin.innerHTML = mensajeVacio;
                     return;
                 }
 
@@ -2001,8 +2039,14 @@
                     }
                 });
 
-                cajaChat.innerHTML = htmlMensajes;
-                cajaChat.scrollTop = cajaChat.scrollHeight;
+                if (cajaChatJugadoras) {
+                    cajaChatJugadoras.innerHTML = htmlMensajes;
+                    cajaChatJugadoras.scrollTop = cajaChatJugadoras.scrollHeight;
+                }
+                if (cajaChatAdmin) {
+                    cajaChatAdmin.innerHTML = htmlMensajes;
+                    cajaChatAdmin.scrollTop = cajaChatAdmin.scrollHeight;
+                }
             });
         }
     </script>
