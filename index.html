@@ -2156,26 +2156,7 @@
     }
 
     // Escuchar los mensajes en vivo desde Firebase para que aparezcan en todos los teléfonos
-    function escucharChatEnVivo() {
-        db.ref('chatSala').limitToLast(30).on('value', function(snapshot) {
-            let cajaChat = document.getElementById('caja-chat-jugadoras');
-            if (!cajaChat) return;
-
-            let htmlMensajes = "";
-            snapshot.forEach(function(childSnapshot) {
-                let data = childSnapshot.val();
-                htmlMensajes += `<div style="margin-bottom: 6px; text-align: left;"><strong>${data.nombre}</strong>: ${data.mensaje}</div>`;
-            });
-
-            if (htmlMensajes === "") {
-                cajaChat.innerHTML = '<p style="color: #888; text-align: center;">¡Escribe el primer mensaje para saludar!</p>';
-            } else {
-                cajaChat.innerHTML = htmlMensajes;
-                cajaChat.scrollTop = cajaChat.scrollHeight; // Mantiene el chat abajo viendo lo más reciente
-            }
-        });
-    }
-
+    
     // Activamos el escucha del chat al cargar
     escucharChatEnVivo();
 </script>
