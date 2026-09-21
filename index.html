@@ -2108,13 +2108,13 @@
         // Ejecutar al cargar la página
         cargarHistorialEnPantalla();
     </script>
-<!-- === SECCIÓN DE CHAT EN VIVO PARA LAS JUGADORAS === -->
+<!-- === SECCIÓN DE CHAT EN VIVO PARA LAS JUGADORAS Y ADMIN === -->
 <div id="panel-chat-jugadora" style="background: #1a1a1a; padding: 15px; border-radius: 10px; margin-top: 20px; color: #fff;">
     <h3 style="margin-bottom: 10px; font-size: 14px; color: #ffc107;">💬 Chat de la Sala</h3>
     
-    <!-- Caja donde se muestran los mensajes -->
-    <div id="caja-chat-jugadoras" style="background: #111; height: 120px; overflow-y: auto; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 12px; border: 1px solid #333;">
-        <p style="color: #888; text-align: center;">¡Bienvenidos al chat de la sala!</p>
+    <!-- Caja donde se muestran los mensajes en tiempo real -->
+    <div id="caja-chat-jugadoras" style="background: #111; height: 120px; overflow-y: auto; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 12px; border: 1px solid #333; text-align: left;">
+        <p style="color: #888; text-align: center;">Conectando al chat en vivo...</p>
     </div>
 
     <!-- Input para escribir y botón de enviar -->
@@ -2125,24 +2125,54 @@
 </div>
 
 <script>
+    // Función para enviar el mensaje directo a Firebase y que llegue a todos los teléfonos
     function enviarMensajeChat() {
         let input = document.getElementById('input-mensaje-jugadora');
-        let mensajeTexto = input.value.trim();
+        if (!input) return;
         
+        let mensajeTexto = input.value.trim();
         if (mensajeTexto === "") return;
 
-        // Aquí puedes conectar con tu base de datos de Firebase si usas una ruta de chat, por ejemplo:
-        // db.ref('room/chat').push({ name: currentUser.name, text: mensajeTexto, timestamp: Date.now() });
-
-        // Simulación local para que vean su mensaje de inmediato en pantalla:
-        let cajaChat = document.getElementById('caja-chat-jugadoras');
-        if (cajaChat) {
-            if (cajaChat.innerHTML.includes("Bienvenidos")) {
-                cajaChat.innerHTML = ""; // Limpia el mensaje de bienvenida inicial
-            }
-            cajaChat.innerHTML += `<div style="margin-bottom: 5px;"><strong>${currentUser ? currentUser.name : 'Jugadora'}</strong>: ${mensajeTexto}</div>`;
-            cajaChat.scrollTop = cajaChat.scrollHeight;
+        let nombreRemitente = "Administradora";
+        if (typeof currentUser !== 'undefined' && !currentUser.isAdmin && currentUser.name) {
+            nombreRemitente = currentUser.name;
         }
+
+        // Enviamos el mensaje a la base de datos en tiempo real de Firebase
+        db.ref('chatSala').push({
+            nombre: nombreRemitente,
+            mensaje: mensajeTexto,
+            tiempo: Date.now()
+        }, function(error) {
+            if (!error) {
+                input.value = ""; // Limpiamos el campo si se envió con éxito
+            }
+        });
+    }
+
+    // Escuchar los mensajes en vivo desde Firebase para que aparezcan en todos los teléfonos
+    function escucharChatEnVivo() {
+        db.ref('chatSala').limitToLast(30).on('value', function(snapshot) {
+            let cajaChat = document.getElementById('caja-chat-jugadoras');
+            if (!cajaChat) return;
+
+            let htmlMensajes = "";
+            snapshot.forEach(function(childSnapshot) {
+                let data = childSnapshot.val();
+                htmlMensajes += `<div style="margin-bottom: 6px; text-align: left;"><strong>${data.nombre}</strong>: ${data.mensaje}</div>`;
+            });
+
+            if (htmlMensajes === "") {
+                cajaChat.innerHTML = '<p style="color: #888; text-align: center;">¡Escribe el primer mensaje para saludar!</p>';
+            } else {
+                cajaChat.innerHTML = htmlMensajes;
+                cajaChat.scrollTop = cajaChat.scrollHeight; // Mantiene el chat abajo viendo lo más reciente
+            }
+        });
+    }
+
+    // Activamos el escucha del chat al cargar
+    escucharChatEnVivo();
 </script>
 
 </body>
