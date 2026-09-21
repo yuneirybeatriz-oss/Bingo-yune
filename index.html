@@ -1949,15 +1949,6 @@
         }
     </script>
 
-    <!-- === SECCIÓN DE CHAT EN VIVO Y WHATSAPP === -->
-    <div id="panel-admin-whatsapp" style="background: #111; padding: 15px; border-radius: 10px; margin-top: 20px; color: #fff;">
-        <h3 style="margin-bottom: 10px;">💬 Chat en Vivo y Resumen para WhatsApp</h3>
-        <div id="lista-historial-guardado"></div>
-    </div>
-
-    <script>
-        const CLAVE_STORAGE = "bingo_historial_rondas_7dias";
-
         function limpiarHistorialAntiguo(historial) {
             const ahora = new Date().getTime();
             const sieteDiasMs = 7 * 24 * 60 * 60 * 1000;
