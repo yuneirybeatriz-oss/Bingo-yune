@@ -399,6 +399,22 @@
                 <div id="player-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1"></div>
             </div>
 
+            <!-- ================= CHAT DE LA SALA EN VIVO (INTEGRADO AQUÍ ADENTRO) ================= -->
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-pink-500/40 shadow-lg">
+                <h3 class="font-bold text-pink-400 text-lg flex items-center gap-2">💬 Chat de la Sala en Vivo</h3>
+                
+                <!-- Caja de mensajes -->
+                <div id="caja-chat-jugadoras" class="bg-slate-900 h-36 overflow-y-auto p-3 rounded-xl border border-slate-700 text-xs text-left space-y-1.5">
+                    <p class="text-slate-500 text-center">Conectando al chat en vivo...</p>
+                </div>
+
+                <!-- Input y botón de enviar -->
+                <div class="flex gap-2">
+                    <input type="text" id="input-mensaje-jugadora" placeholder="Escribe tu mensaje..." class="flex-1 px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs" onkeypress="if(event.key === 'Enter') enviarMensajeChat()">
+                    <button onclick="enviarMensajeChat()" class="px-5 py-2 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl text-xs shadow transition">Enviar</button>
+                </div>
+            </div>
+
             <!-- SELECCIÓN DE CARTONES (MERCADO) -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <div class="flex justify-between items-center">
@@ -745,7 +761,6 @@
             let savedControl = localStorage.getItem('bingo_player_control');
             let savedCode = localStorage.getItem('bingo_player_code');
             
-            // Si el número guardado ya no existe en la base de datos de usuarios, limpiamos el localStorage para que no autocomplemente fantasma
             if (savedControl) {
                 db.ref(`users/${savedControl}`).once('value').then((snap) => {
                     if (!snap.exists()) {
@@ -948,6 +963,7 @@
                         document.getElementById('player-display-control').innerText = control;
 
                         sincronizarDatosJugadora();
+                        escucharChatEnVivo();
                     });
                 });
             });
@@ -1271,7 +1287,6 @@
                 db.ref(`room/connectedPlayers/${safeCtrl}`).remove();
                 db.ref(`users/${controlJugadora}`).remove();
 
-                // Limpiar localStorage si era la misma persona eliminada en este dispositivo
                 let localCtrl = localStorage.getItem('bingo_player_control');
                 if (localCtrl === controlJugadora) {
                     localStorage.removeItem('bingo_player_name');
@@ -1452,7 +1467,7 @@
                     <span class="font-bold text-pink-300">${jugadora.name}</span>
                     <span class="text-[10px] text-slate-400 font-mono">(Ctrl: ${jugadora.control})</span>
                 `;
-                badge.appendChild(badge); // Fixed typo logic if any, using standard innerHTML
+                container.appendChild(badge);
             });
         }
 
@@ -1624,11 +1639,9 @@
             alert("¡Balotas reiniciadas! Los cartones cargados se mantienen para la siguiente figura.");
         }
 
-                             function resetGame() {
+        function resetGame() {
             if (confirm("¿Estás segura de reiniciar TODO el juego completo? Se borrarán todos los cartones y el chat.")) {
                 db.ref('room/drawnBalls').set([]);
-                
-                // 🧹 Limpieza correcta del chat en Firebase para que se borre de verdad
                 db.ref('chatSala').remove();
 
                 document.getElementById('admin-winner-alert').classList.add('hidden');
@@ -1947,12 +1960,51 @@
                 container.appendChild(cardDiv);
             });
         }
+
+        // --- FUNCIONES DEL CHAT EN VIVO INTEGRADO ---
+        function enviarMensajeChat() {
+            let input = document.getElementById('input-mensaje-jugadora');
+            if (!input) return;
+            
+            let mensajeTexto = input.value.trim();
+            if (mensajeTexto === "") return;
+
+            let remitente = currentUser.name || "Jugadora";
+            if (currentUser.isAdmin) remitente = "Administradora ⭐";
+
+            db.ref('chatSala').push({
+                nombre: remitente,
+                mensaje: mensajeTexto,
+                tiempo: Date.now()
+            }, function(error) {
+                if (!error) {
+                    input.value = "";
+                }
+            });
+        }
+
+        function escucharChatEnVivo() {
+            db.ref('chatSala').on('value', function(snapshot) {
+                let cajaChat = document.getElementById('caja-chat-jugadoras');
+                if (!cajaChat) return;
+
+                if (!snapshot.exists()) {
+                    cajaChat.innerHTML = '<p class="text-slate-500 text-center">¡Sé la primera en escribir en el chat de la sala!</p>';
+                    return;
+                }
+
+                let htmlMensajes = "";
+                snapshot.forEach(function(childSnapshot) {
+                    let data = childSnapshot.val();
+                    if (data && data.nombre && data.mensaje) {
+                        htmlMensajes += `<div class="bg-slate-950/50 p-2 rounded-lg border border-slate-800"><strong class="text-yellow-400">${data.nombre}:</strong> <span class="text-slate-200">${data.mensaje}</span></div>`;
+                    }
+                });
+
+                cajaChat.innerHTML = htmlMensajes;
+                cajaChat.scrollTop = cajaChat.scrollHeight;
+            });
+        }
     </script>
-
-
 </body>
 </html>
-                  
-                
-
-                                        
