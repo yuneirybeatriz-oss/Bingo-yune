@@ -1624,9 +1624,13 @@
             alert("¡Balotas reiniciadas! Los cartones cargados se mantienen para la siguiente figura.");
         }
 
-        function resetGame() {
+                function resetGame() {
             if (confirm("¿Estás segura de reiniciar TODO el juego completo? Se borrarán todos los cartones.")) {
                 db.ref('room/drawnBalls').set([]);
+                
+                // 🧹 LÍNEA NUEVA: Limpia y borra automáticamente todo el historial del chat en Firebase
+                db.ref('room/chat').remove();
+
                 document.getElementById('admin-winner-alert').classList.add('hidden');
                 document.getElementById('player-winner-notification').classList.add('hidden');
                 hasSpokenMyBingo = false;
@@ -1645,9 +1649,10 @@
                 }
                 db.ref('room/marketCards').set(initialMarket);
                 db.ref('room/connectedPlayers').remove();
-                alert("¡Juego reiniciado por completo desde cero!");
+                alert("¡Juego reiniciado por completo desde cero y chat limpiado!");
             }
         }
+
 
         function clearWinnerAlert() {
             document.getElementById('admin-winner-alert').classList.add('hidden');
