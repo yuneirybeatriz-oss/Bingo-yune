@@ -2070,7 +2070,7 @@
             }
         }
 
-        function cargarMisCartones() {
+                                function cargarMisCartones() {
             let juegoIniciado = drawnBalls.length > 0;
             if (juegoIniciado) {
                 alert("⚠️ La partida ya comenzó. No puedes cargar más cartones.");
@@ -2081,6 +2081,12 @@
                 let userData = snap.val() || { balance: 0, isCredit: false };
                 let balance = userData.balance || 0;
                 let isCredit = userData.isCredit || false;
+
+                // VALIDACIÓN NUEVA: Si no tiene crédito habilitado Y su saldo es 0 o negativo, se bloquea.
+                if (!isCredit && balance <= 0) {
+                    alert("❌ No puedes cargar cartones porque no tienes saldo positivo ni el crédito habilitado. Comunícate con la administración.");
+                    return;
+                }
 
                 let cartonesNuevos = 0;
                 for (let id in marketCards) {
@@ -2275,3 +2281,4 @@
     </script>
 </body>
 </html>
+
