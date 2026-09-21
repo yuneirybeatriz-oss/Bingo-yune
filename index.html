@@ -1949,12 +1949,6 @@
         }
     </script>
 
-        function limpiarHistorialAntiguo(historial) {
-            const ahora = new Date().getTime();
-            const sieteDiasMs = 7 * 24 * 60 * 60 * 1000;
-            return historial.filter(item => (ahora - item.timestamp) < sieteDiasMs);
-        }
-
         function cargarHistorialEnPantalla() {
             let historialGuardado = JSON.parse(localStorage.getItem(CLAVE_STORAGE)) || [];
             historialGuardado = limpiarHistorialAntiguo(historialGuardado);
