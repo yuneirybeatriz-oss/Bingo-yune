@@ -146,7 +146,8 @@
                 <div id="admin-winner-text" class="text-base font-bold bg-white/25 py-2.5 px-4 rounded-xl flex flex-col gap-1">Ganadores...</div>
                 <div class="flex gap-2 justify-center mt-2 flex-wrap">
                     <button onclick="clearWinnerAlert()" class="py-2 px-4 bg-slate-900 text-yellow-300 text-xs rounded-xl font-bold shadow">Cerrar Alerta</button>
-                    <button onclick="reiniciarBalotasParaSiguienteFigura()" class="py-2 px-4 bg-pink-600 text-white text-xs rounded-xl font-bold shadow">🔄 Limpiar Balotas (Siguiente Figura)</button>
+                    <button onclick="registrarYReiniciarSiguienteRonda()" class="py-2 px-4 bg-emerald-600 text-white text-xs rounded-xl font-bold shadow">🏁 Finalizar Ronda y Registrar</button>
+                    <button onclick="reiniciarBalotasParaSiguienteFigura()" class="py-2 px-4 bg-pink-600 text-white text-xs rounded-xl font-bold shadow">🔄 Limpiar Balotas (Misma Ronda)</button>
                 </div>
             </div>
 
@@ -165,6 +166,52 @@
                         <input type="text" id="admin-room-code" placeholder="Ej: BINGO2026" class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-center">
                         <button onclick="updateRoomCode()" class="px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white font-bold text-xs rounded-xl shadow">Guardar</button>
                     </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN: RESUMEN AUTOMÁTICO PARA WHATSAPP -->
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-emerald-500/40 shadow-lg">
+                <div class="flex justify-between items-center flex-wrap gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl">📱</span>
+                        <h3 class="font-bold text-emerald-400 text-lg">Resumen Automático para WhatsApp</h3>
+                    </div>
+                    <button onclick="copiarResumenWhatsApp()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-1.5">
+                        📋 Copiar Lista para WhatsApp
+                    </button>
+                </div>
+                <p class="text-xs text-slate-400">Generado automáticamente agrupando los cartones por cada jugadora (ej: Maira: #5, #10, #15...). ¡Toca el botón para copiar y pegar en el grupo!</p>
+                <textarea id="texto-whatsapp-preview" readonly class="w-full h-32 bg-slate-900 border border-slate-700 rounded-2xl p-3 text-xs text-slate-300 font-mono resize-none focus:outline-none" placeholder="Generando resumen..."></textarea>
+            </div>
+
+            <!-- SECCIÓN: REGISTRO DE RONDAS Y GANANCIAS DEL DÍA -->
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-blue-500/40 shadow-lg">
+                <div class="flex justify-between items-center flex-wrap gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl">📊</span>
+                        <h3 class="font-bold text-blue-300 text-lg">Control de Rondas y Ganancias del Día</h3>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span id="badge-total-rondas-dia" class="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0 Rondas Realizadas</span>
+                        <button onclick="limpiarHistorialRondas()" class="px-3 py-1.5 bg-red-600/30 hover:bg-red-600 text-red-200 text-xs rounded-xl font-bold transition">🗑️ Reiniciar Día</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="bg-slate-900 p-3 rounded-2xl border border-slate-700 flex flex-col justify-center items-center text-center">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase">Total Recaudado Hoy</span>
+                        <span id="stat-recaudado-hoy" class="text-xl font-black text-emerald-400">0.00</span>
+                    </div>
+                    <div class="bg-slate-900 p-3 rounded-2xl border border-slate-700 flex flex-col justify-center items-center text-center">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase">Total Cartones Jugados</span>
+                        <span id="stat-cartones-hoy" class="text-xl font-black text-yellow-300">0</span>
+                    </div>
+                    <div class="bg-slate-900 p-3 rounded-2xl border border-slate-700 flex flex-col justify-center items-center text-center">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase">Acción Manual</span>
+                        <button onclick="registrarRondaManual()" class="mt-1 px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow">＋ Registrar Ronda Actual</button>
+                    </div>
+                </div>
+                <div id="lista-rondas-dia-container" class="flex flex-col gap-2 max-h-48 overflow-y-auto p-3 bg-slate-900/80 rounded-2xl border border-slate-700/60 text-xs">
+                    <span class="text-slate-500 text-center py-2">No hay rondas finalizadas todavía hoy.</span>
                 </div>
             </div>
 
@@ -213,6 +260,7 @@
                     
                     <div class="flex flex-col gap-2 w-full mt-2">
                         <button onclick="probarVoz()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow">🔊 Anuncio de Inicio de Ronda</button>
+                        <button onclick="registrarYReiniciarSiguienteRonda()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow">🏁 Finalizar Ronda y Registrar</button>
                         <button onclick="reiniciarBalotasParaSiguienteFigura()" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl shadow">🔄 Siguiente Figura (Mismos Cartones)</button>
                         <button onclick="resetGame()" class="w-full py-2 bg-red-600/30 hover:bg-red-600/50 text-red-300 text-xs font-bold rounded-xl">🗑️ Reiniciar Juego Completo</button>
                     </div>
@@ -469,6 +517,7 @@
         let lastAnnouncementId = 0;
         let presenceRef = null;
         let audioHabilitado = true;
+        let rondasDelDia = [];
 
         const nombresPatrones = {
             'line': 'Línea (Horizontal o Vertical)',
@@ -773,6 +822,12 @@
             iniciarRelojEnVivo();
             inicializarMiniDiagrama();
 
+            let savedRondas = localStorage.getItem('bingo_rondas_dia');
+            if (savedRondas) {
+                try { rondasDelDia = JSON.parse(savedRondas); } catch(e) { rondasDelDia = []; }
+                renderizarHistorialRondasDia();
+            }
+
             let savedName = localStorage.getItem('bingo_player_name');
             let savedControl = localStorage.getItem('bingo_player_control');
             let savedCode = localStorage.getItem('bingo_player_code');
@@ -1041,6 +1096,7 @@
                 renderizarSelectLiberarAdmin();
                 renderizarRadarAdmin();
                 renderizarJugadorasConectadasAdmin(data.connectedPlayers || {});
+                actualizarPreviewWhatsApp();
                 verificarGanadoresEnVivoAdmin();
             });
         }
@@ -1119,6 +1175,150 @@
                     }
                 }
             });
+        }
+
+        // --- FUNCIONES DE WHATSAPP AUTOMÁTICO (agrupado por nombre) ---
+        function generarTextoResumenWhatsApp() {
+            let jugadorasMap = {};
+            let totalCartones = 0;
+
+            for (let id in marketCards) {
+                let card = marketCards[id];
+                if (card.owner && card.ownerControl && card.loaded) {
+                    totalCartones++;
+                    if (!jugadorasMap[card.ownerControl]) {
+                        jugadorasMap[card.ownerControl] = { name: card.owner, cards: [] };
+                    }
+                    jugadorasMap[card.ownerControl].cards.push(card.id);
+                }
+            }
+
+            let fechaHoy = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            let texto = `🎲 *LISTA DE CARTONES EN JUEGO - BINGO YUNE* 🎲\n📅 Fecha: ${fechaHoy}\n\n`;
+
+            let controls = Object.keys(jugadorasMap);
+            if (controls.length === 0) {
+                return "Aún no hay cartones cargados en juego para esta ronda.";
+            }
+
+            controls.forEach(ctrl => {
+                let j = jugadorasMap[ctrl];
+                j.cards.sort((a, b) => a - b);
+                texto += `👤 *${j.name}*\n   Cartones: #${j.cards.join(', #')}\n\n`;
+            });
+
+            texto += `🎟️ *Total de cartones:* ${totalCartones}\n`;
+            texto += `💰 *Valor por cartón:* $${cardPrice}\n`;
+            texto += `✨ ¡Mucha suerte a todas en la partida! ✨`;
+
+            return texto;
+        }
+
+        function actualizarPreviewWhatsApp() {
+            let textarea = document.getElementById('texto-whatsapp-preview');
+            if (textarea) {
+                textarea.value = generarTextoResumenWhatsApp();
+            }
+        }
+
+        function copiarResumenWhatsApp() {
+            let textoFinal = generarTextoResumenWhatsApp();
+            navigator.clipboard.writeText(textoFinal).then(() => {
+                alert("📋 ¡Lista copiada con éxito! Ya puedes ir al grupo de WhatsApp y pegarla.");
+            }).catch(err => {
+                let textarea = document.getElementById('texto-whatsapp-preview');
+                textarea.select();
+                document.execCommand('copy');
+                alert("📋 ¡Lista copiada al portapapeles!");
+            });
+        }
+
+        // --- FUNCIONES DE CONTROL DE RONDAS Y GANANCIAS DEL DÍA ---
+        function registrarRondaManual() {
+            let totalCartonesRonda = 0;
+            for (let id in marketCards) {
+                if (marketCards[id].owner && marketCards[id].loaded) {
+                    totalCartonesRonda++;
+                }
+            }
+
+            if (totalCartonesRonda === 0) {
+                alert("⚠️ No hay cartones jugados en esta ronda para registrar.");
+                return;
+            }
+
+            let recaudadoRonda = totalCartonesRonda * cardPrice;
+            let horaActual = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+            let nuevaRonda = {
+                numero: rondasDelDia.length + 1,
+                hora: horaActual,
+                cartones: totalCartonesRonda,
+                recaudado: recaudadoRonda,
+                figura: nombresPatrones[gamePattern] || 'Línea'
+            };
+
+            rondasDelDia.push(nuevaRonda);
+            localStorage.setItem('bingo_rondas_dia', JSON.stringify(rondasDelDia));
+            renderizarHistorialRondasDia();
+            alert(`✅ ¡Ronda #${nuevaRonda.numero} registrada con éxito! (${totalCartonesRonda} cartones / Recaudado: ${recaudadoRonda.toLocaleString()})`);
+        }
+
+        function registrarYReiniciarSiguienteRonda() {
+            registrarRondaManual();
+            reiniciarBalotasParaSiguienteFigura();
+        }
+
+        function renderizarHistorialRondasDia() {
+            let container = document.getElementById('lista-rondas-dia-container');
+            let badgeRondas = document.getElementById('badge-total-rondas-dia');
+            let statRecaudado = document.getElementById('stat-recaudado-hoy');
+            let statCartones = document.getElementById('stat-cartones-hoy');
+            if (!container) return;
+
+            container.innerHTML = '';
+            let totalRecaudadoGlobal = 0;
+            let totalCartonesGlobal = 0;
+
+            if (rondasDelDia.length === 0) {
+                container.innerHTML = '<span class="text-slate-500 text-center py-2">No hay rondas finalizadas todavía hoy.</span>';
+                badgeRondas.innerText = "0 Rondas Realizadas";
+                statRecaudado.innerText = "0.00";
+                statCartones.innerText = "0";
+                return;
+            }
+
+            badgeRondas.innerText = `${rondasDelDia.length} Ronda(s) Realizada(s)`;
+
+            rondasDelDia.forEach(r => {
+                totalRecaudadoGlobal += r.recaudado;
+                totalCartonesGlobal += r.cartones;
+
+                let div = document.createElement('div');
+                div.className = "bg-slate-950 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center";
+                div.innerHTML = `
+                    <div>
+                        <strong class="text-yellow-400">Ronda #${r.numero}</strong> <span class="text-slate-400 text-[10px]">(${r.hora})</span>
+                        <div class="text-slate-300 text-[11px]">Figura: ${r.figura} &bull; ${r.cartones} cartones</div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-emerald-400 font-bold block">${r.recaudado.toLocaleString()}</span>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            statRecaudado.innerText = totalRecaudadoGlobal.toLocaleString();
+            statCartones.innerText = totalCartonesGlobal;
+        }
+
+        function limpiarHistorialRondas() {
+            if (confirm("¿Estás segura de reiniciar el registro de rondas y ganancias de hoy?")) {
+                rondasDelDia = [];
+                localStorage.removeItem('bingo_rondas_dia');
+                renderizarHistorialRondasDia();
+                alert("🗑️ Historial del día reiniciado a cero.");
+            }
         }
 
         function renderizarHistorialAdmin() {
