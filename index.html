@@ -237,7 +237,7 @@
                         <h3 class="font-bold text-purple-300 text-lg">Control de Billeteras, Créditos y Exclusión</h3>
                     </div>
                 </div>
-                <p class="text-xs text-slate-400">Asigna saldo, activa crédito exclusivo o **elimina del sistema** a cualquier jugadora con un solo toque.</p>
+                <p class="text-xs text-slate-400">Asigna saldo, resta saldo, pon en cero, activa crédito exclusivo o **elimina del sistema** a cualquier jugadora.</p>
                 <div id="admin-wallets-list" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto p-3 bg-slate-900/80 rounded-2xl border border-slate-700/60">
                     <span class="text-slate-500 text-xs col-span-2 text-center py-4">Cargando billeteras...</span>
                 </div>
@@ -1462,6 +1462,8 @@
                             <span class="${balanceColor} font-bold block text-sm">${balance.toLocaleString()}</span>
                             <div class="mt-1.5 flex gap-1 justify-end flex-wrap">
                                 <button onclick="setPositiveBalanceAdmin('${code}', '${user.name}')" class="text-[9px] bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-0.5 rounded font-semibold">＋ Saldo</button>
+                                <button onclick="restarSaldoAdmin('${code}', '${user.name}', ${balance})" class="text-[9px] bg-orange-600 hover:bg-orange-500 text-white px-2 py-0.5 rounded font-semibold">➖ Restar</button>
+                                <button onclick="ponerCeroAdmin('${code}', '${user.name}')" class="text-[9px] bg-yellow-600 hover:bg-yellow-500 text-slate-950 px-2 py-0.5 rounded font-bold">0️⃣ En Cero</button>
                                 <button onclick="toggleCreditAdmin('${code}', '${user.name}', ${!isCredit})" class="text-[9px] ${isCredit ? 'bg-amber-700' : 'bg-slate-700 hover:bg-amber-600'} text-white px-2 py-0.5 rounded font-semibold">${isCredit ? 'Quitar Crédito' : 'Dar Crédito'}</button>
                                 <button onclick="eliminarJugadorSistema('${code}', '${user.name}')" class="text-[9px] bg-red-600 hover:bg-red-500 text-white px-2 py-0.5 rounded font-semibold">🗑️ Eliminar</button>
                             </div>
@@ -1473,20 +1475,41 @@
         }
 
         function setPositiveBalanceAdmin(code, name) {
-            let monto = prompt(`Ingresa el saldo para ${name} (Control: ${code}):`);
+            let monto = prompt(`Ingresa el saldo a sumar para ${name} (Control: ${code}):`);
             if (monto !== null && !isNaN(monto)) {
-                db.ref(`users/${code}`).update({
-                    balance: parseFloat(monto)
+                db.ref(`users/${code}`).once('value', (snap) => {
+                    let actual = snap.val() && snap.val().balance ? snap.val().balance : 0;
+                    let nuevo = actual + parseFloat(monto);
+                    db.ref(`users/${code}`).update({ balance: nuevo });
+                    alert(`¡Saldo de ${name} actualizado a ${nuevo.toLocaleString()}!`);
+                    renderizarAdminWallets();
                 });
-                alert(`¡Saldo de ${name} actualizado a ${parseFloat(monto).toLocaleString()}!`);
+            }
+        }
+
+        function restarSaldoAdmin(code, name, saldoActual) {
+            let montoRetiro = prompt(`¿Cuánto deseas restarle o retirarle a ${name}? (Saldo actual: ${saldoActual.toLocaleString()}):`);
+            if (montoRetiro !== null && !isNaN(montoRetiro)) {
+                let valorRestar = parseFloat(montoRetiro);
+                let nuevoSaldo = saldoActual - valorRestar;
+                if (nuevoSaldo < 0) nuevoSaldo = 0;
+
+                db.ref(`users/${code}`).update({ balance: nuevoSaldo });
+                alert(`¡Se le han descontado ${valorRestar.toLocaleString()} a ${name}. Su nuevo saldo es ${nuevoSaldo.toLocaleString()}!`);
+                renderizarAdminWallets();
+            }
+        }
+
+        function ponerCeroAdmin(code, name) {
+            if (confirm(`¿Estás segura de colocar el saldo de ${name} en 0.00?`)) {
+                db.ref(`users/${code}`).update({ balance: 0.00 });
+                alert(`¡La billetera de ${name} ha quedado en cero con éxito!`);
                 renderizarAdminWallets();
             }
         }
 
         function toggleCreditAdmin(code, name, activarCredito) {
-            db.ref(`users/${code}`).update({
-                isCredit: activarCredito
-            });
+            db.ref(`users/${code}`).update({ isCredit: activarCredito });
             if (activarCredito) {
                 alert(`¡Crédito exclusivo activado para ${name}! Ahora podrá jugar sin restricción de saldo.`);
             } else {
