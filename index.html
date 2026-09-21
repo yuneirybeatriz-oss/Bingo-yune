@@ -2144,34 +2144,6 @@
             cajaChat.scrollTop = cajaChat.scrollHeight;
         }
 </script>
-    <script>
-    function enviarMensajeChat() {
-        alert("¡El botón fue presionado!"); // <-- Esto nos dirá si el clic llega o no
-
-        let input = document.getElementById('input-mensaje-jugadora');
-        if (!input) {
-            alert("No se encontró el input 'input-mensaje-jugadora'");
-            return;
-        }
-        
-        let mensajeTexto = input.value.trim();
-        if (mensajeTexto === "") return;
-
-        let cajaChat = document.getElementById('caja-chat-jugadoras');
-        if (cajaChat) {
-            if (cajaChat.innerHTML.includes("Bienvenidos")) {
-                cajaChat.innerHTML = ""; 
-            }
-            
-            let nombreUsuario = (typeof currentUser !== 'undefined' && currentUser && currentUser.name) ? currentUser.name : 'Jugadora';
-            
-            cajaChat.innerHTML += `<div style="margin-bottom: 5px;"><strong>${nombreUsuario}</strong>: ${mensajeTexto}</div>`;
-            cajaChat.scrollTop = cajaChat.scrollHeight;
-        }
-
-        input.value = "";
-    }
-</script>
 
 </body>
 </html>
