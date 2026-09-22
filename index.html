@@ -127,18 +127,19 @@
             </div>
         </div>
 
+
         <!-- PANEL ADMIN -->
         <div id="view-admin-panel" class="w-full flex flex-col gap-6 hidden">
             <div class="bg-slate-800 p-6 rounded-3xl flex justify-between items-center flex-wrap gap-3">
                 <h2 class="text-2xl font-bold text-pink-400">Torre de Control</h2>
                 <div class="flex gap-2 items-center">
+                    <!-- BOTÓN MAESTRO DE CIERRE DE SALA -->
                     <button id="admin-toggle-room-btn" onclick="toggleRoomLockAdmin()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow transition">
                         🟢 Sala Abierta (Cerrar)
                     </button>
                     <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 text-xs rounded-xl">Salir</button>
                 </div>
             </div>
-            
             <!-- ALERTA DE GANADORES MÚLTIPLES -->
             <div id="admin-winner-alert" class="hidden bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-950 p-6 rounded-3xl font-extrabold text-center text-xl shadow-xl alert-bingo flex flex-col gap-3">
                 <div>🎉 ¡BINGO VALIDADO! (Juego Detenido) 🎉</div>
@@ -149,9 +150,9 @@
                     <button onclick="reiniciarBalotasParaSiguienteFigura()" class="py-2 px-4 bg-pink-600 text-white text-xs rounded-xl font-bold shadow">🔄 Limpiar Balotas (Misma Ronda)</button>
                 </div>
             </div>
-
-            <!-- SECCIÓN: VALOR DEL CARTÓN, CÓDIGO DE SALA Y PREMIO -->
+<!-- SECCIÓN: VALOR DEL CARTÓN, CÓDIGO DE SALA Y PREMIO -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-yellow-500/40 shadow-lg">
+                <!-- Fila 1: Valor del cartón y Código de acceso -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="text-xs text-yellow-300 font-bold block mb-1">💵 Valor de Cada Cartón (Bs / $):</label>
@@ -169,14 +170,17 @@
                     </div>
                 </div>
 
+                <!-- Fila 2: Premio de la Figura Actual -->
                 <div>
                     <label class="text-xs text-yellow-300 font-bold block mb-1">💰 Premio de la Figura Actual:</label>
                     <div class="flex gap-2">
                         <input type="number" id="admin-premio-input" placeholder="Ej: 2000" class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-center text-pink-400">
                         <button onclick="(function(){ const val = document.getElementById('admin-premio-input').value; if(!val) { alert('Escribe un monto'); return; } database.ref('room/premioActual').set(Number(val)).then(() => alert('¡Premio actualizado con éxito!')); })()" class="px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white font-extrabold text-xs rounded-xl shadow">Guardar</button>
+
                     </div>
                 </div>
             </div>
+
 
             <!-- SECCIÓN: RESUMEN AUTOMÁTICO PARA WHATSAPP -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-emerald-500/40 shadow-lg">
@@ -189,11 +193,11 @@
                         📋 Copiar Lista para WhatsApp
                     </button>
                 </div>
-                <p class="text-xs text-slate-400">Generado automáticamente agrupando los cartones por cada jugadora.</p>
+                <p class="text-xs text-slate-400">Generado automáticamente agrupando los cartones por cada jugadora (ej: Maira: #5, #10, #15...). ¡Toca el botón para copiar y pegar en el grupo!</p>
                 <textarea id="texto-whatsapp-preview" readonly class="w-full h-32 bg-slate-900 border border-slate-700 rounded-2xl p-3 text-xs text-slate-300 font-mono resize-none focus:outline-none" placeholder="Generando resumen..."></textarea>
             </div>
 
-            <!-- SECCIÓN: CONTROL DE RONDAS Y GANANCIAS -->
+            <!-- SECCIÓN: REGISTRO DE RONDAS Y GANANCIAS DEL DÍA -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-blue-500/40 shadow-lg">
                 <div class="flex justify-between items-center flex-wrap gap-2">
                     <div class="flex items-center gap-2">
@@ -224,7 +228,7 @@
                 </div>
             </div>
 
-            <!-- CARTONES PAGADOS EN JUEGO -->
+            <!-- SECCIÓN: CARTONES PAGADOS EN JUEGO -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-emerald-500/40 shadow-lg">
                 <div class="flex justify-between items-center flex-wrap gap-2">
                     <div class="flex items-center gap-2">
@@ -238,7 +242,7 @@
                 </div>
             </div>
 
-            <!-- BILLETERAS Y CRÉDITOS -->
+            <!-- BILLETERAS Y CRÉDITOS EXCLUSIVOS (PANEL ADMIN) -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-purple-500/40 shadow-lg">
                 <div class="flex justify-between items-center flex-wrap gap-2">
                     <div class="flex items-center gap-2">
@@ -246,7 +250,7 @@
                         <h3 class="font-bold text-purple-300 text-lg">Control de Billeteras, Créditos y Exclusión</h3>
                     </div>
                 </div>
-                <p class="text-xs text-slate-400">Asigna saldo, resta saldo, pon en cero, activa crédito exclusivo o elimina del sistema.</p>
+                <p class="text-xs text-slate-400">Asigna saldo, resta saldo, pon en cero, activa crédito exclusivo o **elimina del sistema** a cualquier jugadora.</p>
                 <div id="admin-wallets-list" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto p-3 bg-slate-900/80 rounded-2xl border border-slate-700/60">
                     <span class="text-slate-500 text-xs col-span-2 text-center py-4">Cargando billeteras...</span>
                 </div>
@@ -306,7 +310,7 @@
                 </div>
             </div>
 
-            <!-- RADAR DE CARTONES -->
+            <!-- RADAR DE CARTONES MÁS CERCANOS -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-yellow-300 text-lg">📡 Radar de Cartones Cercanos</h3>
@@ -317,7 +321,7 @@
                 </div>
             </div>
 
-            <!-- CONTROL DE PAGOS -->
+            <!-- CONTROL DE PAGOS DE JUGADORA -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-pink-400 text-lg">Control de pagos de jugadora</h3>
@@ -326,7 +330,7 @@
                 <div id="admin-cards-summary" class="flex flex-col gap-2.5 max-h-64 overflow-y-auto p-3 bg-slate-900/60 rounded-2xl font-mono text-sm"></div>
             </div>
 
-            <!-- LIBERAR CARTONES -->
+            <!-- SECCIÓN DE LIBERAR CARTONES -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
                 <h3 class="font-bold text-red-400 text-sm">🗑️ Sección para Liberar Cartones Ocupados</h3>
                 <div class="flex gap-3 items-center">
@@ -340,12 +344,16 @@
                 <div id="admin-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1.5"></div>
             </div>
 
-            <!-- CHAT EN VIVO (ADMIN) -->
+            <!-- ================= CHAT DE LA SALA EN VIVO (INTEGRADO EN EL PANEL ADMIN) ================= -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-pink-500/40 shadow-lg">
                 <h3 class="font-bold text-pink-400 text-lg flex items-center gap-2">💬 Chat de la Sala en Vivo (Admin)</h3>
+                
+                <!-- Caja de mensajes -->
                 <div id="caja-chat-admin" class="bg-slate-900 h-36 overflow-y-auto p-3 rounded-xl border border-slate-700 text-xs text-left space-y-1.5">
                     <p class="text-slate-500 text-center">Conectando al chat en vivo...</p>
                 </div>
+
+                <!-- Input y botón de enviar -->
                 <div class="flex gap-2">
                     <input type="text" id="input-mensaje-admin" placeholder="Escribe tu mensaje como Administradora..." class="flex-1 px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs" onkeypress="if(event.key === 'Enter') enviarMensajeChatAdmin()">
                     <button onclick="enviarMensajeChatAdmin()" class="px-5 py-2 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl text-xs shadow transition">Enviar</button>
@@ -361,6 +369,7 @@
                     <p class="text-xs text-slate-400">Control ID: <span id="player-display-control">--</span></p>
                 </div>
                 <div class="flex flex-wrap gap-2 items-center">
+                    <!-- WIDGET BILLETERA VIRTUAL JUGADORA -->
                     <div id="player-wallet-widget" class="bg-slate-900 border border-emerald-500/40 px-4 py-2 rounded-2xl flex items-center gap-3 shadow">
                         <div>
                             <span id="wallet-label" class="text-[9px] text-slate-400 uppercase tracking-wider block font-bold">Mi Saldo</span>
@@ -382,7 +391,7 @@
                 </div>
             </div>
 
-            <!-- MODAL VISTA PREVIA FULLSCREEN -->
+            <!-- MODAL DE VISTA PREVIA DE CARTÓN A PANTALLA COMPLETA -->
             <div id="modal-carton-fullscreen" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
                 <div class="bg-slate-900 border border-pink-500/50 p-6 rounded-3xl shadow-2xl flex flex-col gap-4 max-w-sm w-full text-center relative">
                     <button onclick="cerrarVistaPreviaFullscreen()" class="absolute top-4 right-4 bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white w-8 h-8 rounded-full font-bold flex items-center justify-center transition">✕</button>
@@ -404,7 +413,7 @@
                 </div>
             </div>
 
-            <!-- MODAL DE VICTORIA JUGADORA -->
+            <!-- MODAL DE VICTORIA DE LA JUGADORA -->
             <div id="player-winner-notification" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
                 <div class="flash-winner text-slate-950 p-6 md:p-8 rounded-3xl font-extrabold text-center shadow-2xl alert-bingo flex flex-col gap-4 max-w-lg w-full">
                     <div class="text-3xl md:text-4xl text-yellow-300 drop-shadow">👑 ¡B I N G O ! 👑</div>
@@ -422,7 +431,7 @@
                 </div>
             </div>
 
-            <!-- BOLA ACTUAL -->
+            <!-- ÚLTIMA BOLA CANTADA -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 border-2 border-yellow-500/50 shadow-xl">
                 <div class="flex flex-col items-center md:items-start text-center md:text-left">
                     <span class="text-xs uppercase tracking-wider text-yellow-400 font-bold mb-1">🔥 Bola Actual en Juego</span>
@@ -439,7 +448,7 @@
                 </div>
             </div>
 
-            <!-- JUGADORAS EN LÍNEA -->
+            <!-- LISTA DE JUGADORAS CONECTADAS -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-yellow-300 text-sm">👥 Jugadoras en Línea en la Sala</h3>
@@ -450,7 +459,7 @@
                 </div>
             </div>
 
-            <!-- TUS CARTONES -->
+            <!-- ZONA DE TUS CARTONES EN JUEGO -->
             <div class="flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-yellow-300 text-lg">Tus Cartones en Juego</h3>
@@ -461,30 +470,34 @@
                 </div>
             </div>
 
-            <!-- TABLERO GENERAL -->
+            <!-- TABLERO GENERAL (1-75) -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-2">
                 <h3 class="font-bold text-pink-400 text-sm">Tablero General (1-75)</h3>
                 <div id="player-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1"></div>
             </div>
 
-            <!-- CHAT EN VIVO (JUGADORAS) -->
+            <!-- ================= CHAT DE LA SALA EN VIVO (INTEGRADO EN LA VISTA JUGADORA) ================= -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-pink-500/40 shadow-lg">
                 <h3 class="font-bold text-pink-400 text-lg flex items-center gap-2">💬 Chat de la Sala en Vivo</h3>
+                
+                <!-- Caja de mensajes -->
                 <div id="caja-chat-jugadoras" class="bg-slate-900 h-36 overflow-y-auto p-3 rounded-xl border border-slate-700 text-xs text-left space-y-1.5">
                     <p class="text-slate-500 text-center">Conectando al chat en vivo...</p>
                 </div>
+
+                <!-- Input y botón de enviar -->
                 <div class="flex gap-2">
                     <input type="text" id="input-mensaje-jugadora" placeholder="Escribe tu mensaje..." class="flex-1 px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs" onkeypress="if(event.key === 'Enter') enviarMensajeChatJugadora()">
                     <button onclick="enviarMensajeChatJugadora()" class="px-5 py-2 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl text-xs shadow transition">Enviar</button>
                 </div>
             </div>
 
-            <!-- MERCADO DE CARTONES -->
+            <!-- SELECCIÓN DE CARTONES (MERCADO) -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <div>
                         <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (<span id="available-count">100</span> Disponibles)</h3>
-                        <p id="market-status-msg" class="text-xs text-slate-400">Toca el número para seleccionarlo, o toca el botón de vista previa para inspeccionarlo.</p>
+                        <p id="market-status-msg" class="text-xs text-slate-400">Toca el número para seleccionarlo, o mantén presionado / toca el botón de vista previa para inspeccionarlo.</p>
                     </div>
                 </div>
                 <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
@@ -501,8 +514,7 @@
     <script>
         const firebaseConfig = { databaseURL: "https://bingo-lineal-yune-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const db = database; // Alias para compatibilidad
+        const db = firebase.database();
 
         let currentUser = { name: '', control: '', isAdmin: false };
         let drawnBalls = [];
@@ -519,7 +531,6 @@
         let presenceRef = null;
         let audioHabilitado = true;
         let rondasDelDia = [];
-        let seleccionadosParaCargar = [];
 
         const nombresPatrones = {
             'line': 'Línea (Horizontal o Vertical)',
@@ -545,11 +556,19 @@
                 let minutos = ahora.getMinutes();
                 let segundos = ahora.getSeconds();
                 let ampm = horas >= 12 ? 'PM' : 'AM';
+
                 horas = horas % 12;
                 horas = horas ? horas : 12;
-                let relojTexto = `${horas < 10 ? '0' + horas : horas}:${minutos < 10 ? '0' + minutos : minutos}:${segundos < 10 ? '0' + segundos : segundos} ${ampm}`;
+
+                let horasStr = horas < 10 ? '0' + horas : horas;
+                let minutosStr = minutos < 10 ? '0' + minutos : minutos;
+                let segundosStr = segundos < 10 ? '0' + segundos : segundos;
+
+                let relojTexto = `${horasStr}:${minutosStr}:${segundosStr} ${ampm}`;
                 let relojEl = document.getElementById('clock-time');
-                if (relojEl) relojEl.innerText = relojTexto;
+                if (relojEl) {
+                    relojEl.innerText = relojTexto;
+                }
             }
             actualizarReloj();
             setInterval(actualizarReloj, 1000);
@@ -572,7 +591,9 @@
             } else {
                 btn.className = "px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs font-bold rounded-xl shadow flex items-center gap-1.5 transition";
                 btn.innerText = "🔇 Silenciado";
-                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                }
             }
         }
 
@@ -590,7 +611,10 @@
 
         function probarVoz() {
             let mensajeAnuncio = "¡Bienvenidos al Bingo Lineal Yune! Damos inicio a la ronda. ¡Comenzamos, mucha suerte para todas!";
-            db.ref('room/announcement').set({ text: mensajeAnuncio, timestamp: Date.now() });
+            db.ref('room/announcement').set({
+                text: mensajeAnuncio,
+                timestamp: Date.now()
+            });
         }
 
         function obtenerLetraYNumeroVoz(num) {
@@ -619,6 +643,7 @@
         function generarEstructuraCarton() {
             let carton = [];
             let columnas = [[1, 15], [16, 30], [31, 45], [46, 60], [61, 75]];
+
             for (let c = 0; c < 5; c++) {
                 let colNumeros = [];
                 let min = columnas[c][0];
@@ -629,12 +654,16 @@
                 }
                 carton.push(colNumeros);
             }
+
             let matrizFilas = [];
             for (let f = 0; f < 5; f++) {
                 let fila = [];
-                for (let c = 0; c < 5; c++) fila.push(carton[c][f]);
+                for (let c = 0; c < 5; c++) {
+                    fila.push(carton[c][f]);
+                }
                 matrizFilas.push(fila);
             }
+
             matrizFilas[2][2] = 0; 
             return matrizFilas;
         }
@@ -843,6 +872,7 @@
             db.ref('room').on('value', (snapshot) => {
                 let data = snapshot.val();
                 if (!data) return;
+
                 isRoomLocked = data.isRoomLocked || false;
                 actualizarEstadoBloqueoUI(isRoomLocked);
             });
@@ -981,7 +1011,7 @@
                 }
 
                 if (control.length !== 10) {
-                    alert("El número de control debe tener exactamente 10 dígitos.");
+                    alert("El número de control debe tener exactamente 10 dígitos (cédula o teléfono).");
                     return;
                 }
 
@@ -1160,6 +1190,7 @@
             });
         }
 
+        // --- FUNCIONES DE WHATSAPP AUTOMÁTICO (agrupado por nombre) ---
         function generarTextoResumenWhatsApp() {
             let jugadorasMap = {};
             let totalCartones = 0;
@@ -1179,7 +1210,9 @@
             let texto = `🎲 *LISTA DE CARTONES EN JUEGO - BINGO YUNE* 🎲\n📅 Fecha: ${fechaHoy}\n\n`;
 
             let controls = Object.keys(jugadorasMap);
-            if (controls.length === 0) return "Aún no hay cartones cargados en juego para esta ronda.";
+            if (controls.length === 0) {
+                return "Aún no hay cartones cargados en juego para esta ronda.";
+            }
 
             controls.forEach(ctrl => {
                 let j = jugadorasMap[ctrl];
@@ -1190,32 +1223,46 @@
             texto += `🎟️ *Total de cartones:* ${totalCartones}\n`;
             texto += `💰 *Valor por cartón:* $${cardPrice}\n`;
             texto += `✨ ¡Mucha suerte a todas en la partida! ✨`;
+
             return texto;
         }
 
         function actualizarPreviewWhatsApp() {
             let textarea = document.getElementById('texto-whatsapp-preview');
-            if (textarea) textarea.value = generarTextoResumenWhatsApp();
+            if (textarea) {
+                textarea.value = generarTextoResumenWhatsApp();
+            }
         }
 
         function copiarResumenWhatsApp() {
             let textoFinal = generarTextoResumenWhatsApp();
             navigator.clipboard.writeText(textoFinal).then(() => {
                 alert("📋 ¡Lista copiada con éxito! Ya puedes ir al grupo de WhatsApp y pegarla.");
+            }).catch(err => {
+                let textarea = document.getElementById('texto-whatsapp-preview');
+                textarea.select();
+                document.execCommand('copy');
+                alert("📋 ¡Lista copiada al portapapeles!");
             });
         }
 
+        // --- FUNCIONES DE CONTROL DE RONDAS Y GANANCIAS DEL DÍA ---
         function registrarRondaManual() {
             let totalCartonesRonda = 0;
             for (let id in marketCards) {
-                if (marketCards[id].owner && marketCards[id].loaded) totalCartonesRonda++;
+                if (marketCards[id].owner && marketCards[id].loaded) {
+                    totalCartonesRonda++;
+                }
             }
+
             if (totalCartonesRonda === 0) {
                 alert("⚠️ No hay cartones jugados en esta ronda para registrar.");
                 return;
             }
+
             let recaudadoRonda = totalCartonesRonda * cardPrice;
             let horaActual = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
             let nuevaRonda = {
                 numero: rondasDelDia.length + 1,
                 hora: horaActual,
@@ -1223,10 +1270,11 @@
                 recaudado: recaudadoRonda,
                 figura: nombresPatrones[gamePattern] || 'Línea'
             };
+
             rondasDelDia.push(nuevaRonda);
             localStorage.setItem('bingo_rondas_dia', JSON.stringify(rondasDelDia));
             renderizarHistorialRondasDia();
-            alert(`✅ ¡Ronda #${nuevaRonda.numero} registrada con éxito!`);
+            alert(`✅ ¡Ronda #${nuevaRonda.numero} registrada con éxito! (${totalCartonesRonda} cartones / Recaudado: ${recaudadoRonda.toLocaleString()})`);
         }
 
         function registrarYReiniciarSiguienteRonda() {
@@ -1240,8 +1288,10 @@
             let statRecaudado = document.getElementById('stat-recaudado-hoy');
             let statCartones = document.getElementById('stat-cartones-hoy');
             if (!container) return;
+
             container.innerHTML = '';
-            let totalRecaudadoGlobal = 0, totalCartonesGlobal = 0;
+            let totalRecaudadoGlobal = 0;
+            let totalCartonesGlobal = 0;
 
             if (rondasDelDia.length === 0) {
                 container.innerHTML = '<span class="text-slate-500 text-center py-2">No hay rondas finalizadas todavía hoy.</span>';
@@ -1252,14 +1302,25 @@
             }
 
             badgeRondas.innerText = `${rondasDelDia.length} Ronda(s) Realizada(s)`;
+
             rondasDelDia.forEach(r => {
                 totalRecaudadoGlobal += r.recaudado;
                 totalCartonesGlobal += r.cartones;
+
                 let div = document.createElement('div');
                 div.className = "bg-slate-950 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center";
-                div.innerHTML = `<div><strong class="text-yellow-400">Ronda #${r.numero}</strong> <span class="text-slate-400 text-[10px]">(${r.hora})</span><div class="text-slate-300 text-[11px]">Figura: ${r.figura} &bull; ${r.cartones} cartones</div></div><div class="text-right"><span class="text-emerald-400 font-bold block">${r.recaudado.toLocaleString()}</span></div>`;
+                div.innerHTML = `
+                    <div>
+                        <strong class="text-yellow-400">Ronda #${r.numero}</strong> <span class="text-slate-400 text-[10px]">(${r.hora})</span>
+                        <div class="text-slate-300 text-[11px]">Figura: ${r.figura} &bull; ${r.cartones} cartones</div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-emerald-400 font-bold block">${r.recaudado.toLocaleString()}</span>
+                    </div>
+                `;
                 container.appendChild(div);
             });
+
             statRecaudado.innerText = totalRecaudadoGlobal.toLocaleString();
             statCartones.innerText = totalCartonesGlobal;
         }
@@ -1338,6 +1399,7 @@
             let badgeCount = document.getElementById('admin-paid-count-badge');
             if (!container) return;
             container.innerHTML = '';
+
             let jugadorasMap = {};
             let totalCartonesPagados = 0;
 
@@ -1351,18 +1413,31 @@
                     jugadorasMap[card.ownerControl].cards.push(card.id);
                 }
             }
+
             badgeCount.innerText = `${totalCartonesPagados} cartón(es) pagado(s)`;
+
             let controls = Object.keys(jugadorasMap);
             if (controls.length === 0) {
                 container.innerHTML = '<span class="text-slate-500 text-xs col-span-2 text-center py-4">No hay cartones marcados como "Pagado" todavía.</span>';
                 return;
             }
+
             controls.forEach(ctrl => {
                 let j = jugadorasMap[ctrl];
                 j.cards.sort((a, b) => a - b);
+
                 let div = document.createElement('div');
                 div.className = "bg-slate-950 p-3 rounded-xl flex flex-col gap-1.5 border border-emerald-500/30 text-xs";
-                div.innerHTML = `<div class="flex justify-between items-center"><strong class="text-pink-300 text-sm">${j.name}</strong><span class="text-[10px] bg-slate-900 px-2 py-0.5 rounded text-slate-400 font-mono">Control: ${j.control}</span></div><div class="text-emerald-300 font-bold flex items-center gap-1.5"><span>✅ Cartones en juego:</span> <span class="tracking-wide">#${j.cards.join(', #')}</span></div>`;
+                div.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <strong class="text-pink-300 text-sm">${j.name}</strong>
+                        <span class="text-[10px] bg-slate-900 px-2 py-0.5 rounded text-slate-400 font-mono">Control: ${j.control}</span>
+                    </div>
+                    <div class="text-emerald-300 font-bold flex items-center gap-1.5">
+                        <span>✅ Cartones en juego:</span> 
+                        <span class="tracking-wide">#${j.cards.join(', #')}</span>
+                    </div>
+                `;
                 container.appendChild(div);
             });
         }
@@ -1370,12 +1445,14 @@
         function renderizarAdminWallets() {
             let container = document.getElementById('admin-wallets-list');
             if (!container) return;
+
             db.ref('users').once('value', (snapshot) => {
                 let users = snapshot.val();
                 if (!users) {
                     container.innerHTML = '<span class="text-slate-500 text-xs col-span-2 text-center py-4">No hay jugadoras registradas aún.</span>';
                     return;
                 }
+
                 container.innerHTML = '';
                 Object.keys(users).forEach(code => {
                     let user = users[code];
@@ -1386,48 +1463,76 @@
 
                     let div = document.createElement('div');
                     div.className = "bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center gap-2 text-xs";
-                    div.innerHTML = `<div><div class="flex items-center gap-2"><strong class="text-slate-200 text-sm">${user.name}</strong>${badgeText}</div><span class="text-slate-400 font-mono text-[10px]">Control: ${code}</span></div><div class="text-right"><span class="${balanceColor} font-bold block text-sm">${balance.toLocaleString()}</span><div class="mt-1.5 flex gap-1 justify-end flex-wrap"><button onclick="setPositiveBalanceAdmin('${code}', '${user.name}')" class="text-[9px] bg-emerald-600 text-white px-2 py-0.5 rounded font-semibold">＋ Saldo</button><button onclick="restarSaldoAdmin('${code}', '${user.name}', ${balance})" class="text-[9px] bg-orange-600 text-white px-2 py-0.5 rounded font-semibold">➖ Restar</button><button onclick="ponerCeroAdmin('${code}', '${user.name}')" class="text-[9px] bg-yellow-600 text-slate-950 px-2 py-0.5 rounded font-bold">0️⃣ En Cero</button><button onclick="toggleCreditAdmin('${code}', '${user.name}', ${!isCredit})" class="text-[9px] ${isCredit ? 'bg-amber-700' : 'bg-slate-700'} text-white px-2 py-0.5 rounded font-semibold">${isCredit ? 'Quitar Crédito' : 'Dar Crédito'}</button><button onclick="eliminarJugadorSistema('${code}', '${user.name}')" class="text-[9px] bg-red-600 text-white px-2 py-0.5 rounded font-semibold">🗑️ Eliminar</button></div></div>`;
+                    div.innerHTML = `
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <strong class="text-slate-200 text-sm">${user.name}</strong>
+                                ${badgeText}
+                            </div>
+                            <span class="text-slate-400 font-mono text-[10px]">Control: ${code}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="${balanceColor} font-bold block text-sm">${balance.toLocaleString()}</span>
+                            <div class="mt-1.5 flex gap-1 justify-end flex-wrap">
+                                <button onclick="setPositiveBalanceAdmin('${code}', '${user.name}')" class="text-[9px] bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-0.5 rounded font-semibold">＋ Saldo</button>
+                                <button onclick="restarSaldoAdmin('${code}', '${user.name}', ${balance})" class="text-[9px] bg-orange-600 hover:bg-orange-500 text-white px-2 py-0.5 rounded font-semibold">➖ Restar</button>
+                                <button onclick="ponerCeroAdmin('${code}', '${user.name}')" class="text-[9px] bg-yellow-600 hover:bg-yellow-500 text-slate-950 px-2 py-0.5 rounded font-bold">0️⃣ En Cero</button>
+                                <button onclick="toggleCreditAdmin('${code}', '${user.name}', ${!isCredit})" class="text-[9px] ${isCredit ? 'bg-amber-700' : 'bg-slate-700 hover:bg-amber-600'} text-white px-2 py-0.5 rounded font-semibold">${isCredit ? 'Quitar Crédito' : 'Dar Crédito'}</button>
+                                <button onclick="eliminarJugadorSistema('${code}', '${user.name}')" class="text-[9px] bg-red-600 hover:bg-red-500 text-white px-2 py-0.5 rounded font-semibold">🗑️ Eliminar</button>
+                            </div>
+                        </div>
+                    `;
                     container.appendChild(div);
                 });
             });
         }
 
         function setPositiveBalanceAdmin(code, name) {
-            let monto = prompt(`Ingresa el saldo a sumar para ${name}:`);
+            let monto = prompt(`Ingresa el saldo a sumar para ${name} (Control: ${code}):`);
             if (monto !== null && !isNaN(monto)) {
                 db.ref(`users/${code}`).once('value', (snap) => {
                     let actual = snap.val() && snap.val().balance ? snap.val().balance : 0;
                     let nuevo = actual + parseFloat(monto);
                     db.ref(`users/${code}`).update({ balance: nuevo });
+                    alert(`¡Saldo de ${name} actualizado a ${nuevo.toLocaleString()}!`);
                     renderizarAdminWallets();
                 });
             }
         }
 
         function restarSaldoAdmin(code, name, saldoActual) {
-            let montoRetiro = prompt(`¿Cuánto deseas restarle a ${name}?`);
+            let montoRetiro = prompt(`¿Cuánto deseas restarle o retirarle a ${name}? (Saldo actual: ${saldoActual.toLocaleString()}):`);
             if (montoRetiro !== null && !isNaN(montoRetiro)) {
-                let nuevoSaldo = saldoActual - parseFloat(montoRetiro);
+                let valorRestar = parseFloat(montoRetiro);
+                let nuevoSaldo = saldoActual - valorRestar;
                 if (nuevoSaldo < 0) nuevoSaldo = 0;
+
                 db.ref(`users/${code}`).update({ balance: nuevoSaldo });
+                alert(`¡Se le han descontado ${valorRestar.toLocaleString()} a ${name}. Su nuevo saldo es ${nuevoSaldo.toLocaleString()}!`);
                 renderizarAdminWallets();
             }
         }
 
         function ponerCeroAdmin(code, name) {
-            if (confirm(`¿Colocar el saldo de ${name} en 0.00?`)) {
+            if (confirm(`¿Estás segura de colocar el saldo de ${name} en 0.00?`)) {
                 db.ref(`users/${code}`).update({ balance: 0.00 });
+                alert(`¡La billetera de ${name} ha quedado en cero con éxito!`);
                 renderizarAdminWallets();
             }
         }
 
         function toggleCreditAdmin(code, name, activarCredito) {
             db.ref(`users/${code}`).update({ isCredit: activarCredito });
+            if (activarCredito) {
+                alert(`¡Crédito exclusivo activado para ${name}! Ahora podrá jugar sin restricción de saldo.`);
+            } else {
+                alert(`¡Crédito desactivado para ${name}! Ahora dependerá de su saldo.`);
+            }
             renderizarAdminWallets();
         }
 
         function eliminarJugadorSistema(controlJugadora, nombreJugadora) {
-            if (confirm(`¿Eliminar a ${nombreJugadora} del sistema?`)) {
+            if (confirm(`¿Estás segura de eliminar por completo a ${nombreJugadora} (Control: ${controlJugadora}) del sistema? Sus cartones serán liberados y su cuenta borrada.`)) {
                 for (let id in marketCards) {
                     if (marketCards[id].ownerControl === controlJugadora) {
                         db.ref(`room/marketCards/${id}`).update({ owner: null, ownerControl: null, loaded: false, paid: false });
@@ -1436,6 +1541,23 @@
                 let safeCtrl = controlJugadora.replace(/[.#$\/\[\]]/g, "_");
                 db.ref(`room/connectedPlayers/${safeCtrl}`).remove();
                 db.ref(`users/${controlJugadora}`).remove();
+
+                let localCtrl = localStorage.getItem('bingo_player_control');
+                if (localCtrl === controlJugadora) {
+                    localStorage.removeItem('bingo_player_name');
+                    localStorage.removeItem('bingo_player_control');
+                    localStorage.removeItem('bingo_player_code');
+                    let nameInput = document.getElementById('player-name-input');
+                    let ctrlInput = document.getElementById('player-control-input');
+                    let codeInput = document.getElementById('player-access-code-input');
+                    if (nameInput) nameInput.value = '';
+                    if (ctrlInput) ctrlInput.value = '';
+                    if (codeInput) codeInput.value = '';
+                    let msg = document.getElementById('welcome-back-msg');
+                    if (msg) msg.classList.add('hidden');
+                }
+
+                alert(`¡${nombreJugadora} ha sido eliminada del sistema con éxito!`);
                 renderizarAdminWallets();
             }
         }
@@ -1444,6 +1566,7 @@
             let container = document.getElementById('admin-cards-summary');
             if (!container) return;
             container.innerHTML = '';
+            
             let jugadorasMap = {};
             for (let id in marketCards) {
                 let card = marketCards[id];
@@ -1454,21 +1577,35 @@
                     jugadorasMap[card.ownerControl].cards.push(card);
                 }
             }
+
             let controls = Object.keys(jugadorasMap);
             if (controls.length === 0) {
                 container.innerHTML = '<span class="text-slate-500 text-xs text-center py-4">No hay jugadoras con cartones seleccionados o cargados aún.</span>';
                 return;
             }
+
             controls.forEach(ctrl => {
                 let j = jugadorasMap[ctrl];
                 j.cards.sort((a, b) => a.id - b.id);
+                
                 let numerosCartonesStr = j.cards.map(c => c.id).join(', ');
                 let todosPagados = true;
                 j.cards.forEach(c => { if (!c.paid) todosPagados = false; });
 
                 let div = document.createElement('div');
                 div.className = "bg-slate-950 p-2.5 rounded-xl flex justify-between items-center gap-2 border border-slate-800 text-xs";
-                div.innerHTML = `<div class="flex items-center gap-2 overflow-x-auto"><strong class="text-pink-400 min-w-[70px]">${j.name}</strong><span class="text-yellow-300 tracking-wide">Cartones: [${numerosCartonesStr}]</span></div><div class="flex items-center gap-2 flex-shrink-0"><button onclick="togglePaidAllJugadora('${j.control}', ${!todosPagados})" class="px-3 py-1 rounded-lg font-bold text-xs ${todosPagados ? 'bg-green-600 text-white' : 'bg-amber-600/30 text-amber-300'}">${todosPagados ? 'Pagado' : 'Pendiente'}</button><button onclick="eliminarJugadorSistema('${j.control}', '${j.name}')" class="px-2 py-1 bg-red-600/30 text-red-200 rounded-lg font-bold text-[10px]">❌</button></div>`;
+                div.innerHTML = `
+                    <div class="flex items-center gap-2 overflow-x-auto">
+                        <strong class="text-pink-400 min-w-[70px]">${j.name}</strong>
+                        <span class="text-yellow-300 tracking-wide">Cartones: [${numerosCartonesStr}]</span>
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <button onclick="togglePaidAllJugadora('${j.control}', ${!todosPagados})" class="px-3 py-1 rounded-lg font-bold text-xs ${todosPagados ? 'bg-green-600 text-white' : 'bg-amber-600/30 text-amber-300 border border-amber-500/50'}">
+                            ${todosPagados ? 'Pagado' : 'Pendiente'}
+                        </button>
+                        <button onclick="eliminarJugadorSistema('${j.control}', '${j.name}')" class="px-2 py-1 bg-red-600/30 hover:bg-red-600 text-red-200 rounded-lg font-bold text-[10px]" title="Eliminar del sistema">❌</button>
+                    </div>
+                `;
                 container.appendChild(div);
             });
         }
@@ -1485,19 +1622,22 @@
             let selectEl = document.getElementById('admin-liberar-select');
             if (!selectEl) return;
             selectEl.innerHTML = '';
+            
             let ocupados = [];
             for (let id in marketCards) {
                 if (marketCards[id].owner) ocupados.push(marketCards[id]);
             }
+
             if (ocupados.length === 0) {
                 selectEl.innerHTML = '<option value="">-- No hay cartones ocupados --</option>';
                 return;
             }
+
             selectEl.innerHTML = '<option value="">-- Selecciona cartón a liberar --</option>';
             ocupados.forEach(card => {
                 let opt = document.createElement('option');
                 opt.value = card.id;
-                opt.innerText = `Cartón #${card.id} (Dueña: ${card.owner})`;
+                opt.innerText = `Cartón #${card.id} (Dueña: ${card.owner} - Ctrl: ${card.ownerControl})`;
                 selectEl.appendChild(opt);
             });
         }
@@ -1505,9 +1645,12 @@
         function liberarCartonSeleccionadoAdmin() {
             let selectEl = document.getElementById('admin-liberar-select');
             let id = selectEl.value;
-            if (!id) return;
+            if (!id) {
+                alert("Por favor selecciona un cartón de la lista para liberar.");
+                return;
+            }
             db.ref(`room/marketCards/${id}`).update({ owner: null, ownerControl: null, loaded: false, paid: false });
-            alert(`¡Cartón #${id} liberado!`);
+            alert(`¡Cartón #${id} liberado con éxito!`);
         }
 
         function renderizarJugadorasConectadasAdmin(connectedPlayers) {
@@ -1515,16 +1658,44 @@
             let counterBadge = document.getElementById('admin-active-players-count');
             if (!container) return;
             container.innerHTML = '';
+            
             let listaConectadas = Object.values(connectedPlayers || {});
             counterBadge.innerText = `${listaConectadas.length} activa(s)`;
+
             if (listaConectadas.length === 0) {
-                container.innerHTML = '<span class="text-slate-500 text-center py-4">No hay jugadoras conectadas.</span>';
+                container.innerHTML = '<span class="text-slate-500 text-center py-4">No hay jugadoras conectadas en este momento.</span>';
                 return;
             }
+
             listaConectadas.forEach(jugadora => {
+                let cartonesActivos = [];
+                for (let id in marketCards) {
+                    let c = marketCards[id];
+                    if (c.ownerControl === jugadora.control && c.loaded) {
+                        cartonesActivos.push(c.id);
+                    }
+                }
+
                 let div = document.createElement('div');
-                div.className = "bg-slate-800/90 border border-slate-700/80 p-2.5 rounded-xl flex justify-between items-center text-xs";
-                div.innerHTML = `<div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span><strong class="text-pink-300">${jugadora.name}</strong></div><button onclick="eliminarJugadorSistema('${jugadora.control}', '${jugadora.name}')" class="text-[10px] bg-red-600 text-white px-2 py-0.5 rounded font-bold">Expulsar</button>`;
+                div.className = "bg-slate-800/90 border border-slate-700/80 p-2.5 rounded-xl flex flex-col gap-1.5 shadow-sm";
+                
+                let cartonesTexto = cartonesActivos.length > 0 
+                    ? `<span class="text-yellow-300 font-bold">Cartones activos: #${cartonesActivos.join(', #')}</span>` 
+                    : `<span class="text-slate-400 italic">Sin cartones cargados aún</span>`;
+
+                div.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <strong class="text-pink-300 text-sm">${jugadora.name}</strong>
+                        </div>
+                        <span class="text-[10px] bg-slate-900 px-2 py-0.5 rounded-md text-slate-400 font-mono">Control: ${jugadora.control}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-[11px] pl-4 border-l-2 border-pink-500/50 mt-0.5">
+                        ${cartonesTexto}
+                        <button onclick="eliminarJugadorSistema('${jugadora.control}', '${jugadora.name}')" class="text-[10px] bg-red-600 hover:bg-red-500 text-white px-2 py-0.5 rounded font-bold">🗑️ Expulsar</button>
+                    </div>
+                `;
                 container.appendChild(div);
             });
         }
@@ -1534,16 +1705,23 @@
             let counterBadge = document.getElementById('player-active-count-badge');
             if (!container) return;
             container.innerHTML = '';
+            
             let listaConectadas = Object.values(connectedPlayers || {});
             if (counterBadge) counterBadge.innerText = `${listaConectadas.length} activa(s)`;
+
             if (listaConectadas.length === 0) {
                 container.innerHTML = '<span class="text-slate-500 italic">No hay jugadoras conectadas todavía.</span>';
                 return;
             }
+
             listaConectadas.forEach(jugadora => {
                 let badge = document.createElement('div');
                 badge.className = "bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs shadow-sm";
-                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span class="font-bold text-pink-300">${jugadora.name}</span>`;
+                badge.innerHTML = `
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="font-bold text-pink-300">${jugadora.name}</span>
+                    <span class="text-[10px] text-slate-400 font-mono">(Ctrl: ${jugadora.control})</span>
+                `;
                 container.appendChild(badge);
             });
         }
@@ -1552,6 +1730,7 @@
             let radarContainer = document.getElementById('admin-radar-container');
             if (!radarContainer) return;
             radarContainer.innerHTML = '';
+
             let listaRadar = [];
             for (let id in marketCards) {
                 let card = marketCards[id];
@@ -1560,62 +1739,213 @@
                     listaRadar.push({ card: card, analisis: analisis });
                 }
             }
+
             listaRadar.sort((a, b) => a.analisis.count - b.analisis.count);
+
             if (listaRadar.length === 0) {
                 radarContainer.innerHTML = '<span class="text-slate-500 text-xs col-span-2 text-center py-4">Ningún jugador ha cargado cartones todavía.</span>';
                 return;
             }
+
             listaRadar.forEach(item => {
                 let card = item.card;
                 let analisis = item.analisis;
                 let faltantesTexto = analisis.faltantes.length > 0 ? analisis.faltantes.map(n => n === 0 ? '⭐' : '#' + n).join(', ') : '¡BINGO LISTO!';
+
                 let div = document.createElement('div');
                 div.className = `bg-slate-900 p-3 rounded-xl flex flex-col gap-1.5 border ${analisis.count === 1 ? 'border-yellow-400 bg-yellow-500/10' : 'border-slate-700'} text-xs`;
-                div.innerHTML = `<div class="flex justify-between font-bold"><span class="text-yellow-300">Cartón #${card.id} (${card.owner})</span><span class="${analisis.count === 1 ? 'text-yellow-400 animate-pulse' : 'text-pink-400'}">${analisis.count === 1 ? '🔥 ¡A UNA BOLITA!' : analisis.count + ' faltantes'}</span></div><div class="text-[11px] text-slate-300"><strong>Faltan:</strong> <span class="text-pink-300 font-bold">${faltantesTexto}</span></div>`;
+                div.innerHTML = `
+                    <div class="flex justify-between font-bold">
+                        <span class="text-yellow-300">Cartón #${card.id} (${card.owner})</span>
+                        <span class="${analisis.count === 1 ? 'text-yellow-400 font-extrabold animate-pulse' : 'text-pink-400'}">${analisis.count === 1 ? '🔥 ¡A UNA BOLITA!' : analisis.count + ' faltantes'}</span>
+                    </div>
+                    <div class="text-[11px] text-slate-300">
+                        <strong>Números que le faltan:</strong> <span class="text-pink-300 font-bold">${faltantesTexto}</span>
+                    </div>
+                    <span class="text-[10px] text-slate-400">Control: ${card.ownerControl || 'N/A'}</span>
+                `;
                 radarContainer.appendChild(div);
             });
         }
 
-        function verificarGanadoresEnVivoAdmin() {
+                function verificarGanadoresEnVivoAdmin() {
             let alertBox = document.getElementById('admin-winner-alert');
             let winnerText = document.getElementById('admin-winner-text');
+
             let ganadoresEncontrados = [];
 
             for (let id in marketCards) {
                 let card = marketCards[id];
                 if (card.owner && card.loaded) {
                     let gano = verificarFiguraGanadora(card.grid, drawnBalls, gamePattern);
-                    if (gano) ganadoresEncontrados.push(card);
+                    if (gano) {
+                        ganadoresEncontrados.push(card);
+                    }
                 }
             }
 
             if (ganadoresEncontrados.length > 0) {
+                // --- REPARTICIÓN AUTOMÁTICA DE PREMIOS ---
                 db.ref('room/premioActual').once('value').then((snap) => {
                     let premioTotal = snap.val() || 0;
+                    
                     if (premioTotal > 0) {
                         let cantidadGanadores = ganadoresEncontrados.length;
                         let premioPorPersona = premioTotal / cantidadGanadores;
-                        let controlesProcesados = new Set();
+                        let controlesProcesados = new Set(); // Evita pagarle duplicado si una misma jugadora tiene varios cartones ganadores
+
                         ganadoresEncontrados.forEach(card => {
                             let ctrlJugadora = card.ownerControl;
                             if (ctrlJugadora && !controlesProcesados.has(ctrlJugadora)) {
                                 controlesProcesados.add(ctrlJugadora);
+
                                 db.ref(`users/${ctrlJugadora}`).once('value').then((userSnap) => {
                                     let userData = userSnap.val() || { balance: 0 };
-                                    let nuevoBalance = (userData.balance || 0) + premioPorPersona;
+                                    let saldoActual = userData.balance || 0;
+                                    let nuevoBalance = saldoActual + premioPorPersona;
+
+                                    // Suma automática al balance (si estaba en negativo por crédito, se ajusta)
                                     db.ref(`users/${ctrlJugadora}/balance`).set(nuevoBalance);
                                 });
                             }
                         });
                     }
                 });
+                // ------------------------------------------
 
-                let htmlGanadores = `<div class="text-base text-yellow-300 font-extrabold mb-1">¡Se detectaron ${ganadoresEncontrados.length} ganador(es)!</div>`;
+                let htmlGanadores = `<div class="text-base text-yellow-300 font-extrabold mb-1">¡Se detectaron ${ganadoresEncontrados.length} ganador(es) simultáneo(s)!</div>`;
+                
                 ganadoresEncontrados.forEach(card => {
-                    htmlGanadores += `<div class="bg-slate-900/90 text-white p-3 rounded-2xl my-1 flex flex-col gap-1.5 border border-yellow-400 text-xs"><span class="font-bold text-yellow-300">Cartón #${card.id} &bull; ${card.owner}</span></div>`;
+                    htmlGanadores += `
+                        <div class="bg-slate-900/90 text-white p-3 rounded-2xl my-1 flex flex-col gap-1.5 border border-yellow-400 text-xs">
+                            <span class="font-bold text-yellow-300">Cartón #${card.id} &bull; ${card.owner} (Ctrl: ${card.ownerControl})</span>
+                            <div class="grid grid-cols-5 gap-1 max-w-[180px] mx-auto w-full">`;
+                    
+                    for (let r = 0; r < 5; r++) {
+                        for (let c = 0; c < 5; c++) {
+                            let num = card.grid[r][c];
+                            let marcado = num === 0 || drawnBalls.includes(num);
+                            let esFiguraGanadora = esCeldaDelPatron(r, c, gamePattern);
+                            let claseColor = marcado ? 'bg-yellow-400 text-slate-950' : 'bg-slate-800 text-slate-300';
+                            if (esFiguraGanadora) claseColor = 'winning-pattern-cell';
+                            htmlGanadores += `<div class="py-0.5 text-[9px] font-bold text-center rounded ${claseColor}">${num === 0 ? '⭐' : num}</div>`;
+                        }
+                    }
+                    htmlGanadores += `</div></div>`;
                 });
+
                 winnerText.innerHTML = htmlGanadores;
+
+                if (alertBox.classList.contains('hidden')) {
+                    cantarTextoVoz("¡Bingo! ¡Tenemos cartón ganador en la sala!");
+                }
                 alertBox.classList.remove('hidden');
+
+                if (isAutoRunning) {
+                    clearInterval(autoDrawInterval);
+                    isAutoRunning = false;
+                    let autoBtn = document.getElementById('auto-draw-btn');
+                    if (autoBtn) {
+                        autoBtn.innerText = "▶ Iniciar Auto (Cada 3s)";
+                        autoBtn.classList.replace('bg-slate-600', 'bg-pink-600');
+                    }
+                }
+            }
+        }
+
+        function drawBallManually() {
+            for (let id in marketCards) {
+                if (marketCards[id].owner && marketCards[id].loaded && verificarFiguraGanadora(marketCards[id].grid, drawnBalls, gamePattern)) {
+                    alert("⚠️ ¡Ya hay cartón ganador en esta ronda! El juego está detenido.");
+                    return;
+                }
+            }
+
+            if (drawnBalls.length >= 75) {
+                alert("¡Ya salieron todas las balotas!");
+                return;
+            }
+            let disponibles = [];
+            for (let i = 1; i <= 75; i++) {
+                if (!drawnBalls.includes(i)) disponibles.push(i);
+            }
+            let nuevaBola = disponibles[Math.floor(Math.random() * disponibles.length)];
+            drawnBalls.push(nuevaBola);
+            db.ref('room/drawnBalls').set(drawnBalls);
+        }
+
+        function toggleAutoDraw() {
+            if (isAutoRunning) {
+                clearInterval(autoDrawInterval);
+                isAutoRunning = false;
+                document.getElementById('auto-draw-btn').innerText = "▶ Iniciar Auto (Cada 3s)";
+                document.getElementById('auto-draw-btn').classList.replace('bg-pink-600', 'bg-slate-600');
+            } else {
+                isAutoRunning = true;
+                document.getElementById('auto-draw-btn').innerText = "⏸ Pausar Auto";
+                document.getElementById('auto-draw-btn').classList.replace('bg-pink-600', 'bg-slate-600');
+                autoDrawInterval = setInterval(() => {
+                    for (let id in marketCards) {
+                        if (marketCards[id].owner && marketCards[id].loaded && verificarFiguraGanadora(marketCards[id].grid, drawnBalls, gamePattern)) {
+                            clearInterval(autoDrawInterval);
+                            isAutoRunning = false;
+                            let autoBtn = document.getElementById('auto-draw-btn');
+                            if (autoBtn) {
+                                autoBtn.innerText = "▶ Iniciar Auto (Cada 3s)";
+                                autoBtn.classList.replace('bg-slate-600', 'bg-pink-600');
+                            }
+                            return;
+                        }
+                    }
+
+                    if (drawnBalls.length >= 75) {
+                        clearInterval(autoDrawInterval);
+                        isAutoRunning = false;
+                        let autoBtn = document.getElementById('auto-draw-btn');
+                        if (autoBtn) {
+                            autoBtn.innerText = "▶ Iniciar Auto (Cada 3s)";
+                            autoBtn.classList.replace('bg-slate-600', 'bg-pink-600');
+                        }
+                        return;
+                    }
+                    drawBallManually();
+                }, 3000);
+            }
+        }
+
+        function reiniciarBalotasParaSiguienteFigura() {
+            db.ref('room/drawnBalls').set([]);
+            document.getElementById('admin-winner-alert').classList.add('hidden');
+            document.getElementById('player-winner-notification').classList.add('hidden');
+            hasSpokenMyBingo = false;
+            lastSpokenBallCount = 0;
+            alert("¡Balotas reiniciadas! Los cartones cargados se mantienen para la siguiente figura.");
+        }
+
+        function resetGame() {
+            if (confirm("¿Estás segura de reiniciar TODO el juego completo? Se borrarán todos los cartones y el chat.")) {
+                db.ref('room/drawnBalls').set([]);
+                db.ref('chatSala').remove();
+
+                document.getElementById('admin-winner-alert').classList.add('hidden');
+                document.getElementById('player-winner-notification').classList.add('hidden');
+                hasSpokenMyBingo = false;
+                lastSpokenBallCount = 0;
+                
+                let initialMarket = {};
+                for (let i = 1; i <= 100; i++) {
+                    initialMarket[i] = {
+                        id: i,
+                        grid: generarEstructuraCarton(),
+                        owner: null,
+                        ownerControl: null,
+                        loaded: false,
+                        paid: false
+                    };
+                }
+                db.ref('room/marketCards').set(initialMarket);
+                db.ref('room/connectedPlayers').remove();
+                alert("¡Juego reiniciado por completo desde cero y chat limpiado!");
             }
         }
 
@@ -1623,126 +1953,168 @@
             document.getElementById('admin-winner-alert').classList.add('hidden');
         }
 
-        function reiniciarBalotasParaSiguienteFigura() {
-            db.ref('room').update({ drawnBalls: [] }).then(() => {
-                alert("🔄 ¡Balotas reiniciadas! Los cartones se mantienen en juego.");
-                document.getElementById('admin-winner-alert').classList.add('hidden');
-            });
-        }
-
-        function resetGame() {
-            if (confirm("¿Reiniciar todo el juego por completo?")) {
-                db.ref('room').update({ drawnBalls: [], marketCards: null }).then(() => {
-                    inicializarMercadoCartones();
-                    alert("🗑️ ¡Juego reiniciado por completo!");
-                });
-            }
+        function cerrarModalJugadora() {
+            document.getElementById('player-winner-notification').classList.add('hidden');
         }
 
         function updateGamePattern() {
-            let val = document.getElementById('game-pattern-select').value;
-            db.ref('room/gamePattern').set(val);
-        }
-
-        function updateCardPrice() {
-            let val = document.getElementById('admin-card-price-input').value;
-            if (val && !isNaN(val)) {
-                db.ref('room/cardPrice').set(Number(val)).then(() => alert("¡Precio de cartón actualizado!"));
-            }
+            let sel = document.getElementById('game-pattern-select').value;
+            db.ref('room/gamePattern').set(sel);
         }
 
         function updateRoomCode() {
-            let val = document.getElementById('admin-room-code').value.trim();
-            if (val) {
-                db.ref('room/roomCode').set(val).then(() => alert("¡Código de sala actualizado!"));
+            let code = document.getElementById('admin-room-code').value.trim();
+            if (code) {
+                db.ref('room/roomCode').set(code);
+                alert("¡Código de sala actualizado con éxito!");
             }
         }
 
-        function drawBallManually() {
-            let disponibles = [];
-            for (let i = 1; i <= 75; i++) {
-                if (!drawnBalls.includes(i)) disponibles.push(i);
-            }
-            if (disponibles.length === 0) {
-                alert("¡Ya se han sacado las 75 balotas!");
-                return;
-            }
-            let randomIndex = Math.floor(Math.random() * disponibles.length);
-            let nuevaBola = disponibles[randomIndex];
-            let nuevasBalotas = [...drawnBalls, nuevaBola];
-            db.ref('room/drawnBalls').set(nuevasBalotas);
-        }
-
-        function toggleAutoDraw() {
-            let btn = document.getElementById('auto-draw-btn');
-            if (isAutoRunning) {
-                clearInterval(autoDrawInterval);
-                isAutoRunning = false;
-                btn.className = "w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold rounded-xl shadow";
-                btn.innerText = "▶ Iniciar Auto (Cada 3s)";
+        function updateCardPrice() {
+            let price = parseFloat(document.getElementById('admin-card-price-input').value);
+            if (!isNaN(price) && price >= 0) {
+                db.ref('room/cardPrice').set(price);
+                alert(`¡Valor de cada cartón actualizado a ${price.toLocaleString()}!`);
             } else {
-                isAutoRunning = true;
-                btn.className = "w-full py-2.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-xl shadow animate-pulse";
-                btn.innerText = "⏹ Detener Auto";
-                autoDrawInterval = setInterval(() => {
-                    drawBallManually();
-                }, 3000);
+                alert("Por favor ingresa un número válido.");
             }
+        }
+
+        function inicializarMiniDiagrama() {
+            let gridContainer = document.getElementById('mini-diagram-grid');
+            if (!gridContainer) return;
+            gridContainer.innerHTML = '';
+            for (let i = 0; i < 25; i++) {
+                let cell = document.createElement('div');
+                cell.className = 'mini-cell';
+                cell.dataset.index = i;
+                gridContainer.appendChild(cell);
+            }
+        }
+
+        function actualizarMiniDiagramaPatron(patron) {
+            let cells = document.querySelectorAll('#mini-diagram-grid .mini-cell');
+            if (cells.length === 0) {
+                inicializarMiniDiagrama();
+                cells = document.querySelectorAll('#mini-diagram-grid .mini-cell');
+            }
+            if (cells.length === 0) return;
+
+            cells.forEach(c => c.classList.remove('active'));
+
+            let indicesActivos = [];
+
+            if (patron === 'line') indicesActivos = [0, 1, 2, 3, 4];
+            else if (patron === 'letter_l') indicesActivos = [0, 5, 10, 15, 20, 21, 22, 23, 24];
+            else if (patron === 'cross_x') indicesActivos = [0, 4, 6, 8, 12, 16, 18, 20, 24];
+            else if (patron === 'four_corners') indicesActivos = [0, 4, 20, 24];
+            else if (patron === 'diagonal') indicesActivos = [0, 6, 12, 18, 24];
+            else if (patron === 'small_cross') indicesActivos = [2, 7, 10, 11, 12, 13, 14, 17, 22];
+            else if (patron === 'letter_o') indicesActivos = [0, 1, 2, 3, 4, 5, 9, 10, 14, 15, 19, 20, 21, 22, 23, 24];
+            else if (patron === 'full_card') indicesActivos = Array.from({length: 25}, (_, i) => i);
+            else if (patron === 'church') indicesActivos = [1, 3, 7, 2, 7, 12, 17, 22];
+            else if (patron === 'letter_t') indicesActivos = [0, 1, 2, 3, 4, 7, 12, 17, 22];
+            else if (patron === 'letter_h') indicesActivos = [0, 5, 10, 15, 20, 4, 9, 14, 19, 24, 11, 12, 13];
+            else if (patron === 'anchor') indicesActivos = [2, 7, 12, 17, 22, 20, 21, 23, 24, 15, 19];
+            else if (patron === 'plane') indicesActivos = [2, 7, 12, 17, 22, 10, 11, 13, 14, 6, 8];
+            else if (patron === 'rombo') indicesActivos = [6, 8, 10, 14, 16, 18];
+            else indicesActivos = [0, 1, 2, 3, 4];
+
+            indicesActivos.forEach(idx => {
+                if (cells[idx] && idx >= 0 && idx < 25) cells[idx].classList.add('active');
+            });
+        }
+
+        function abrirVistaPreviaFullscreen(cardId) {
+            let card = marketCards[cardId];
+            if (!card) return;
+
+            document.getElementById('modal-preview-title').innerText = `Cartón #${card.id}`;
+            let gridContainer = document.getElementById('modal-preview-grid');
+            gridContainer.innerHTML = '';
+
+            for (let r = 0; r < 5; r++) {
+                for (let c = 0; c < 5; c++) {
+                    let num = card.grid[r][c];
+                    let marcado = num === 0 || drawnBalls.includes(num);
+                    let esFigura = esCeldaDelPatron(r, c, gamePattern);
+                    
+                    let clasesCelda = `py-2.5 text-xs font-bold text-center rounded relative ${marcado ? 'bg-yellow-400 text-slate-950 shadow' : 'bg-slate-800 text-slate-200'} ${esFigura ? 'cell-pattern-target border border-pink-400' : ''}`;
+                    gridContainer.innerHTML += `<div class="${clasesCelda}">${num === 0 ? '⭐' : num}</div>`;
+                }
+            }
+
+            document.getElementById('modal-carton-fullscreen').classList.remove('hidden');
+        }
+
+        function cerrarVistaPreviaFullscreen() {
+            document.getElementById('modal-carton-fullscreen').classList.add('hidden');
         }
 
         function renderizarMercadoJugadora() {
-            let grid = document.getElementById('cards-market-grid');
-            let countEl = document.getElementById('available-count');
-            if (!grid) return;
-            grid.innerHTML = '';
+            let container = document.getElementById('cards-market-grid');
+            let statusMsg = document.getElementById('market-status-msg');
+            if (!container) return;
+            container.innerHTML = '';
             let disponiblesCount = 0;
+            let juegoIniciado = drawnBalls.length > 0;
 
-            for (let id = 1; id <= 100; id++) {
+            if (juegoIniciado) {
+                statusMsg.innerText = "🔒 Partida iniciada: El mercado está cerrado y los cartones en juego no se pueden modificar.";
+            } else {
+                statusMsg.innerText = "Toca un cartón para seleccionarlo/quitarlo. Toca el botón 🔍 para inspeccionarlo en pantalla completa.";
+            }
+
+            for (let id in marketCards) {
                 let card = marketCards[id];
-                if (!card) continue;
-                let btn = document.createElement('button');
-                let es Mio = card.ownerControl === currentUser.control;
-                let estaOcupado = card.owner !== null && !esMio;
-
                 if (!card.owner) disponiblesCount++;
 
-                let clases = "w-full h-11 rounded-xl font-extrabold text-xs flex flex-col items-center justify-center transition shadow ";
-                if (esMio) {
-                    clases += card.loaded ? "bg-emerald-600 text-white ring-2 ring-yellow-300" : "bg-purple-600 text-white ring-2 ring-pink-400";
-                } else if (estaOcupado) {
-                    clases += "bg-slate-900 text-slate-600 cursor-not-allowed opacity-50";
-                } else if (seleccionadosParaCargar.includes(id)) {
-                    clases += "bg-yellow-400 text-slate-950 ring-2 ring-white";
-                } else {
-                    clases += "bg-slate-800 text-slate-300 hover:bg-slate-700";
-                }
-
-                btn.className = clases;
-                btn.innerHTML = `<span>#${id}</span>`;
+                let div = document.createElement('div');
+                let esMio = card.ownerControl === currentUser.control;
+                let estaCargadoMio = esMio && card.loaded;
                 
-                if (!estaOcupado) {
-                    btn.onclick = () => {
-                        if (esMio) {
-                            alert(`El cartón #${id} ya es tuyo.`);
-                            return;
-                        }
-                        let index = seleccionadosParaCargar.indexOf(id);
-                        if (index > -1) {
-                            seleccionadosParaCargar.splice(index, 1);
-                        } else {
-                            seleccionadosParaCargar.push(id);
-                        }
-                        renderizarMercadoJugadora();
-                    };
-                }
-                grid.appendChild(btn);
+                div.className = `p-2 rounded-xl text-center font-bold text-xs border flex flex-col items-center justify-between gap-1.5 ${estaCargadoMio ? 'bg-pink-600/40 border-pink-500 text-pink-200' : esMio ? 'bg-green-600/30 border-green-500 text-green-300' : card.owner ? 'bg-slate-900 border-slate-800 text-slate-600 opacity-80' : 'bg-slate-800 border-slate-700 text-yellow-300 hover:bg-slate-700'}`;
+                
+                div.innerHTML = `
+                    <span class="cursor-pointer w-full py-1" onclick="seleccionarCarton(${id})">#${id}</span>
+                    <button onclick="event.stopPropagation(); abrirVistaPreviaFullscreen(${id})" class="w-full bg-slate-900/80 hover:bg-slate-900 text-slate-300 hover:text-white py-1 rounded text-[10px] flex items-center justify-center gap-1 shadow">🔍 Ver</button>
+                `;
+
+                container.appendChild(div);
             }
-            if (countEl) countEl.innerText = disponiblesCount;
+            document.getElementById('available-count').innerText = disponiblesCount;
+        }
+
+        function seleccionarCarton(id) {
+            let card = marketCards[id];
+            let juegoIniciado = drawnBalls.length > 0;
+
+            if (juegoIniciado) {
+                alert("⚠️ La partida ya comenzó.");
+                return;
+            }
+
+            if (card.owner && card.ownerControl !== currentUser.control) {
+                alert("Este cartón ya está ocupado por otra jugadora.");
+                return;
+            }
+
+            if (card.ownerControl === currentUser.control && card.loaded) {
+                alert("🔒 Este cartón ya está cargado. Escríbele a Yune para que te lo libere si deseas cambiarlo.");
+                return;
+            }
+
+            if (card.ownerControl === currentUser.control && !card.loaded) {
+                db.ref(`room/marketCards/${id}`).update({ owner: null, ownerControl: null, loaded: false, paid: false });
+            } else {
+                db.ref(`room/marketCards/${id}`).update({ owner: currentUser.name, ownerControl: currentUser.control, loaded: false, paid: false });
+            }
         }
 
         function cargarMisCartones() {
-            if (seleccionadosParaCargar.length === 0) {
-                alert("Selecciona al menos un cartón del mercado para cargar.");
+            let juegoIniciado = drawnBalls.length > 0;
+            if (juegoIniciado) {
+                alert("⚠️ La partida ya comenzó. No puedes cargar más cartones.");
                 return;
             }
 
@@ -1750,30 +2122,44 @@
                 let userData = snap.val() || { balance: 0, isCredit: false };
                 let balance = userData.balance || 0;
                 let isCredit = userData.isCredit || false;
-                let costoTotal = seleccionadosParaCargar.length * cardPrice;
 
-                if (!isCredit && balance < costoTotal) {
-                    alert(`⚠️ Saldo insuficiente. Tienes $${balance.toLocaleString()} y el total de tus cartones es $${costoTotal.toLocaleString()}. Pídele saldo a la Administradora.`);
+                if (!isCredit && balance <= 0) {
+                    alert("❌ No puedes cargar cartones porque no tienes saldo positivo ni el crédito habilitado. Comunícate con la administración.");
                     return;
                 }
 
-                let updates = {};
-                seleccionadosParaCargar.forEach(id => {
-                    updates[`room/marketCards/${id}/owner`] = currentUser.name;
-                    updates[`room/marketCards/${id}/ownerControl`] = currentUser.control;
-                    updates[`room/marketCards/${id}/loaded`] = true;
-                    updates[`room/marketCards/${id}/paid`] = isCredit ? true : false;
-                });
-
-                if (!isCredit) {
-                    updates[`users/${currentUser.control}/balance`] = balance - costoTotal;
+                let cartonesNuevos = 0;
+                for (let id in marketCards) {
+                    let card = marketCards[id];
+                    if (card.ownerControl === currentUser.control && !card.loaded) {
+                        cartonesNuevos++;
+                    }
                 }
 
-                db.ref().update(updates).then(() => {
-                    alert(`🎉 ¡Tus cartones fueron cargados con éxito!`);
-                    seleccionadosParaCargar = [];
-                    renderizarMercadoJugadora();
-                });
+                if (cartonesNuevos === 0) {
+                    alert("No tienes cartones nuevos seleccionados para cargar.");
+                    return;
+                }
+
+                let costoTotal = cartonesNuevos * cardPrice;
+
+                if (!isCredit && balance < costoTotal) {
+                    alert(`Saldo insuficiente. Necesitas ${costoTotal.toLocaleString()} y tienes ${balance.toLocaleString()}. Comunícate con Yune para recargar.`);
+                    return;
+                }
+
+                let nuevoSaldo = balance - costoTotal;
+                
+                db.ref(`users/${currentUser.control}/balance`).set(nuevoSaldo);
+
+                for (let id in marketCards) {
+                    let card = marketCards[id];
+                    if (card.ownerControl === currentUser.control && !card.loaded) {
+                        db.ref(`room/marketCards/${id}`).update({ loaded: true, paid: true });
+                    }
+                }
+
+                alert(`¡${cartonesNuevos} cartón(es) cargado(s) con éxito por un valor total de ${costoTotal.toLocaleString()}! Nuevo saldo: ${nuevoSaldo.toLocaleString()}`);
             });
         }
 
@@ -1781,136 +2167,154 @@
             let container = document.getElementById('player-my-cards-container');
             if (!container) return;
             container.innerHTML = '';
+            
             let misCartones = [];
-
             for (let id in marketCards) {
-                let card = marketCards[id];
-                if (card.ownerControl === currentUser.control && card.loaded) {
-                    misCartones.push(card);
+                if (marketCards[id].ownerControl === currentUser.control && marketCards[id].loaded) {
+                    let analisis = obtenerNumerosFaltantesGanar(marketCards[id].grid, drawnBalls, gamePattern);
+                    misCartones.push({ card: marketCards[id], analisis: analisis });
                 }
             }
 
             if (misCartones.length === 0) {
-                container.innerHTML = '<span class="text-slate-500 text-sm col-span-2">Aún no tienes cartones cargados en esta ronda. ¡Selecciónalos abajo!</span>';
+                container.innerHTML = '<span class="text-slate-500 text-sm col-span-2">Aún no tienes cartones cargados. Selecciona en el mercado y presiona "Cargar".</span>';
                 return;
             }
 
-            misCartones.forEach(card => {
-                let analisis = obtenerNumerosFaltantesGanar(card.grid, drawnBalls, gamePattern);
-                let esUnaAway = analisis.count === 1;
+            misCartones.sort((a, b) => a.analisis.count - b.analisis.count);
 
-                let wrapper = document.createElement('div');
-                wrapper.className = `bg-slate-900 p-3 rounded-2xl border ${esUnaAway ? 'card-one-away' : 'border-slate-700'} flex flex-col gap-2 shadow-lg`;
+            misCartones.forEach(item => {
+                let card = item.card;
+                let analisis = item.analisis;
+                let gano = analisis.count === 0;
+                let estaAUna = analisis.count === 1;
                 
-                let headerHtml = `<div class="flex justify-between items-center text-xs"><strong class="text-yellow-300">Cartón #${card.id}</strong><span class="${esUnaAway ? 'text-yellow-400 font-bold animate-pulse' : 'text-pink-400'}">${esUnaAway ? '🔥 ¡A 1 BOLITA!' : analisis.count + ' faltan'}</span></div>`;
+                if (gano && !hasSpokenMyBingo) {
+                    hasSpokenMyBingo = true;
+                    cantarTextoVoz("¡Bingo! ¡Tu cartón ha ganado!");
+
+                    document.getElementById('public-winner-text').innerText = `¡Tu Cartón #${card.id} hizo BINGO!`;
+                    document.getElementById('public-winner-card-title').innerText = `Cartón Ganador #${card.id}`;
+                    
+                    let publicWinningGrid = document.getElementById('public-winning-card-grid');
+                    publicWinningGrid.innerHTML = '';
+                    for (let r = 0; r < 5; r++) {
+                        for (let c = 0; c < 5; c++) {
+                            let num = card.grid[r][c];
+                            let marcado = num === 0 || drawnBalls.includes(num);
+                            let esFiguraGanadora = esCeldaDelPatron(r, c, gamePattern);
+                            let claseColor = marcado ? 'bg-yellow-400 text-slate-950' : 'bg-slate-800 text-slate-300';
+                            if (esFiguraGanadora) claseColor = 'winning-pattern-cell';
+                            publicWinningGrid.innerHTML += `<div class="py-1 text-[10px] font-bold text-center rounded ${claseColor}">${num === 0 ? '⭐' : num}</div>`;
+                        }
+                    }
+
+                    document.getElementById('player-winner-notification').classList.remove('hidden');
+                }
+
+                let cardDiv = document.createElement('div');
+                let estiloExtra = gano ? 'border-yellow-400 bg-yellow-500/10' : estaAUna ? 'card-one-away bg-pink-500/10' : 'border-slate-700';
+                cardDiv.className = `bg-slate-900 border ${estiloExtra} p-3 rounded-2xl flex flex-col gap-2 cursor-pointer hover:border-pink-500 transition`;
                 
-                let gridHtml = '<div class="grid grid-cols-5 gap-1 text-[9px] text-pink-400 font-bold text-center"><div class="bg-slate-950 py-0.5 rounded">B</div><div class="bg-slate-950 py-0.5 rounded">I</div><div class="bg-slate-950 py-0.5 rounded">N</div><div class="bg-slate-950 py-0.5 rounded">G</div><div class="bg-slate-950 py-0.5 rounded">O</div></div><div class="grid grid-cols-5 gap-1">';
-                
+                cardDiv.onclick = () => abrirVistaPreviaFullscreen(card.id);
+
+                let htmlGrid = '<div class="grid grid-cols-5 gap-1 text-center">';
                 for (let r = 0; r < 5; r++) {
                     for (let c = 0; c < 5; c++) {
                         let num = card.grid[r][c];
                         let marcado = num === 0 || drawnBalls.includes(num);
                         let esFigura = esCeldaDelPatron(r, c, gamePattern);
-                        let claseCelda = "h-7 rounded flex items-center justify-center font-bold text-[10px] ";
-                        if (num === 0) {
-                            claseCelda += "bg-yellow-400 text-slate-950";
-                        } else if (marcado) {
-                            claseCelda += "bg-emerald-500 text-slate-950 shadow-sm";
-                        } else {
-                            claseCelda += "bg-slate-800 text-slate-300";
-                        }
-                        gridHtml += `<div class="${claseCelda}">${num === 0 ? '⭐' : num}</div>`;
+                        let clasesCasilla = `py-1 text-[10px] font-bold rounded relative ${marcado ? 'bg-yellow-400 text-slate-950' : 'bg-slate-800 text-slate-300'} ${esFigura ? 'cell-pattern-target border border-pink-400' : ''}`;
+                        htmlGrid += `<div class="${clasesCasilla}">${num === 0 ? '⭐' : num}</div>`;
                     }
                 }
-                gridHtml += '</div>';
+                htmlGrid += '</div>';
 
-                wrapper.innerHTML = headerHtml + gridHtml;
-                container.appendChild(wrapper);
+                let faltantesStr = analisis.faltantes.map(n => n === 0 ? '⭐' : '#' + n).join(', ');
+
+                cardDiv.innerHTML = `
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-bold text-yellow-300">Cartón #${card.id} ${gano ? '👑 ¡BINGO!' : estaAUna ? '🔥 ¡A UNA BOLITA!' : ''}</span>
+                        <span class="text-[10px] text-slate-400">${card.paid ? '💰 Pagado' : '⏳ Por Pagar'}</span>
+                    </div>
+                    ${htmlGrid}
+                    <div class="text-[11px] bg-slate-950 p-2 rounded-xl border border-slate-800 flex justify-between items-center">
+                        <div><span class="text-slate-400">Le falta(n):</span> <span class="text-pink-400 font-bold">${analisis.count === 0 ? '¡Listo!' : faltantesStr}</span></div>
+                        ${estaAUna ? '<span class="text-[10px] bg-yellow-400 text-slate-950 px-2 py-0.5 rounded-full font-extrabold animate-bounce">⏱️ ¡CANTANDO!</span>' : ''}
+                    </div>
+                `;
+                container.appendChild(cardDiv);
             });
         }
 
-        function inicializarMiniDiagrama() {
-            let grid = document.getElementById('mini-diagram-grid');
-            if (!grid) return;
-            grid.innerHTML = '';
-            for (let r = 0; r < 5; r++) {
-                for (let c = 0; c < 5; c++) {
-                    let cell = document.createElement('div');
-                    cell.className = 'mini-cell';
-                    cell.dataset.r = r;
-                    cell.dataset.c = c;
-                    grid.appendChild(cell);
-                }
-            }
-            actualizarMiniDiagramaPatron('line');
-        }
+        // --- FUNCIONES DEL CHAT EN VIVO COMPARTIDO (ADMIN Y JUGADORAS) ---
+        function enviarMensajeChatJugadora() {
+            let input = document.getElementById('input-mensaje-jugadora');
+            if (!input) return;
+            
+            let mensajeTexto = input.value.trim();
+            if (mensajeTexto === "") return;
 
-        function actualizarMiniDiagramaPatron(patron) {
-            let cells = document.querySelectorAll('.mini-cell');
-            cells.forEach(cell => {
-                let r = parseInt(cell.dataset.r);
-                let c = parseInt(cell.dataset.c);
-                if (esCeldaDelPatron(r, c, patron)) {
-                    cell.classList.add('active');
-                } else {
-                    cell.classList.remove('active');
-                }
-            });
-        }
+            let remitente = currentUser.name || "Jugadora";
 
-        function cerrarVistaPreviaFullscreen() {
-            document.getElementById('modal-carton-fullscreen').classList.add('hidden');
-        }
-
-        function cerrarModalJugadora() {
-            document.getElementById('player-winner-notification').classList.add('hidden');
-        }
-
-        function escucharChatEnVivo() {
-            db.ref('room/chat').limitToLast(30).on('child_added', (snapshot) => {
-                let msg = snapshot.val();
-                if (!msg) return;
-                
-                let cajaAdmin = document.getElementById('caja-chat-admin');
-                let cajaJugadoras = document.getElementById('caja-chat-jugadoras');
-
-                let htmlMsg = `<div class="text-slate-300"><strong class="${msg.isAdmin ? 'text-pink-400' : 'text-yellow-300'}">${msg.sender}:</strong> ${msg.text}</div>`;
-
-                if (cajaAdmin) {
-                    cajaAdmin.innerHTML += htmlMsg;
-                    cajaAdmin.scrollTop = cajaAdmin.scrollHeight;
-                }
-                if (cajaJugadoras) {
-                    cajaJugadoras.innerHTML += htmlMsg;
-                    cajaJugadoras.scrollTop = cajaJugadoras.scrollHeight;
+            db.ref('chatSala').push({
+                nombre: remitente,
+                mensaje: mensajeTexto,
+                tiempo: Date.now()
+            }, function(error) {
+                if (!error) {
+                    input.value = "";
                 }
             });
         }
 
         function enviarMensajeChatAdmin() {
             let input = document.getElementById('input-mensaje-admin');
-            let text = input.value.trim();
-            if (!text) return;
-            db.ref('room/chat').push({
-                sender: 'Administradora',
-                text: text,
-                isAdmin: true,
-                timestamp: Date.now()
+            if (!input) return;
+            
+            let mensajeTexto = input.value.trim();
+            if (mensajeTexto === "") return;
+
+            db.ref('chatSala').push({
+                nombre: "Administradora ⭐",
+                mensaje: mensajeTexto,
+                tiempo: Date.now()
+            }, function(error) {
+                if (!error) {
+                    input.value = "";
+                }
             });
-            input.value = '';
         }
 
-        function enviarMensajeChatJugadora() {
-            let input = document.getElementById('input-mensaje-jugadora');
-            let text = input.value.trim();
-            if (!text) return;
-            db.ref('room/chat').push({
-                sender: currentUser.name || 'Jugadora',
-                text: text,
-                isAdmin: false,
-                timestamp: Date.now()
+        function escucharChatEnVivo() {
+            db.ref('chatSala').on('value', function(snapshot) {
+                let cajaChatJugadoras = document.getElementById('caja-chat-jugadoras');
+                let cajaChatAdmin = document.getElementById('caja-chat-admin');
+
+                if (!snapshot.exists()) {
+                    let mensajeVacio = '<p class="text-slate-500 text-center">¡Sé la primera en escribir en el chat!</p>';
+                    if (cajaChatJugadoras) cajaChatJugadoras.innerHTML = mensajeVacio;
+                    if (cajaChatAdmin) cajaChatAdmin.innerHTML = mensajeVacio;
+                    return;
+                }
+
+                let htmlMensajes = "";
+                snapshot.forEach(function(childSnapshot) {
+                    let data = childSnapshot.val();
+                    if (data && data.nombre && data.mensaje) {
+                        htmlMensajes += `<div class="bg-slate-950/50 p-2 rounded-lg border border-slate-800"><strong class="text-yellow-400">${data.nombre}:</strong> <span class="text-slate-200">${data.mensaje}</span></div>`;
+                    }
+                });
+
+                if (cajaChatJugadoras) {
+                    cajaChatJugadoras.innerHTML = htmlMensajes;
+                    cajaChatJugadoras.scrollTop = cajaChatJugadoras.scrollHeight;
+                }
+                if (cajaChatAdmin) {
+                    cajaChatAdmin.innerHTML = htmlMensajes;
+                    cajaChatAdmin.scrollTop = cajaChatAdmin.scrollHeight;
+                }
             });
-            input.value = '';
         }
     </script>
 </body>
