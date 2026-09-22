@@ -2070,7 +2070,7 @@
             }
         }
 
-                                function cargarMisCartones() {
+                                          function cargarMisCartones() {
             let juegoIniciado = drawnBalls.length > 0;
             if (juegoIniciado) {
                 alert("⚠️ La partida ya comenzó. No puedes cargar más cartones.");
@@ -2082,7 +2082,7 @@
                 let balance = userData.balance || 0;
                 let isCredit = userData.isCredit || false;
 
-                // VALIDACIÓN NUEVA: Si no tiene crédito habilitado Y su saldo es 0 o negativo, se bloquea.
+                // VALIDACIÓN: Si no tiene crédito y su saldo es menor o igual a 0, se bloquea. Si tiene crédito, pasa libremente.
                 if (!isCredit && balance <= 0) {
                     alert("❌ No puedes cargar cartones porque no tienes saldo positivo ni el crédito habilitado. Comunícate con la administración.");
                     return;
@@ -2103,16 +2103,17 @@
 
                 let costoTotal = cartonesNuevos * cardPrice;
 
+                // Si no tiene crédito y el saldo no le alcanza para el total, se bloquea. Si tiene crédito, se le permite endeudarse.
                 if (!isCredit && balance < costoTotal) {
                     alert(`Saldo insuficiente. Necesitas ${costoTotal.toLocaleString()} y tienes ${balance.toLocaleString()}. Comunícate con Yune para recargar.`);
                     return;
                 }
 
+                // Aquí calculamos el nuevo saldo (puede quedar en negativo si está jugando a crédito)
                 let nuevoSaldo = balance - costoTotal;
                 
-                if (!isCredit) {
-                    db.ref(`users/${currentUser.control}/balance`).set(nuevoSaldo);
-                }
+                // GUARDAR EN FIREBASE: Ahora se ejecuta siempre para actualizar el saldo (positivo o negativo) de la jugadora
+                db.ref(`users/${currentUser.control}/balance`).set(nuevoSaldo);
 
                 for (let id in marketCards) {
                     let card = marketCards[id];
@@ -2121,7 +2122,7 @@
                     }
                 }
 
-                alert(`¡${cartonesNuevos} cartón(es) cargado(s) con éxito por un valor total de ${costoTotal.toLocaleString()}!`);
+                alert(`¡${cartonesNuevos} cartón(es) cargado(s) con éxito por un valor total de ${costoTotal.toLocaleString()}! Nuevo saldo: ${nuevoSaldo.toLocaleString()}`);
             });
         }
 
@@ -2280,5 +2281,7 @@
         }
     </script>
 </body>
+</html>
+
 </html>
 
