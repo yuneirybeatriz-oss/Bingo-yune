@@ -175,7 +175,8 @@
                     <label class="text-xs text-yellow-300 font-bold block mb-1">💰 Premio de la Figura Actual:</label>
                     <div class="flex gap-2">
                         <input type="number" id="admin-premio-input" placeholder="Ej: 2000" class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-center text-pink-400">
-                        <button onclick="updatePremioActual()" class="px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white font-extrabold text-xs rounded-xl shadow">Guardar</button>
+                        <button onclick="(function(){ const val = document.getElementById('admin-premio-input').value; if(!val) { alert('Escribe un monto'); return; } database.ref('room/premioActual').set(Number(val)).then(() => alert('¡Premio actualizado con éxito!')); })()" class="px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white font-extrabold text-xs rounded-xl shadow">Guardar</button>
+
                     </div>
                 </div>
             </div>
