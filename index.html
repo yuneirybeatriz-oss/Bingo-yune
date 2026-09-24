@@ -408,7 +408,15 @@
                 </div>
             </div>
 
-
+LISTA DE JUGADORAS CONECTADAS -->
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-yellow-300 text-sm">👥 Jugadoras en Línea en la Sala</h3>
+                    <span id="player-active-count-badge" class="bg-yellow-400/20 text-yellow-300 px-2 py-0.5 rounded-full text-[10px] font-bold">0 activas</span>
+                </div>
+                <div id="player-room-online-list" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-3 bg-slate-900/60 rounded-2xl text-xs">
+                    <span class="text-slate-500 italic">Buscando compañeras conectadas...</span>
+                </div>
             <!-- ================= CHAT DE LA SALA EN VIVO (INTEGRADO EN LA VISTA JUGADORA) ================= -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-pink-500/40 shadow-lg">
                 <h3 class="font-bold text-pink-400 text-lg flex items-center gap-2">💬 Chat de la Sala en Vivo</h3>
@@ -424,15 +432,7 @@
                     <button onclick="enviarMensajeChatJugadora()" class="px-5 py-2 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl text-xs shadow transition">Enviar</button>
                 </div>
             </div>
-<!-- LISTA DE JUGADORAS CONECTADAS -->
-            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
-                <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-yellow-300 text-sm">👥 Jugadoras en Línea en la Sala</h3>
-                    <span id="player-active-count-badge" class="bg-yellow-400/20 text-yellow-300 px-2 py-0.5 rounded-full text-[10px] font-bold">0 activas</span>
-                </div>
-                <div id="player-room-online-list" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-3 bg-slate-900/60 rounded-2xl text-xs">
-                    <span class="text-slate-500 italic">Buscando compañeras conectadas...</span>
-                </div>
+<!-- 
 
             <!-- TABLERO GENERAL (1-75) -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-2">
