@@ -445,34 +445,31 @@
                     <p class="text-slate-500 text-center">Conectando al chat en vivo...</p>
                 </div>
 
-                <!-- Input y botón de enviar -->
-                <div class="flex gap-2">
-                    <input type="text" id="input-mensaje-jugadora" placeholder="Escribe tu mensaje..." class="flex-1 px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs" onkeypress="if(event.key === 'Enter') enviarMensajeChatJugadora()">
-                    <button onclick="enviarMensajeChatJugadora()" class="px-5 py-2 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl text-xs shadow transition">Enviar</button>
-                </div>
-            </div>
-
-            <!-- SELECCIÓN DE CARTONES (MERCADO) -->
-            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (<span id="available-count">100</span> Disponibles)</h3>
-                        <p id="market-status-msg" class="text-xs text-slate-400">Toca el número para seleccionarlo, o mantén presionado / toca el botón de vista previa para inspeccionarlo.</p>
-                    </div>
-                </div>
-                <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
-                
-                <button onclick="cargarMisCartones()" id="btn-cargar-cartones" class="w-full py-3.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-extrabold text-sm rounded-2xl shadow-lg transition transform active:scale-95">
-                    📥 Cargar / Confirmar Mis Cartones
-                </button>
-            </div>
+            <div class="w-full flex flex-col gap-3 my-2">
+    <button onclick="toggleMercadoCartones()" class="w-full py-4 bg-pink-600 text-white font-bold rounded-2xl">🛒 ¡Comprar Cartones - Presiona Aquí!</button>
+    <div id="contenedor-mercado-cartones" class="hidden bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
+        <div class="flex justify-between">
+            <h3 class="text-pink-400 font-bold">Selecciona tus Cartones</h3>
+            <button onclick="toggleMercadoCartones()" class="text-white">✖</button>
         </div>
+        <div id="cards-market-grid" class="grid grid-cols-5 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900 rounded-2xl"></div>
+        <button onclick="cargarMisCartones(); toggleMercadoCartones();" class="w-full py-3 bg-green-600 text-white font-bold rounded-2xl">📥 Cargar / Confirmar</button>
     </div>
+</div>
 
-    <footer class="text-center text-xs text-slate-500 py-6">Bingo Lineal Yune &bull; Tiempo Real 🌟</footer>
+<footer class="text-center text-xs text-slate-500 py-6">Bingo Lineal Yune &bull; Tiempo Real 🌟</footer>
 
-    <script>
-        const firebaseConfig = { databaseURL: "https://bingo-lineal-yune-default-rtdb.firebaseio.com/" };
+<script>
+    function toggleMercadoCartones() {
+        const mercado = document.getElementById('contenedor-mercado-cartones');
+        if (mercado) {
+            mercado.classList.toggle('hidden');
+        }
+    }
+</script>
+
+            
+const firebaseConfig = { databaseURL: "https://bingo-lineal-yune-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
