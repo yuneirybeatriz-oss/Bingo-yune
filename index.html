@@ -2232,6 +2232,57 @@
         }
 
 </div>
+// Variables de control de rondas
+let rondaActualAdmin = localStorage.getItem('rondaActualAdmin') ? parseInt(localStorage.getItem('rondaActualAdmin')) : 1;
+let totalRondasDia = localStorage.getItem('totalRondasDia') ? parseInt(localStorage.getItem('totalRondasDia')) : 1;
+
+function actualizarVistaModalRondas() {
+    const txtRonda = document.getElementById('txt-ronda-actual-modal');
+    const txtTotal = document.getElementById('txt-total-rondas-dia');
+    
+    if (txtRonda) txtRonda.textContent = `Ronda ${rondaActualAdmin}`;
+    if (txtTotal) txtTotal.textContent = totalRondasDia;
+}
+
+function abrirModalRondas() {
+    const modal = document.getElementById('modal-rondas-dia');
+    if (modal) {
+        modal.classList.remove('hidden');
+        actualizarVistaModalRondas();
+    }
+}
+
+function cerrarModalRondas() {
+    const modal = document.getElementById('modal-rondas-dia');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+function reiniciarRondaActual() {
+    if (confirm('¿Deseas reiniciar el marcador de esta ronda?')) {
+        actualizarVistaModalRondas();
+    }
+}
+
+function reiniciarDiaCompleto() {
+    if (confirm("⚠️ ¿Estás segura de reiniciar todo el día? Esto pondrá las rondas desde cero.")) {
+        rondaActualAdmin = 1;
+        totalRondasDia = 1;
+        
+        localStorage.setItem('rondaActualAdmin', rondaActualAdmin);
+        localStorage.setItem('totalRondasDia', totalRondasDia);
+        
+        actualizarVistaModalRondas();
+        alert("¡El día ha sido reiniciado!");
+        cerrarModalRondas();
+    }
+}
+
+// Actualizar textos al cargar la página
+document.addEventListener('DOMContentLoaded', () => {
+    actualizarVistaModalRondas();
+});
 
         
     </script>
