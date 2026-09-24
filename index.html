@@ -435,6 +435,44 @@
                 </div>
             </div>
 
+<!-- MODAL DE CONTROL DE RONDAS PRIVADO -->
+<div id="modal-rondas-dia" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+    <div class="bg-slate-900 border border-yellow-500/50 p-6 rounded-3xl shadow-2xl flex flex-col gap-5 max-w-sm w-full relative">
+        <button onclick="cerrarModalRondas()" class="absolute top-4 right-4 bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white w-8 h-8 rounded-full font-bold flex items-center justify-center transition">✕</button>
+        
+        <div>
+            <h3 class="text-xl font-bold text-yellow-300">Control de Rondas</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Gestión interna de tus partidas de hoy</p>
+        </div>
+
+        <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex flex-col gap-3 text-left">
+            <div class="flex justify-between items-center">
+                <span class="text-xs text-slate-300">Ronda Actual:</span>
+                <span id="txt-ronda-actual-modal" class="text-sm font-bold text-emerald-400">Ronda 1</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-xs text-slate-300">Total Rondas Jugadas Hoy:</span>
+                <span id="txt-total-rondas-dia" class="text-sm font-bold text-yellow-300">1</span>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <button onclick="reiniciarRondaActual()" class="w-full py-2.5 bg-yellow-600 hover:bg-yellow-500 text-slate-950 font-bold text-xs rounded-xl shadow transition">
+                🔄 Reiniciar Ronda Actual
+            </button>
+            <button onclick="reiniciarDiaCompleto()" class="w-full py-2.5 bg-red-600/80 hover:bg-red-600 text-white font-bold text-xs rounded-xl shadow transition">
+                ⚠️ Reiniciar Todo el Día
+            </button>
+        </div>
+
+        <button onclick="cerrarModalRondas()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition">
+            Cerrar
+        </button>
+    </div>
+</div>
+
+            
+
             <!-- TABLERO GENERAL (1-75) -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-2">
                 <h3 class="font-bold text-pink-400 text-sm">Tablero General (1-75)</h3>
@@ -2192,40 +2230,7 @@
                 }
             });
         }
-<!-- MODAL DE CONTROL DE RONDAS PRIVADO -->
-<div id="modal-rondas-dia" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-    <div class="bg-slate-900 border border-yellow-500/50 p-6 rounded-3xl shadow-2xl flex flex-col gap-5 max-w-sm w-full relative">
-        <button onclick="cerrarModalRondas()" class="absolute top-4 right-4 bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white w-8 h-8 rounded-full font-bold flex items-center justify-center transition">✕</button>
-        
-        <div>
-            <h3 class="text-xl font-bold text-yellow-300">Control de Rondas</h3>
-            <p class="text-xs text-slate-400 mt-0.5">Gestión interna de tus partidas de hoy</p>
-        </div>
 
-        <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex flex-col gap-3 text-left">
-            <div class="flex justify-between items-center">
-                <span class="text-xs text-slate-300">Ronda Actual:</span>
-                <span id="txt-ronda-actual-modal" class="text-sm font-bold text-emerald-400">Ronda 1</span>
-            </div>
-            <div class="flex justify-between items-center">
-                <span class="text-xs text-slate-300">Total Rondas Jugadas Hoy:</span>
-                <span id="txt-total-rondas-dia" class="text-sm font-bold text-yellow-300">1</span>
-            </div>
-        </div>
-
-        <div class="flex flex-col gap-2">
-            <button onclick="reiniciarRondaActual()" class="w-full py-2.5 bg-yellow-600 hover:bg-yellow-500 text-slate-950 font-bold text-xs rounded-xl shadow transition">
-                🔄 Reiniciar Ronda Actual
-            </button>
-            <button onclick="reiniciarDiaCompleto()" class="w-full py-2.5 bg-red-600/80 hover:bg-red-600 text-white font-bold text-xs rounded-xl shadow transition">
-                ⚠️ Reiniciar Todo el Día
-            </button>
-        </div>
-
-        <button onclick="cerrarModalRondas()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition">
-            Cerrar
-        </button>
-    </div>
 </div>
 
         
