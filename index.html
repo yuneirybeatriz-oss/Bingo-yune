@@ -197,38 +197,7 @@
                 <textarea id="texto-whatsapp-preview" readonly class="w-full h-32 bg-slate-900 border border-slate-700 rounded-2xl p-3 text-xs text-slate-300 font-mono resize-none focus:outline-none" placeholder="Generando resumen..."></textarea>
             </div>
 
-            <!-- SECCIÓN: REGISTRO DE RONDAS Y GANANCIAS DEL DÍA -->
-            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-blue-500/40 shadow-lg">
-                <div class="flex justify-between items-center flex-wrap gap-2">
-                    <div class="flex items-center gap-2">
-                        <span class="text-2xl">📊</span>
-                        <h3 class="font-bold text-blue-300 text-lg">Control de Rondas y Ganancias del Día</h3>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <span id="badge-total-rondas-dia" class="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0 Rondas Realizadas</span>
-                        <button onclick="limpiarHistorialRondas()" class="px-3 py-1.5 bg-red-600/30 hover:bg-red-600 text-red-200 text-xs rounded-xl font-bold transition">🗑️ Reiniciar Día</button>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div class="bg-slate-900 p-3 rounded-2xl border border-slate-700 flex flex-col justify-center items-center text-center">
-                        <span class="text-[10px] text-slate-400 font-bold uppercase">Total Recaudado Hoy</span>
-                        <span id="stat-recaudado-hoy" class="text-xl font-black text-emerald-400">0.00</span>
-                    </div>
-                    <div class="bg-slate-900 p-3 rounded-2xl border border-slate-700 flex flex-col justify-center items-center text-center">
-                        <span class="text-[10px] text-slate-400 font-bold uppercase">Total Cartones Jugados</span>
-                        <span id="stat-cartones-hoy" class="text-xl font-black text-yellow-300">0</span>
-                    </div>
-                    <div class="bg-slate-900 p-3 rounded-2xl border border-slate-700 flex flex-col justify-center items-center text-center">
-                        <span class="text-[10px] text-slate-400 font-bold uppercase">Acción Manual</span>
-                        <button onclick="registrarRondaManual()" class="mt-1 px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow">＋ Registrar Ronda Actual</button>
-                    </div>
-                </div>
-                <div id="lista-rondas-dia-container" class="flex flex-col gap-2 max-h-48 overflow-y-auto p-3 bg-slate-900/80 rounded-2xl border border-slate-700/60 text-xs">
-                    <span class="text-slate-500 text-center py-2">No hay rondas finalizadas todavía hoy.</span>
-                </div>
-            </div>
-
-            <!-- SECCIÓN: CARTONES PAGADOS EN JUEGO -->
+             <!-- SECCIÓN: CARTONES PAGADOS EN JUEGO -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-emerald-500/40 shadow-lg">
                 <div class="flex justify-between items-center flex-wrap gap-2">
                     <div class="flex items-center gap-2">
