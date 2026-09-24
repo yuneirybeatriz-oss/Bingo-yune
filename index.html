@@ -1246,93 +1246,13 @@
             });
         }
 
-        // --- FUNCIONES DE CONTROL DE RONDAS Y GANANCIAS DEL DÍA ---
-        function registrarRondaManual() {
-            let totalCartonesRonda = 0;
-            for (let id in marketCards) {
-                if (marketCards[id].owner && marketCards[id].loaded) {
-                    totalCartonesRonda++;
-                }
-            }
-
-            if (totalCartonesRonda === 0) {
-                alert("⚠️ No hay cartones jugados en esta ronda para registrar.");
-                return;
-            }
-
-            let recaudadoRonda = totalCartonesRonda * cardPrice;
-            let horaActual = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-
-            let nuevaRonda = {
-                numero: rondasDelDia.length + 1,
-                hora: horaActual,
-                cartones: totalCartonesRonda,
-                recaudado: recaudadoRonda,
-                figura: nombresPatrones[gamePattern] || 'Línea'
-            };
-
-            rondasDelDia.push(nuevaRonda);
-            localStorage.setItem('bingo_rondas_dia', JSON.stringify(rondasDelDia));
-            renderizarHistorialRondasDia();
-            alert(`✅ ¡Ronda #${nuevaRonda.numero} registrada con éxito! (${totalCartonesRonda} cartones / Recaudado: ${recaudadoRonda.toLocaleString()})`);
-        }
+        
 
         function registrarYReiniciarSiguienteRonda() {
             registrarRondaManual();
             reiniciarBalotasParaSiguienteFigura();
         }
 
-        function renderizarHistorialRondasDia() {
-            let container = document.getElementById('lista-rondas-dia-container');
-            let badgeRondas = document.getElementById('badge-total-rondas-dia');
-            let statRecaudado = document.getElementById('stat-recaudado-hoy');
-            let statCartones = document.getElementById('stat-cartones-hoy');
-            if (!container) return;
-
-            container.innerHTML = '';
-            let totalRecaudadoGlobal = 0;
-            let totalCartonesGlobal = 0;
-
-            if (rondasDelDia.length === 0) {
-                container.innerHTML = '<span class="text-slate-500 text-center py-2">No hay rondas finalizadas todavía hoy.</span>';
-                badgeRondas.innerText = "0 Rondas Realizadas";
-                statRecaudado.innerText = "0.00";
-                statCartones.innerText = "0";
-                return;
-            }
-
-            badgeRondas.innerText = `${rondasDelDia.length} Ronda(s) Realizada(s)`;
-
-            rondasDelDia.forEach(r => {
-                totalRecaudadoGlobal += r.recaudado;
-                totalCartonesGlobal += r.cartones;
-
-                let div = document.createElement('div');
-                div.className = "bg-slate-950 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center";
-                div.innerHTML = `
-                    <div>
-                        <strong class="text-yellow-400">Ronda #${r.numero}</strong> <span class="text-slate-400 text-[10px]">(${r.hora})</span>
-                        <div class="text-slate-300 text-[11px]">Figura: ${r.figura} &bull; ${r.cartones} cartones</div>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-emerald-400 font-bold block">${r.recaudado.toLocaleString()}</span>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-
-            statRecaudado.innerText = totalRecaudadoGlobal.toLocaleString();
-            statCartones.innerText = totalCartonesGlobal;
-        }
-
-        function limpiarHistorialRondas() {
-            if (confirm("¿Estás segura de reiniciar el registro de rondas y ganancias de hoy?")) {
-                rondasDelDia = [];
-                localStorage.removeItem('bingo_rondas_dia');
-                renderizarHistorialRondasDia();
-                alert("🗑️ Historial del día reiniciado a cero.");
-            }
-        }
 
         function renderizarHistorialAdmin() {
             let container = document.getElementById('admin-history-balls');
@@ -1394,53 +1314,7 @@
             }
         }
 
-        function renderizarVentanaCartonesPagadosAdmin() {
-            let container = document.getElementById('admin-paid-cards-window');
-            let badgeCount = document.getElementById('admin-paid-count-badge');
-            if (!container) return;
-            container.innerHTML = '';
-
-            let jugadorasMap = {};
-            let totalCartonesPagados = 0;
-
-            for (let id in marketCards) {
-                let card = marketCards[id];
-                if (card.owner && card.ownerControl && card.paid) {
-                    totalCartonesPagados++;
-                    if (!jugadorasMap[card.ownerControl]) {
-                        jugadorasMap[card.ownerControl] = { name: card.owner, control: card.ownerControl, cards: [] };
-                    }
-                    jugadorasMap[card.ownerControl].cards.push(card.id);
-                }
-            }
-
-            badgeCount.innerText = `${totalCartonesPagados} cartón(es) pagado(s)`;
-
-            let controls = Object.keys(jugadorasMap);
-            if (controls.length === 0) {
-                container.innerHTML = '<span class="text-slate-500 text-xs col-span-2 text-center py-4">No hay cartones marcados como "Pagado" todavía.</span>';
-                return;
-            }
-
-            controls.forEach(ctrl => {
-                let j = jugadorasMap[ctrl];
-                j.cards.sort((a, b) => a - b);
-
-                let div = document.createElement('div');
-                div.className = "bg-slate-950 p-3 rounded-xl flex flex-col gap-1.5 border border-emerald-500/30 text-xs";
-                div.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <strong class="text-pink-300 text-sm">${j.name}</strong>
-                        <span class="text-[10px] bg-slate-900 px-2 py-0.5 rounded text-slate-400 font-mono">Control: ${j.control}</span>
-                    </div>
-                    <div class="text-emerald-300 font-bold flex items-center gap-1.5">
-                        <span>✅ Cartones en juego:</span> 
-                        <span class="tracking-wide">#${j.cards.join(', #')}</span>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
+    
 
         function renderizarAdminWallets() {
             let container = document.getElementById('admin-wallets-list');
