@@ -447,133 +447,144 @@
             </div>
 
     <!-- ZONA DE COMPRA DE CARTONES DESPLEGABLE -->
-            <div class="w-full flex flex-col gap-3 my-2">
-                <button onclick="toggleMercadoCartones()" class="w-full py-4 bg-pink-600 text-white font-bold rounded-2xl">🛒 ¡Comprar Cartones - Presiona Aquí!</button>
-                <div id="contenedor-mercado-cartones" class="hidden bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
-                    <div class="flex justify-between">
-                        <h3 class="text-pink-400 font-bold">Selecciona tus Cartones</h3>
-                        <button onclick="toggleMercadoCartones()" class="text-white">✖</button>
-                    </div>
-                    <div id="cards-market-grid" class="grid grid-cols-5 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900 rounded-2xl"></div>
-                    <button onclick="cargarMisCartones(); toggleMercadoCartones();" class="w-full py-3 bg-green-600 text-white font-bold rounded-2xl">📥 Cargar / Confirmar</button>
-                </div>
-            </div>
-
-            <footer class="text-center text-xs text-slate-500 py-6">Bingo Lineal Yune &bull; Tiempo Real 🌟</footer>
-
+<div class="w-full flex flex-col gap-3 my-2">
+    <button onclick="toggleMercadoCartones()" class="w-full py-4 bg-pink-600 text-white font-bold rounded-2xl">🛒 ¡Comprar Cartones - Presiona Aquí!</button>
+    <div id="contenedor-mercado-cartones" class="hidden bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
+        <div class="flex justify-between">
+            <h3 class="text-pink-400 font-bold">Selecciona tus Cartones</h3>
+            <button onclick="toggleMercadoCartones()" class="text-white">✖</button>
         </div>
+        <div id="cards-market-grid" class="grid grid-cols-5 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900 rounded-2xl"></div>
+        <button onclick="cargarMisCartones(); toggleMercadoCartones();" class="w-full py-3 bg-green-600 text-white font-bold rounded-2xl">📥 Cargar / Confirmar</button>
     </div>
+</div>
 
-    <script>
-        function toggleMercadoCartones() {
-            const mercado = document.getElementById('contenedor-mercado-cartones');
-            if (mercado) {
-                mercado.classList.toggle('hidden');
-            }
+<footer class="text-center text-xs text-slate-500 py-6">Bingo Lineal Yune &bull; Tiempo Real 🌟</footer>
+
+</div>
+</div>
+
+<script>
+    // 1. CONFIGURACIÓN DE FIREBASE Y VARIABLES GLOBALES
+    const firebaseConfig = { databaseURL: "https://bingo-lineal-yune-default-rtdb.firebaseio.com/" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let currentUser = { name: '', control: '', isAdmin: false };
+    let drawnBalls = [];
+    let gamePattern = 'line';
+    let marketCards = {}; 
+    let cardPrice = 300;
+    let isRoomLocked = false;
+    let autoDrawInterval = null;
+    let isAutoRunning = false;
+    let adminSecretKey = 'June 2026';
+    let hasSpokenMyBingo = false;
+    let lastSpokenBallCount = 0;
+    let lastAnnouncementId = 0;
+    let presenceRef = null;
+    let audioHabilitado = true;
+    let rondasDelDia = [];
+    let misCartonesSeleccionados = [];
+
+    const nombresPatrones = {
+        'line': 'Línea (Horizontal o Vertical)',
+        'letter_l': 'Letra L',
+        'cross_x': 'La X (Cruz Grande)',
+        'four_corners': 'Cuatro Esquinas',
+        'diagonal': 'Diagonal',
+        'small_cross': 'Cruz Pequeña (Centro)',
+        'letter_o': 'Letra O (Marco Exterior)',
+        'full_card': 'Cartón Lleno (Apagón)',
+        'church': 'La Iglesia ⛪',
+        'letter_t': 'Letra T 🔤',
+        'letter_h': 'Letra H 🔤',
+        'anchor': 'El Ancla ⚓',
+        'plane': 'El Avión ✈️',
+        'rombo': 'Rombo Pequeño 💎'
+    };
+
+    // 2. FUNCIÓN PARA ABRIR/CERRAR EL MENÚ DEL MERCADO
+    function toggleMercadoCartones() {
+        const mercado = document.getElementById('contenedor-mercado-cartones');
+        if (mercado) {
+            mercado.classList.toggle('hidden');
         }
+    }
 
-        // Variables para el mercado de cartones
-        let misCartonesSeleccionados = [];
+    // 3. FUNCIÓN PARA GENERAR LOS 100 CARTONES CON ESTADOS Y DISPONIBILIDAD
+    function renderCardsMarket() {
+        const marketGrid = document.getElementById('cards-market-grid');
+        if (!marketGrid) return;
+        
+        marketGrid.innerHTML = '';
+        let availableCount = 0;
 
-        // 1. FUNCIÓN PARA GENERAR LOS 100 CARTONES EN LA CUADRÍCULA
-        function renderCardsMarket() {
-            const marketGrid = document.getElementById('cards-market-grid');
-            if (!marketGrid) return;
+        for (let i = 1; i <= 100; i++) {
+            let isSelected = misCartonesSeleccionados.includes(i);
+            let cardData = marketCards[i]; // Verifica si ya está ocupado/comprado en Firebase
+
+            const cardBtn = document.createElement('button');
+            cardBtn.type = 'button';
+            cardBtn.textContent = i;
             
-            marketGrid.innerHTML = '';
-            let availableCount = 0;
-
-            // Creamos los 100 cartones
-            for (let i = 1; i <= 100; i++) {
-                let isSelected = misCartonesSeleccionados.includes(i);
-
-                const cardBtn = document.createElement('button');
-                cardBtn.type = 'button';
-                cardBtn.textContent = i;
-                
-                // Estilos según si está seleccionado o disponible
+            // Evaluamos si el cartón está ocupado por otra jugadora o libre
+            if (cardData && cardData.status === 'sold' && cardData.owner !== currentUser.name) {
+                // Ocupado por otro
+                cardBtn.className = 'py-2.5 rounded-xl font-bold text-sm bg-red-900/50 text-red-300 cursor-not-allowed flex items-center justify-center';
+                cardBtn.disabled = true;
+                cardBtn.title = `Ocupado por ${cardData.owner}`;
+            } else {
+                availableCount++;
                 cardBtn.className = `py-2.5 rounded-xl font-bold text-sm transition transform active:scale-90 flex items-center justify-center shadow-md ${
                     isSelected 
                         ? 'bg-amber-500 text-slate-950 ring-2 ring-white scale-105' 
                         : 'bg-slate-700 hover:bg-slate-600 text-white'
                 }`;
-
                 cardBtn.onclick = () => toggleSelectCard(i);
-                marketGrid.appendChild(cardBtn);
-            }
-        }
-
-        // 2. SELECCIONAR O DESELECCIONAR UN CARTÓN AL HACER CLIC
-        function toggleSelectCard(cardNum) {
-            const index = misCartonesSeleccionados.indexOf(cardNum);
-            if (index > -1) {
-                misCartonesSeleccionados.splice(index, 1); // Lo quitamos si ya estaba
-            } else {
-                misCartonesSeleccionados.push(cardNum); // Lo agregamos
-            }
-            renderCardsMarket(); // Volvemos a pintar para actualizar los colores
-        }
-
-        // 3. FUNCIÓN DEL BOTÓN CARGAR / CONFIRMAR
-        function cargarMisCartones() {
-            if (misCartonesSeleccionados.length === 0) {
-                alert("Por favor, selecciona al menos un cartón antes de confirmar.");
-                return;
             }
 
-            console.log("Cartones cargados:", misCartonesSeleccionados);
-            alert(`¡Listo! Has seleccionado y cargado los cartones: ${misCartonesSeleccionados.join(', ')}`);
+            marketGrid.appendChild(cardBtn);
+        }
+    }
+
+    // 4. SELECCIONAR O DESELECCIONAR UN CARTÓN AL HACER CLIC
+    function toggleSelectCard(cardNum) {
+        const index = misCartonesSeleccionados.indexOf(cardNum);
+        if (index > -1) {
+            misCartonesSeleccionados.splice(index, 1);
+        } else {
+            misCartonesSeleccionados.push(cardNum);
+        }
+        renderCardsMarket();
+    }
+
+    // 5. FUNCIÓN DEL BOTÓN CARGAR / CONFIRMAR
+    function cargarMisCartones() {
+        if (misCartonesSeleccionados.length === 0) {
+            alert("Por favor, selecciona al menos un cartón antes de confirmar.");
+            return;
         }
 
-        // Ejecutar la creación de los cartones apenas cargue la página
-        window.onload = function() {
+        console.log("Cartones cargados:", misCartonesSeleccionados);
+        alert(`¡Listo! Has seleccionado y cargado los cartones: ${misCartonesSeleccionados.join(', ')}`);
+    }
+
+    // 6. ESCUCHA DE FIREBASE PARA ACTUALIZAR EL MERCADO EN TIEMPO REAL
+    function escucharMercadoCartones() {
+        db.ref('marketCards').on('value', (snapshot) => {
+            marketCards = snapshot.val() || {};
             renderCardsMarket();
-        };
-    </script>
+        });
+    }
 
-        function toggleMercadoCartones() {
-            const mercado = document.getElementById('contenedor-mercado-cartones');
-            if (mercado) {
-                mercado.classList.toggle('hidden');
-            }
-        }
+    // Ejecutar al cargar la página
+    window.onload = function() {
+        renderCardsMarket();
+        escucharMercadoCartones();
+    };
+</script>
 
-        const firebaseConfig = { databaseURL: "https://bingo-lineal-yune-default-rtdb.firebaseio.com/" };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        let currentUser = { name: '', control: '', isAdmin: false };
-        let drawnBalls = [];
-        let gamePattern = 'line';
-        let marketCards = {}; 
-        let cardPrice = 300;
-        let isRoomLocked = false;
-        let autoDrawInterval = null;
-        let isAutoRunning = false;
-        let adminSecretKey = 'June 2026';
-        let hasSpokenMyBingo = false;
-        let lastSpokenBallCount = 0;
-        let lastAnnouncementId = 0;
-        let presenceRef = null;
-        let audioHabilitado = true;
-        let rondasDelDia = [];
-
-        const nombresPatrones = {
-            'line': 'Línea (Horizontal o Vertical)',
-            'letter_l': 'Letra L',
-            'cross_x': 'La X (Cruz Grande)',
-            'four_corners': 'Cuatro Esquinas',
-            'diagonal': 'Diagonal',
-            'small_cross': 'Cruz Pequeña (Centro)',
-            'letter_o': 'Letra O (Marco Exterior)',
-            'full_card': 'Cartón Lleno (Apagón)',
-            'church': 'La Iglesia ⛪',
-            'letter_t': 'Letra T 🔤',
-            'letter_h': 'Letra H 🔤',
-            'anchor': 'El Ancla ⚓',
-            'plane': 'El Avión ✈️',
-            'rombo': 'Rombo Pequeño 💎'
-        };
 
         function iniciarRelojEnVivo() {
             function actualizarReloj() {
