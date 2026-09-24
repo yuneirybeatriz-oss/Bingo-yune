@@ -322,180 +322,363 @@
         </div>
 
         <!-- SALA JUGADORA -->
-        <div id="view-player-room" class="w-full flex flex-col gap-6 hidden">
-            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col md:flex-row justify-between items-center gap-4">
-                <div>
-                    <h2 class="text-2xl font-bold text-yellow-300">¡Hola, <span id="player-display-name">Jugadora</span>!</h2>
-                    <p class="text-xs text-slate-400">Control ID: <span id="player-display-control">--</span></p>
-                </div>
-                <div class="flex flex-wrap gap-2 items-center">
-                    <!-- WIDGET BILLETERA VIRTUAL JUGADORA -->
-                    <div id="player-wallet-widget" class="bg-slate-900 border border-emerald-500/40 px-4 py-2 rounded-2xl flex items-center gap-3 shadow">
-                        <div>
-                            <span id="wallet-label" class="text-[9px] text-slate-400 uppercase tracking-wider block font-bold">Mi Saldo</span>
-                            <span id="wallet-balance-display" class="text-lg font-black text-emerald-400">0</span>
-                        </div>
-                    </div>
 
-                    <button id="btn-toggle-audio" onclick="toggleAudioJugadora()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow flex items-center gap-1.5 transition">
-                        🔊 Sonido Activado
-                    </button>
-                    <div class="bg-slate-900/90 border border-pink-500/50 px-3 py-1.5 rounded-xl flex items-center gap-2">
-                        <div id="mini-diagram-grid" class="mini-grid-pattern"></div>
-                        <div class="flex flex-col">
-                            <span class="text-[9px] text-pink-400 font-bold uppercase">Figura</span>
-                            <span id="player-pattern-label" class="text-xs text-yellow-300 font-semibold">Línea</span>
-                        </div>
-                    </div>
-                    <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 text-xs rounded-xl">Salir</button>
-                </div>
-            </div>
+        <div id="view-player-room" class="w-full flex flex-col gap-6 hidden">
 
-            <!-- MODAL DE VISTA PREVIA DE CARTÓN A PANTALLA COMPLETA -->
-            <div id="modal-carton-fullscreen" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-                <div class="bg-slate-900 border border-pink-500/50 p-6 rounded-3xl shadow-2xl flex flex-col gap-4 max-w-sm w-full text-center relative">
-                    <button onclick="cerrarVistaPreviaFullscreen()" class="absolute top-4 right-4 bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white w-8 h-8 rounded-full font-bold flex items-center justify-center transition">✕</button>
-                    <div>
-                        <h3 id="modal-preview-title" class="text-xl font-bold text-yellow-300">Cartón #--</h3>
-                        <p class="text-xs text-slate-400 mt-0.5">Inspección detallada antes de confirmar</p>
-                    </div>
-                    <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800">
-                        <div class="grid grid-cols-5 gap-1 text-[11px] text-pink-400 font-bold mb-1">
-                            <div class="bg-slate-900 py-1 rounded">B</div>
-                            <div class="bg-slate-900 py-1 rounded">I</div>
-                            <div class="bg-slate-900 py-1 rounded">N</div>
-                            <div class="bg-slate-900 py-1 rounded">G</div>
-                            <div class="bg-slate-900 py-1 rounded">O</div>
-                        </div>
-                        <div id="modal-preview-grid" class="grid grid-cols-5 gap-1.5"></div>
-                    </div>
-                    <button onclick="cerrarVistaPreviaFullscreen()" class="w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white font-bold text-xs rounded-xl shadow">Cerrar Inspección</button>
-                </div>
-            </div>
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col md:flex-row justify-between items-center gap-4">
 
-            <!-- MODAL DE VICTORIA DE LA JUGADORA -->
-            <div id="player-winner-notification" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-                <div class="flash-winner text-slate-950 p-6 md:p-8 rounded-3xl font-extrabold text-center shadow-2xl alert-bingo flex flex-col gap-4 max-w-lg w-full">
-                    <div class="text-3xl md:text-4xl text-yellow-300 drop-shadow">👑 ¡B I N G O ! 👑</div>
-                    <div id="public-winner-text" class="text-base font-bold bg-white/20 py-2 px-4 rounded-xl text-slate-950">¡Tu cartón hizo bingo! El juego se ha detenido.</div>
-                    
-                    <div class="bg-slate-900 text-white p-4 rounded-2xl max-w-xs mx-auto w-full flex flex-col gap-2">
-                        <span class="text-xs text-yellow-300 font-bold" id="public-winner-card-title">Cartón Ganador</span>
-                        <div class="grid grid-cols-5 gap-1 text-[10px] text-pink-400 font-bold">
-                            <div class="bg-slate-800 py-1 rounded">B</div><div class="bg-slate-800 py-1 rounded">I</div><div class="bg-slate-800 py-1 rounded">N</div><div class="bg-slate-800 py-1 rounded">G</div><div class="bg-slate-800 py-1 rounded">O</div>
-                        </div>
-                        <div id="public-winning-card-grid" class="grid grid-cols-5 gap-1"></div>
-                    </div>
+                <div>
 
-                    <button onclick="cerrarModalJugadora()" class="mt-2 py-2 px-6 bg-slate-900 text-yellow-300 text-xs rounded-xl font-bold shadow mx-auto">Cerrar y Ver Tablero</button>
-                </div>
-            </div>
+                    <h2 class="text-2xl font-bold text-yellow-300">¡Hola, <span id="player-display-name">Jugadora</span>!</h2>
 
-            <!-- ÚLTIMA BOLA CANTADA -->
-            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 border-2 border-yellow-500/50 shadow-xl">
-                <div class="flex flex-col items-center md:items-start text-center md:text-left">
-                    <span class="text-xs uppercase tracking-wider text-yellow-400 font-bold mb-1">🔥 Bola Actual en Juego</span>
-                    <h3 class="text-slate-300 text-sm">¡Mantén tu vista aquí para cantar rápido!</h3>
-                </div>
-                <div class="flex items-center gap-6">
-                    <div id="player-current-ball" class="w-24 h-24 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-4xl flex items-center justify-center shadow-lg animate-pulse">--</div>
-                    <div class="flex flex-col items-center gap-1.5">
-                        <span class="text-[11px] text-slate-400 font-semibold">Últimas 5 salidas:</span>
-                        <div id="player-history-balls" class="flex gap-2 items-center justify-center min-h-[38px]">
-                            <span class="text-xs text-slate-500">--</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                    <p class="text-xs text-slate-400">Control ID: <span id="player-display-control">--</span></p>
 
-             <!-- LISTA DE JUGADORAS CONECTADAS -->
-            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
-                <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-yellow-300 text-sm">👥 Jugadoras en Línea en la Sala</h3>
-                    <span id="player-active-count-badge" class="bg-yellow-400/20 text-yellow-300 px-2 py-0.5 rounded-full text-[10px] font-bold">0 activas</span>
-                </div>
-                <div id="player-room-online-list" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-3 bg-slate-900/60 rounded-2xl text-xs">
-                    <span class="text-slate-500 italic">Buscando compañeras conectadas...</span>
-                </div>
-            <!-- ================= CHAT DE LA SALA EN VIVO (INTEGRADO EN LA VISTA JUGADORA) ================= -->
-            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-pink-500/40 shadow-lg">
-                <h3 class="font-bold text-pink-400 text-lg flex items-center gap-2">💬 Chat de la Sala en Vivo</h3>
-                
-                <!-- Caja de mensajes -->
-                <div id="caja-chat-jugadoras" class="bg-slate-900 h-36 overflow-y-auto p-3 rounded-xl border border-slate-700 text-xs text-left space-y-1.5">
-                    <p class="text-slate-500 text-center">Conectando al chat en vivo...</p>
-                </div>
+                </div>
 
-                <!-- Input y botón de enviar -->
-                <div class="flex gap-2">
-                    <input type="text" id="input-mensaje-jugadora" placeholder="Escribe tu mensaje..." class="flex-1 px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs" onkeypress="if(event.key === 'Enter') enviarMensajeChatJugadora()">
-                    <button onclick="enviarMensajeChatJugadora()" class="px-5 py-2 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl text-xs shadow transition">Enviar</button>
-                </div>
-            </div>
-<!-- 
+                <div class="flex flex-wrap gap-2 items-center">
 
-            <!-- TABLERO GENERAL (1-75) -->
-            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-2">
-                <h3 class="font-bold text-pink-400 text-sm">Tablero General (1-75)</h3>
-                <div id="player-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1"></div>
-            </div>
-            <!-- SELECCIÓN DE CARTONES (MERCADO) -->
-            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (<span id="available-count">100</span> Disponibles)</h3>
-                        <p id="market-status-msg" class="text-xs text-slate-400">Toca el número para seleccionarlo, o mantén presionado / toca el botón de vista previa para inspeccionarlo.</p>
-                    </div>
-                </div>
-                <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
-                
-                <button onclick="cargarMisCartones()" id="btn-cargar-cartones" class="w-full py-3.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-extrabold text-sm rounded-2xl shadow-lg transition transform active:scale-95">
-                    📥 Cargar / Confirmar Mis Cartones
-                </button>
-            </div>
-        </div>
-    </div>
+                    <!-- WIDGET BILLETERA VIRTUAL JUGADORA -->
 
-    <footer class="text-center text-xs text-slate-500 py-6">Bingo Lineal Yune &bull; Tiempo Real 🌟</footer>
+                    <div id="player-wallet-widget" class="bg-slate-900 border border-emerald-500/40 px-4 py-2 rounded-2xl flex items-center gap-3 shadow">
 
-    <script>
-        const firebaseConfig = { databaseURL: "https://bingo-lineal-yune-default-rtdb.firebaseio.com/" };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+                        <div>
 
-        let currentUser = { name: '', control: '', isAdmin: false };
-        let drawnBalls = [];
-        let gamePattern = 'line';
-        let marketCards = {}; 
-        let cardPrice = 300;
-        let isRoomLocked = false;
-        let autoDrawInterval = null;
-        let isAutoRunning = false;
-        let adminSecretKey = 'June 2026';
-        let hasSpokenMyBingo = false;
-        let lastSpokenBallCount = 0;
-        let lastAnnouncementId = 0;
-        let presenceRef = null;
-        let audioHabilitado = true;
-        let rondasDelDia = [];
+                            <span id="wallet-label" class="text-[9px] text-slate-400 uppercase tracking-wider block font-bold">Mi Saldo</span>
 
-        const nombresPatrones = {
-            'line': 'Línea (Horizontal o Vertical)',
-            'letter_l': 'Letra L',
-            'cross_x': 'La X (Cruz Grande)',
-            'four_corners': 'Cuatro Esquinas',
-            'diagonal': 'Diagonal',
-            'small_cross': 'Cruz Pequeña (Centro)',
-            'letter_o': 'Letra O (Marco Exterior)',
-            'full_card': 'Cartón Lleno (Apagón)',
-            'church': 'La Iglesia ⛪',
-            'letter_t': 'Letra T 🔤',
-            'letter_h': 'Letra H 🔤',
-            'anchor': 'El Ancla ⚓',
-            'plane': 'El Avión ✈️',
-            'rombo': 'Rombo Pequeño 💎'
-        };
+                            <span id="wallet-balance-display" class="text-lg font-black text-emerald-400">0</span>
 
+                        </div>
+
+                    </div>
+
+
+                    <button id="btn-toggle-audio" onclick="toggleAudioJugadora()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow flex items-center gap-1.5 transition">
+
+                        🔊 Sonido Activado
+
+                    </button>
+
+                    <div class="bg-slate-900/90 border border-pink-500/50 px-3 py-1.5 rounded-xl flex items-center gap-2">
+
+                        <div id="mini-diagram-grid" class="mini-grid-pattern"></div>
+
+                        <div class="flex flex-col">
+
+                            <span class="text-[9px] text-pink-400 font-bold uppercase">Figura</span>
+
+                            <span id="player-pattern-label" class="text-xs text-yellow-300 font-semibold">Línea</span>
+
+                        </div>
+
+                    </div>
+
+                    <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 text-xs rounded-xl">Salir</button>
+
+                </div>
+
+            </div>
+
+
+            <!-- MODAL DE VISTA PREVIA DE CARTÓN A PANTALLA COMPLETA -->
+
+            <div id="modal-carton-fullscreen" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+
+                <div class="bg-slate-900 border border-pink-500/50 p-6 rounded-3xl shadow-2xl flex flex-col gap-4 max-w-sm w-full text-center relative">
+
+                    <button onclick="cerrarVistaPreviaFullscreen()" class="absolute top-4 right-4 bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white w-8 h-8 rounded-full font-bold flex items-center justify-center transition">✕</button>
+
+                    <div>
+
+                        <h3 id="modal-preview-title" class="text-xl font-bold text-yellow-300">Cartón #--</h3>
+
+                        <p class="text-xs text-slate-400 mt-0.5">Inspección detallada antes de confirmar</p>
+
+                    </div>
+
+                    <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800">
+
+                        <div class="grid grid-cols-5 gap-1 text-[11px] text-pink-400 font-bold mb-1">
+
+                            <div class="bg-slate-900 py-1 rounded">B</div>
+
+                            <div class="bg-slate-900 py-1 rounded">I</div>
+
+                            <div class="bg-slate-900 py-1 rounded">N</div>
+
+                            <div class="bg-slate-900 py-1 rounded">G</div>
+
+                            <div class="bg-slate-900 py-1 rounded">O</div>
+
+                        </div>
+
+                        <div id="modal-preview-grid" class="grid grid-cols-5 gap-1.5"></div>
+
+                    </div>
+
+                    <button onclick="cerrarVistaPreviaFullscreen()" class="w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white font-bold text-xs rounded-xl shadow">Cerrar Inspección</button>
+
+                </div>
+
+            </div>
+
+
+            <!-- MODAL DE VICTORIA DE LA JUGADORA -->
+
+            <div id="player-winner-notification" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+
+                <div class="flash-winner text-slate-950 p-6 md:p-8 rounded-3xl font-extrabold text-center shadow-2xl alert-bingo flex flex-col gap-4 max-w-lg w-full">
+
+                    <div class="text-3xl md:text-4xl text-yellow-300 drop-shadow">👑 ¡B I N G O ! 👑</div>
+
+                    <div id="public-winner-text" class="text-base font-bold bg-white/20 py-2 px-4 rounded-xl text-slate-950">¡Tu cartón hizo bingo! El juego se ha detenido.</div>
+
+                    
+
+                    <div class="bg-slate-900 text-white p-4 rounded-2xl max-w-xs mx-auto w-full flex flex-col gap-2">
+
+                        <span class="text-xs text-yellow-300 font-bold" id="public-winner-card-title">Cartón Ganador</span>
+
+                        <div class="grid grid-cols-5 gap-1 text-[10px] text-pink-400 font-bold">
+
+                            <div class="bg-slate-800 py-1 rounded">B</div><div class="bg-slate-800 py-1 rounded">I</div><div class="bg-slate-800 py-1 rounded">N</div><div class="bg-slate-800 py-1 rounded">G</div><div class="bg-slate-800 py-1 rounded">O</div>
+
+                        </div>
+
+                        <div id="public-winning-card-grid" class="grid grid-cols-5 gap-1"></div>
+
+                    </div>
+
+
+                    <button onclick="cerrarModalJugadora()" class="mt-2 py-2 px-6 bg-slate-900 text-yellow-300 text-xs rounded-xl font-bold shadow mx-auto">Cerrar y Ver Tablero</button>
+
+                </div>
+
+            </div>
+
+
+            <!-- ÚLTIMA BOLA CANTADA -->
+
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 border-2 border-yellow-500/50 shadow-xl">
+
+                <div class="flex flex-col items-center md:items-start text-center md:text-left">
+
+                    <span class="text-xs uppercase tracking-wider text-yellow-400 font-bold mb-1">🔥 Bola Actual en Juego</span>
+
+                    <h3 class="text-slate-300 text-sm">¡Mantén tu vista aquí para cantar rápido!</h3>
+
+                </div>
+
+                <div class="flex items-center gap-6">
+
+                    <div id="player-current-ball" class="w-24 h-24 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-4xl flex items-center justify-center shadow-lg animate-pulse">--</div>
+
+                    <div class="flex flex-col items-center gap-1.5">
+
+                        <span class="text-[11px] text-slate-400 font-semibold">Últimas 5 salidas:</span>
+
+                        <div id="player-history-balls" class="flex gap-2 items-center justify-center min-h-[38px]">
+
+                            <span class="text-xs text-slate-500">--</span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- LISTA DE JUGADORAS CONECTADAS -->
+
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
+
+                <div class="flex justify-between items-center">
+
+                    <h3 class="font-bold text-yellow-300 text-sm">👥 Jugadoras en Línea en la Sala</h3>
+
+                    <span id="player-active-count-badge" class="bg-yellow-400/20 text-yellow-300 px-2 py-0.5 rounded-full text-[10px] font-bold">0 activas</span>
+
+                </div>
+
+                <div id="player-room-online-list" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-3 bg-slate-900/60 rounded-2xl text-xs">
+
+                    <span class="text-slate-500 italic">Buscando compañeras conectadas...</span>
+
+                </div>
+
+            </div>
+
+
+            <!-- ZONA DE TUS CARTONES EN JUEGO -->
+
+            <div class="flex flex-col gap-4">
+
+                <div class="flex justify-between items-center">
+
+                    <h3 class="font-bold text-yellow-300 text-lg">Tus Cartones en Juego</h3>
+
+                    <span class="text-xs text-slate-400">Toca cualquier cartón tuyo para inspeccionarlo en grande</span>
+
+                </div>
+
+                <div id="player-my-cards-container" class="grid grid-cols-2 gap-3">
+
+                    <span class="text-slate-500 text-sm col-span-2">Aún no has seleccionado cartones.</span>
+
+                </div>
+
+            </div>
+
+
+            <!-- TABLERO GENERAL (1-75) -->
+
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-2">
+
+                <h3 class="font-bold text-pink-400 text-sm">Tablero General (1-75)</h3>
+
+                <div id="player-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1"></div>
+
+            </div>
+
+
+            <!-- ================= CHAT DE LA SALA EN VIVO (INTEGRADO EN LA VISTA JUGADORA) ================= -->
+
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-pink-500/40 shadow-lg">
+
+                <h3 class="font-bold text-pink-400 text-lg flex items-center gap-2">💬 Chat de la Sala en Vivo</h3>
+
+                
+
+                <!-- Caja de mensajes -->
+
+                <div id="caja-chat-jugadoras" class="bg-slate-900 h-36 overflow-y-auto p-3 rounded-xl border border-slate-700 text-xs text-left space-y-1.5">
+
+                    <p class="text-slate-500 text-center">Conectando al chat en vivo...</p>
+
+                </div>
+
+
+                <!-- Input y botón de enviar -->
+
+                <div class="flex gap-2">
+
+                    <input type="text" id="input-mensaje-jugadora" placeholder="Escribe tu mensaje..." class="flex-1 px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs" onkeypress="if(event.key === 'Enter') enviarMensajeChatJugadora()">
+
+                    <button onclick="enviarMensajeChatJugadora()" class="px-5 py-2 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl text-xs shadow transition">Enviar</button>
+
+                </div>
+
+            </div>
+
+
+            <!-- SELECCIÓN DE CARTONES (MERCADO) -->
+
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
+
+                <div class="flex justify-between items-center">
+
+                    <div>
+
+                        <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (<span id="available-count">100</span> Disponibles)</h3>
+
+                        <p id="market-status-msg" class="text-xs text-slate-400">Toca el número para seleccionarlo, o mantén presionado / toca el botón de vista previa para inspeccionarlo.</p>
+
+                    </div>
+
+                </div>
+
+                <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
+
+                
+
+                <button onclick="cargarMisCartones()" id="btn-cargar-cartones" class="w-full py-3.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-extrabold text-sm rounded-2xl shadow-lg transition transform active:scale-95">
+
+                    📥 Cargar / Confirmar Mis Cartones
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <footer class="text-center text-xs text-slate-500 py-6">Bingo Lineal Yune &bull; Tiempo Real 🌟</footer>
+
+
+    <script>
+
+        const firebaseConfig = { databaseURL: "https://bingo-lineal-yune-default-rtdb.firebaseio.com/" };
+
+        firebase.initializeApp(firebaseConfig);
+
+        const db = firebase.database();
+
+
+        let currentUser = { name: '', control: '', isAdmin: false };
+
+        let drawnBalls = [];
+
+        let gamePattern = 'line';
+
+        let marketCards = {}; 
+
+        let cardPrice = 300;
+
+        let isRoomLocked = false;
+
+        let autoDrawInterval = null;
+
+        let isAutoRunning = false;
+
+        let adminSecretKey = 'June 2026';
+
+        let hasSpokenMyBingo = false;
+
+        let lastSpokenBallCount = 0;
+
+        let lastAnnouncementId = 0;
+
+        let presenceRef = null;
+
+        let audioHabilitado = true;
+
+        let rondasDelDia = [];
+
+
+        const nombresPatrones = {
+
+            'line': 'Línea (Horizontal o Vertical)',
+
+            'letter_l': 'Letra L',
+
+            'cross_x': 'La X (Cruz Grande)',
+
+            'four_corners': 'Cuatro Esquinas',
+
+            'diagonal': 'Diagonal',
+
+            'small_cross': 'Cruz Pequeña (Centro)',
+
+            'letter_o': 'Letra O (Marco Exterior)',
+
+            'full_card': 'Cartón Lleno (Apagón)',
+
+            'church': 'La Iglesia ⛪',
+
+            'letter_t': 'Letra T 🔤',
+
+            'letter_h': 'Letra H 🔤',
+
+            'anchor': 'El Ancla ⚓',
+
+            'plane': 'El Avión ✈️',
+
+            'rombo': 'Rombo Pequeño 💎'
+
+        };
         function iniciarRelojEnVivo() {
             function actualizarReloj() {
                 let ahora = new Date();
