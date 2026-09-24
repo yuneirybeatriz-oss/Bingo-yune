@@ -446,7 +446,7 @@
                 </div>
             </div>
 
-    <!-- ZONA DE COMPRA DE CARTONES DESPLEGABLE -->
+     <!-- ZONA DE COMPRA DE CARTONES DESPLEGABLE -->
 <div class="w-full flex flex-col gap-3 my-2">
     <button onclick="toggleMercadoCartones()" class="w-full py-4 bg-pink-600 text-white font-bold rounded-2xl">🛒 ¡Comprar Cartones - Presiona Aquí!</button>
     <div id="contenedor-mercado-cartones" class="hidden bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
@@ -465,27 +465,20 @@
 </div>
 
 <script>
-    // 1. CONFIGURACIÓN DE FIREBASE Y VARIABLES GLOBALES
-    const firebaseConfig = { databaseURL: "https://bingo-lineal-yune-default-rtdb.firebaseio.com/" };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    // 1. CONFIGURACIÓN DE FIREBASE Y VARIABLES GLOBALES (Asegúrate de tener esto una sola vez arriba)
+    // Si ya tienes inicializado Firebase y estas variables arriba del todo, puedes omitir esta sección para evitar duplicados.
+    if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+        const firebaseConfig = { databaseURL: "https://bingo-lineal-yune-default-rtdb.firebaseio.com/" };
+        firebase.initializeApp(firebaseConfig);
+    }
+    const dbCardMarket = firebase.database();
 
-    let currentUser = { name: '', control: '', isAdmin: false };
-    let drawnBalls = [];
-    let gamePattern = 'line';
-    let marketCards = {}; 
-    let cardPrice = 300;
-    let isRoomLocked = false;
-    let autoDrawInterval = null;
-    let isAutoRunning = false;
-    let adminSecretKey = 'June 2026';
-    let hasSpokenMyBingo = false;
-    let lastSpokenBallCount = 0;
-    let lastAnnouncementId = 0;
-    let presenceRef = null;
-    let audioHabilitado = true;
-    let rondasDelDia = [];
-    let misCartonesSeleccionados = [];
+    if (typeof misCartonesSeleccionados === 'undefined') {
+        var misCartonesSeleccionados = [];
+    }
+    if (typeof marketCards === 'undefined') {
+        var marketCards = {};
+    }
 
     const nombresPatrones = {
         'line': 'Línea (Horizontal o Vertical)',
@@ -522,15 +515,13 @@
 
         for (let i = 1; i <= 100; i++) {
             let isSelected = misCartonesSeleccionados.includes(i);
-            let cardData = marketCards[i]; // Verifica si ya está ocupado/comprado en Firebase
+            let cardData = marketCards[i]; 
 
             const cardBtn = document.createElement('button');
             cardBtn.type = 'button';
             cardBtn.textContent = i;
             
-            // Evaluamos si el cartón está ocupado por otra jugadora o libre
             if (cardData && cardData.status === 'sold' && cardData.owner !== currentUser.name) {
-                // Ocupado por otro
                 cardBtn.className = 'py-2.5 rounded-xl font-bold text-sm bg-red-900/50 text-red-300 cursor-not-allowed flex items-center justify-center';
                 cardBtn.disabled = true;
                 cardBtn.title = `Ocupado por ${cardData.owner}`;
@@ -572,18 +563,13 @@
 
     // 6. ESCUCHA DE FIREBASE PARA ACTUALIZAR EL MERCADO EN TIEMPO REAL
     function escucharMercadoCartones() {
-        db.ref('marketCards').on('value', (snapshot) => {
+        dbCardMarket.ref('marketCards').on('value', (snapshot) => {
             marketCards = snapshot.val() || {};
             renderCardsMarket();
         });
     }
-
-    // Ejecutar al cargar la página
-    window.onload = function() {
-        renderCardsMarket();
-        escucharMercadoCartones();
-    };
 </script>
+
 
 
         function iniciarRelojEnVivo() {
