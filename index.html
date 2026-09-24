@@ -436,7 +436,7 @@
                 <div id="player-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1"></div>
             </div>
 
-            <!-- ================= CHAT DE LA SALA EN VIVO (INTEGRADO EN LA VISTA JUGADORA) ================= -->
+                        <!-- ================= CHAT DE LA SALA EN VIVO (INTEGRADO EN LA VISTA JUGADORA) ================= -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-pink-500/40 shadow-lg">
                 <h3 class="font-bold text-pink-400 text-lg flex items-center gap-2">💬 Chat de la Sala en Vivo</h3>
                 
@@ -444,32 +444,35 @@
                 <div id="caja-chat-jugadoras" class="bg-slate-900 h-36 overflow-y-auto p-3 rounded-xl border border-slate-700 text-xs text-left space-y-1.5">
                     <p class="text-slate-500 text-center">Conectando al chat en vivo...</p>
                 </div>
+            </div>
 
+            <!-- ZONA DE COMPRA DE CARTONES DESPLEGABLE -->
             <div class="w-full flex flex-col gap-3 my-2">
-    <button onclick="toggleMercadoCartones()" class="w-full py-4 bg-pink-600 text-white font-bold rounded-2xl">🛒 ¡Comprar Cartones - Presiona Aquí!</button>
-    <div id="contenedor-mercado-cartones" class="hidden bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
-        <div class="flex justify-between">
-            <h3 class="text-pink-400 font-bold">Selecciona tus Cartones</h3>
-            <button onclick="toggleMercadoCartones()" class="text-white">✖</button>
+                <button onclick="toggleMercadoCartones()" class="w-full py-4 bg-pink-600 text-white font-bold rounded-2xl">🛒 ¡Comprar Cartones - Presiona Aquí!</button>
+                <div id="contenedor-mercado-cartones" class="hidden bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
+                    <div class="flex justify-between">
+                        <h3 class="text-pink-400 font-bold">Selecciona tus Cartones</h3>
+                        <button onclick="toggleMercadoCartones()" class="text-white">✖</button>
+                    </div>
+                    <div id="cards-market-grid" class="grid grid-cols-5 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900 rounded-2xl"></div>
+                    <button onclick="cargarMisCartones(); toggleMercadoCartones();" class="w-full py-3 bg-green-600 text-white font-bold rounded-2xl">📥 Cargar / Confirmar</button>
+                </div>
+            </div>
+
+            <footer class="text-center text-xs text-slate-500 py-6">Bingo Lineal Yune &bull; Tiempo Real 🌟</footer>
+
         </div>
-        <div id="cards-market-grid" class="grid grid-cols-5 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900 rounded-2xl"></div>
-        <button onclick="cargarMisCartones(); toggleMercadoCartones();" class="w-full py-3 bg-green-600 text-white font-bold rounded-2xl">📥 Cargar / Confirmar</button>
     </div>
-</div>
 
-<footer class="text-center text-xs text-slate-500 py-6">Bingo Lineal Yune &bull; Tiempo Real 🌟</footer>
-
-<script>
-    function toggleMercadoCartones() {
-        const mercado = document.getElementById('contenedor-mercado-cartones');
-        if (mercado) {
-            mercado.classList.toggle('hidden');
+    <script>
+        function toggleMercadoCartones() {
+            const mercado = document.getElementById('contenedor-mercado-cartones');
+            if (mercado) {
+                mercado.classList.toggle('hidden');
+            }
         }
-    }
-</script>
 
-            
-const firebaseConfig = { databaseURL: "https://bingo-lineal-yune-default-rtdb.firebaseio.com/" };
+        const firebaseConfig = { databaseURL: "https://bingo-lineal-yune-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
@@ -530,6 +533,8 @@ const firebaseConfig = { databaseURL: "https://bingo-lineal-yune-default-rtdb.fi
             actualizarReloj();
             setInterval(actualizarReloj, 1000);
         }
+
+            
 
         function desbloquearAudioInicial() {
             if ('speechSynthesis' in window && audioHabilitado) {
