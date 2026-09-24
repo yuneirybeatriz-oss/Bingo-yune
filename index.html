@@ -197,7 +197,38 @@
                 <textarea id="texto-whatsapp-preview" readonly class="w-full h-32 bg-slate-900 border border-slate-700 rounded-2xl p-3 text-xs text-slate-300 font-mono resize-none focus:outline-none" placeholder="Generando resumen..."></textarea>
             </div>
 
-             <!-- SECCIÓN: CARTONES PAGADOS EN JUEGO -->
+            <!-- SECCIÓN: REGISTRO DE RONDAS Y GANANCIAS DEL DÍA -->
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-blue-500/40 shadow-lg">
+                <div class="flex justify-between items-center flex-wrap gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl">📊</span>
+                        <h3 class="font-bold text-blue-300 text-lg">Control de Rondas y Ganancias del Día</h3>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span id="badge-total-rondas-dia" class="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0 Rondas Realizadas</span>
+                        <button onclick="limpiarHistorialRondas()" class="px-3 py-1.5 bg-red-600/30 hover:bg-red-600 text-red-200 text-xs rounded-xl font-bold transition">🗑️ Reiniciar Día</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="bg-slate-900 p-3 rounded-2xl border border-slate-700 flex flex-col justify-center items-center text-center">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase">Total Recaudado Hoy</span>
+                        <span id="stat-recaudado-hoy" class="text-xl font-black text-emerald-400">0.00</span>
+                    </div>
+                    <div class="bg-slate-900 p-3 rounded-2xl border border-slate-700 flex flex-col justify-center items-center text-center">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase">Total Cartones Jugados</span>
+                        <span id="stat-cartones-hoy" class="text-xl font-black text-yellow-300">0</span>
+                    </div>
+                    <div class="bg-slate-900 p-3 rounded-2xl border border-slate-700 flex flex-col justify-center items-center text-center">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase">Acción Manual</span>
+                        <button onclick="registrarRondaManual()" class="mt-1 px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow">＋ Registrar Ronda Actual</button>
+                    </div>
+                </div>
+                <div id="lista-rondas-dia-container" class="flex flex-col gap-2 max-h-48 overflow-y-auto p-3 bg-slate-900/80 rounded-2xl border border-slate-700/60 text-xs">
+                    <span class="text-slate-500 text-center py-2">No hay rondas finalizadas todavía hoy.</span>
+                </div>
+            </div>
+
+            <!-- SECCIÓN: CARTONES PAGADOS EN JUEGO -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-emerald-500/40 shadow-lg">
                 <div class="flex justify-between items-center flex-wrap gap-2">
                     <div class="flex items-center gap-2">
@@ -290,7 +321,16 @@
                 </div>
             </div>
 
-     <!-- SECCIÓN DE LIBERAR CARTONES -->
+            <!-- CONTROL DE PAGOS DE JUGADORA -->
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-pink-400 text-lg">Control de pagos de jugadora</h3>
+                    <span class="text-xs text-slate-400">Toca el estado para cambiar entre Pagado / Pendiente</span>
+                </div>
+                <div id="admin-cards-summary" class="flex flex-col gap-2.5 max-h-64 overflow-y-auto p-3 bg-slate-900/60 rounded-2xl font-mono text-sm"></div>
+            </div>
+
+            <!-- SECCIÓN DE LIBERAR CARTONES -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
                 <h3 class="font-bold text-red-400 text-sm">🗑️ Sección para Liberar Cartones Ocupados</h3>
                 <div class="flex gap-3 items-center">
@@ -436,7 +476,7 @@
                 <div id="player-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1"></div>
             </div>
 
-                        <!-- ================= CHAT DE LA SALA EN VIVO (INTEGRADO EN LA VISTA JUGADORA) ================= -->
+            <!-- ================= CHAT DE LA SALA EN VIVO (INTEGRADO EN LA VISTA JUGADORA) ================= -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-pink-500/40 shadow-lg">
                 <h3 class="font-bold text-pink-400 text-lg flex items-center gap-2">💬 Chat de la Sala en Vivo</h3>
                 
@@ -444,129 +484,70 @@
                 <div id="caja-chat-jugadoras" class="bg-slate-900 h-36 overflow-y-auto p-3 rounded-xl border border-slate-700 text-xs text-left space-y-1.5">
                     <p class="text-slate-500 text-center">Conectando al chat en vivo...</p>
                 </div>
+
+                <!-- Input y botón de enviar -->
+                <div class="flex gap-2">
+                    <input type="text" id="input-mensaje-jugadora" placeholder="Escribe tu mensaje..." class="flex-1 px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs" onkeypress="if(event.key === 'Enter') enviarMensajeChatJugadora()">
+                    <button onclick="enviarMensajeChatJugadora()" class="px-5 py-2 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl text-xs shadow transition">Enviar</button>
+                </div>
             </div>
 
-     <!-- ZONA DE COMPRA DE CARTONES DESPLEGABLE -->
-<div class="w-full flex flex-col gap-3 my-2">
-    <button onclick="toggleMercadoCartones()" class="w-full py-4 bg-pink-600 text-white font-bold rounded-2xl">🛒 ¡Comprar Cartones - Presiona Aquí!</button>
-    <div id="contenedor-mercado-cartones" class="hidden bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
-        <div class="flex justify-between">
-            <h3 class="text-pink-400 font-bold">Selecciona tus Cartones</h3>
-            <button onclick="toggleMercadoCartones()" class="text-white">✖</button>
+            <!-- SELECCIÓN DE CARTONES (MERCADO) -->
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (<span id="available-count">100</span> Disponibles)</h3>
+                        <p id="market-status-msg" class="text-xs text-slate-400">Toca el número para seleccionarlo, o mantén presionado / toca el botón de vista previa para inspeccionarlo.</p>
+                    </div>
+                </div>
+                <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
+                
+                <button onclick="cargarMisCartones()" id="btn-cargar-cartones" class="w-full py-3.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-extrabold text-sm rounded-2xl shadow-lg transition transform active:scale-95">
+                    📥 Cargar / Confirmar Mis Cartones
+                </button>
+            </div>
         </div>
-        <div id="cards-market-grid" class="grid grid-cols-5 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900 rounded-2xl"></div>
-        <button onclick="cargarMisCartones(); toggleMercadoCartones();" class="w-full py-3 bg-green-600 text-white font-bold rounded-2xl">📥 Cargar / Confirmar</button>
     </div>
-</div>
 
-<footer class="text-center text-xs text-slate-500 py-6">Bingo Lineal Yune &bull; Tiempo Real 🌟</footer>
+    <footer class="text-center text-xs text-slate-500 py-6">Bingo Lineal Yune &bull; Tiempo Real 🌟</footer>
 
-</div>
-</div>
-<script>
-    // 1. CONFIGURACIÓN DE FIREBASE Y VARIABLES GLOBALES (Asegúrate de tener esto una sola vez arriba)
-    // Si ya tienes inicializado Firebase y estas variables arriba del todo, puedes omitir esta sección para evitar duplicados.
-    if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+    <script>
         const firebaseConfig = { databaseURL: "https://bingo-lineal-yune-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
-    }
-    const dbCardMarket = firebase.database();
+        const db = firebase.database();
 
-    if (typeof misCartonesSeleccionados === 'undefined') {
-        var misCartonesSeleccionados = [];
-    }
-    if (typeof marketCards === 'undefined') {
-        var marketCards = {};
-    }
+        let currentUser = { name: '', control: '', isAdmin: false };
+        let drawnBalls = [];
+        let gamePattern = 'line';
+        let marketCards = {}; 
+        let cardPrice = 300;
+        let isRoomLocked = false;
+        let autoDrawInterval = null;
+        let isAutoRunning = false;
+        let adminSecretKey = 'June 2026';
+        let hasSpokenMyBingo = false;
+        let lastSpokenBallCount = 0;
+        let lastAnnouncementId = 0;
+        let presenceRef = null;
+        let audioHabilitado = true;
+        let rondasDelDia = [];
 
-    const nombresPatrones = {
-        'line': 'Línea (Horizontal o Vertical)',
-        'letter_l': 'Letra L',
-        'cross_x': 'La X (Cruz Grande)',
-        'four_corners': 'Cuatro Esquinas',
-        'diagonal': 'Diagonal',
-        'small_cross': 'Cruz Pequeña (Centro)',
-        'letter_o': 'Letra O (Marco Exterior)',
-        'full_card': 'Cartón Lleno (Apagón)',
-        'church': 'La Iglesia ⛪',
-        'letter_t': 'Letra T 🔤',
-        'letter_h': 'Letra H 🔤',
-        'anchor': 'El Ancla ⚓',
-        'plane': 'El Avión ✈️',
-        'rombo': 'Rombo Pequeño 💎'
-    };
-
-    // 2. FUNCIÓN PARA ABRIR/CERRAR EL MENÚ DEL MERCADO
-    function toggleMercadoCartones() {
-        const mercado = document.getElementById('contenedor-mercado-cartones');
-        if (mercado) {
-            mercado.classList.toggle('hidden');
-        }
-    }
-
-    // 3. FUNCIÓN PARA GENERAR LOS 100 CARTONES CON ESTADOS Y DISPONIBILIDAD
-    function renderCardsMarket() {
-        const marketGrid = document.getElementById('cards-market-grid');
-        if (!marketGrid) return;
-        
-        marketGrid.innerHTML = '';
-        let availableCount = 0;
-
-        for (let i = 1; i <= 100; i++) {
-            let isSelected = misCartonesSeleccionados.includes(i);
-            let cardData = marketCards[i]; 
-
-            const cardBtn = document.createElement('button');
-            cardBtn.type = 'button';
-            cardBtn.textContent = i;
-            
-            if (cardData && cardData.status === 'sold' && cardData.owner !== currentUser.name) {
-                cardBtn.className = 'py-2.5 rounded-xl font-bold text-sm bg-red-900/50 text-red-300 cursor-not-allowed flex items-center justify-center';
-                cardBtn.disabled = true;
-                cardBtn.title = `Ocupado por ${cardData.owner}`;
-            } else {
-                availableCount++;
-                cardBtn.className = `py-2.5 rounded-xl font-bold text-sm transition transform active:scale-90 flex items-center justify-center shadow-md ${
-                    isSelected 
-                        ? 'bg-amber-500 text-slate-950 ring-2 ring-white scale-105' 
-                        : 'bg-slate-700 hover:bg-slate-600 text-white'
-                }`;
-                cardBtn.onclick = () => toggleSelectCard(i);
-            }
-
-            marketGrid.appendChild(cardBtn);
-        }
-    }
-
-    // 4. SELECCIONAR O DESELECCIONAR UN CARTÓN AL HACER CLIC
-    function toggleSelectCard(cardNum) {
-        const index = misCartonesSeleccionados.indexOf(cardNum);
-        if (index > -1) {
-            misCartonesSeleccionados.splice(index, 1);
-        } else {
-            misCartonesSeleccionados.push(cardNum);
-        }
-        renderCardsMarket();
-    }
-
-    // 5. FUNCIÓN DEL BOTÓN CARGAR / CONFIRMAR
-    function cargarMisCartones() {
-        if (misCartonesSeleccionados.length === 0) {
-            alert("Por favor, selecciona al menos un cartón antes de confirmar.");
-            return;
-        }
-
-        console.log("Cartones cargados:", misCartonesSeleccionados);
-        alert(`¡Listo! Has seleccionado y cargado los cartones: ${misCartonesSeleccionados.join(', ')}`);
-    }
-
-    // 6. ESCUCHA DE FIREBASE PARA ACTUALIZAR EL MERCADO EN TIEMPO REAL
-    function escucharMercadoCartones() {
-        dbCardMarket.ref('marketCards').on('value', (snapshot) => {
-            marketCards = snapshot.val() || {};
-            renderCardsMarket();
-        });
-    }
+        const nombresPatrones = {
+            'line': 'Línea (Horizontal o Vertical)',
+            'letter_l': 'Letra L',
+            'cross_x': 'La X (Cruz Grande)',
+            'four_corners': 'Cuatro Esquinas',
+            'diagonal': 'Diagonal',
+            'small_cross': 'Cruz Pequeña (Centro)',
+            'letter_o': 'Letra O (Marco Exterior)',
+            'full_card': 'Cartón Lleno (Apagón)',
+            'church': 'La Iglesia ⛪',
+            'letter_t': 'Letra T 🔤',
+            'letter_h': 'Letra H 🔤',
+            'anchor': 'El Ancla ⚓',
+            'plane': 'El Avión ✈️',
+            'rombo': 'Rombo Pequeño 💎'
+        };
 
         function iniciarRelojEnVivo() {
             function actualizarReloj() {
@@ -592,8 +573,6 @@
             actualizarReloj();
             setInterval(actualizarReloj, 1000);
         }
-
-            
 
         function desbloquearAudioInicial() {
             if ('speechSynthesis' in window && audioHabilitado) {
