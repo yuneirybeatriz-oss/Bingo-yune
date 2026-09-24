@@ -290,15 +290,6 @@
                 </div>
             </div>
 
-            <!-- CONTROL DE PAGOS DE JUGADORA -->
-            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
-                <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-pink-400 text-lg">Control de pagos de jugadora</h3>
-                    <span class="text-xs text-slate-400">Toca el estado para cambiar entre Pagado / Pendiente</span>
-                </div>
-                <div id="admin-cards-summary" class="flex flex-col gap-2.5 max-h-64 overflow-y-auto p-3 bg-slate-900/60 rounded-2xl font-mono text-sm"></div>
-            </div>
-
             <!-- SECCIÓN DE LIBERAR CARTONES -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
                 <h3 class="font-bold text-red-400 text-sm">🗑️ Sección para Liberar Cartones Ocupados</h3>
@@ -1214,53 +1205,7 @@
                 alert("📋 ¡Lista copiada al portapapeles!");
             });
         }
-
-        // --- FUNCIONES DE CONTROL DE RONDAS Y GANANCIAS DEL DÍA ---
-        function registrarRondaManual() {
-            let totalCartonesRonda = 0;
-            for (let id in marketCards) {
-                if (marketCards[id].owner && marketCards[id].loaded) {
-                    totalCartonesRonda++;
-                }
-            }
-
-            if (totalCartonesRonda === 0) {
-                alert("⚠️ No hay cartones jugados en esta ronda para registrar.");
-                return;
-            }
-
-            let recaudadoRonda = totalCartonesRonda * cardPrice;
-            let horaActual = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-
-            let nuevaRonda = {
-                numero: rondasDelDia.length + 1,
-                hora: horaActual,
-                cartones: totalCartonesRonda,
-                recaudado: recaudadoRonda,
-                figura: nombresPatrones[gamePattern] || 'Línea'
-            };
-
-            rondasDelDia.push(nuevaRonda);
-            localStorage.setItem('bingo_rondas_dia', JSON.stringify(rondasDelDia));
-            renderizarHistorialRondasDia();
-            alert(`✅ ¡Ronda #${nuevaRonda.numero} registrada con éxito! (${totalCartonesRonda} cartones / Recaudado: ${recaudadoRonda.toLocaleString()})`);
-        }
-
-        function registrarYReiniciarSiguienteRonda() {
-            registrarRondaManual();
-            reiniciarBalotasParaSiguienteFigura();
-        }
-
-        function limpiarHistorialRondas() {
-            if (confirm("¿Estás segura de reiniciar el registro de rondas y ganancias de hoy?")) {
-                rondasDelDia = [];
-                localStorage.removeItem('bingo_rondas_dia');
-                renderizarHistorialRondasDia();
-                alert("🗑️ Historial del día reiniciado a cero.");
-            }
-        }
-
-        function renderizarHistorialAdmin() {
+ function renderizarHistorialAdmin() {
             let container = document.getElementById('admin-history-balls');
             if (!container) return;
             container.innerHTML = '';
