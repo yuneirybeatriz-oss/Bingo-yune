@@ -447,7 +447,6 @@
     <footer class="text-center text-xs text-slate-500 py-6">Bingo Lineal Yune &bull; Tiempo Real 🌟</footer>
 
     <script>
-        // CONFIGURACIÓN DE FIREBASE 8.X
         const firebaseConfig = { 
             databaseURL: "https://bingo-lineal-yune-default-rtdb.firebaseio.com/"
         };
@@ -1087,7 +1086,8 @@
                     }
                 }
 
-                document.getElementById('player-pattern-label').innerText = nombresPatrones[gamePattern] || 'Línea';
+                let labelPatternEl = document.getElementById('player-pattern-label');
+                if (labelPatternEl) labelPatternEl.innerText = nombresPatrones[gamePattern] || 'Línea';
                 actualizarMiniDiagramaPatron(gamePattern);
 
                 let currentBallEl = document.getElementById('player-current-ball');
