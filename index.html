@@ -46,27 +46,56 @@
         .mini-cell { background: rgba(255, 255, 255, 0.1); border-radius: 1px; }
         .mini-cell.active { background: #22c55e; box-shadow: 0 0 4px #22c55e; }
 
-        /* ESTILO CIRCUITO PERIMETRAL */
+        /* ESTILO CUADRO PERIMETRAL REAL (GRID 4x4 CON CENTRO VACÍO) */
+        .ruleta-marco-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 10px;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
         .objeto-card {
             background: #1e1e3f;
             border: 2px solid #333366;
-            border-radius: 12px;
-            padding: 8px;
+            border-radius: 14px;
+            padding: 10px;
             text-align: center;
             transition: all 0.08s ease-in-out;
-            position: relative;
             cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 85px;
         }
         .objeto-card.titling {
             border: 4px solid #facc15 !important;
-            box-shadow: 0 0 30px #facc15, inset 0 0 15px #facc15 !important;
+            box-shadow: 0 0 35px #facc15, inset 0 0 15px #facc15 !important;
             transform: scale(1.12);
             background: #3730a3 !important;
-            z-index: 10;
+            z-index: 20;
         }
         .objeto-card.selected-by-user {
             border-color: #05d9e8;
             background: #0d3b66;
+        }
+
+        /* CENTRO DEL CUADRO (OCUPA LAS 4 CASILLAS DEL MEDIO 2x2) */
+        .centro-visor-cuadro {
+            grid-column: 2 / span 2;
+            grid-row: 2 / span 2;
+            background: #0b0f19;
+            border: 3px solid #ec4899;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            text-align: center;
+            box-shadow: inset 0 0 20px rgba(236, 72, 153, 0.4);
         }
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -137,18 +166,13 @@
             </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- SECCIÓN 1: BINGO LINEAL TRADICIONAL        -->
-        <!-- ========================================== -->
+        <!-- SECCIÓN 1: BINGO LINEAL TRADICIONAL -->
         <div id="section-bingo-main" class="w-full flex-col gap-6 hidden">
-            <!-- PANEL ADMIN BINGO -->
             <div id="view-admin-panel" class="w-full flex flex-col gap-6 hidden">
                 <div class="bg-slate-800 p-6 rounded-3xl flex justify-between items-center flex-wrap gap-3">
                     <h2 class="text-2xl font-bold text-pink-400">Torre de Control</h2>
                     <div class="flex gap-2 items-center">
-                        <button id="admin-toggle-room-btn" onclick="toggleRoomLockAdmin()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow transition">
-                            🟢 Sala Abierta (Cerrar)
-                        </button>
+                        <button id="admin-toggle-room-btn" onclick="toggleRoomLockAdmin()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow transition">🟢 Sala Abierta (Cerrar)</button>
                         <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 text-xs rounded-xl">Salir</button>
                     </div>
                 </div>
@@ -159,71 +183,51 @@
                     <div class="flex gap-2 justify-center mt-2 flex-wrap">
                         <button onclick="clearWinnerAlert()" class="py-2 px-4 bg-slate-900 text-yellow-300 text-xs rounded-xl font-bold shadow">Cerrar Alerta</button>
                         <button onclick="registrarYReiniciarSiguienteRonda()" class="py-2 px-4 bg-emerald-600 text-white text-xs rounded-xl font-bold shadow">🏁 Finalizar Ronda y Registrar</button>
-                        <button onclick="reiniciarBalotasParaSiguienteFigura()" class="py-2 px-4 bg-pink-600 text-white text-xs rounded-xl font-bold shadow">🔄 Limpiar Balotas (Misma Ronda)</button>
+                        <button onclick="reiniciarBalotasParaSiguienteFigura()" class="py-2 px-4 bg-pink-600 text-white text-xs rounded-xl font-bold shadow">🔄 Limpiar Balotas</button>
                     </div>
                 </div>
 
-                <!-- VALOR DEL CARTÓN Y CÓDIGO -->
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-yellow-500/40 shadow-lg">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="text-xs text-yellow-300 font-bold block mb-1">💵 Valor de Cada Cartón (Bs / $):</label>
+                            <label class="text-xs text-yellow-300 font-bold block mb-1">💵 Valor de Cada Cartón:</label>
                             <div class="flex gap-2">
                                 <input type="number" id="admin-card-price-input" placeholder="Ej: 300" class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-center">
-                                <button onclick="updateCardPrice()" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-extrabold text-xs rounded-xl shadow">Guardar</button>
+                                <button onclick="updateCardPrice()" class="px-4 py-2 bg-yellow-500 text-slate-950 font-extrabold text-xs rounded-xl shadow">Guardar</button>
                             </div>
                         </div>
                         <div>
-                            <label class="text-xs text-pink-400 font-bold block mb-1">🔑 Código de Acceso para Jugadoras:</label>
+                            <label class="text-xs text-pink-400 font-bold block mb-1">🔑 Código de Acceso:</label>
                             <div class="flex gap-2">
                                 <input type="text" id="admin-room-code" placeholder="Ej: BINGO2026" class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-center">
-                                <button onclick="updateRoomCode()" class="px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white font-bold text-xs rounded-xl shadow">Guardar</button>
+                                <button onclick="updateRoomCode()" class="px-4 py-2 bg-pink-600 text-white font-bold text-xs rounded-xl shadow">Guardar</button>
                             </div>
                         </div>
                     </div>
-
-                    <div>
-                        <label class="text-xs text-yellow-300 font-bold block mb-1">💰 Premio de la Figura Actual (Deja en 0 si pagas manual):</label>
-                        <div class="flex gap-2">
-                            <input type="number" id="admin-premio-input" placeholder="Ej: 0" class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-center text-pink-400">
-                            <button onclick="(function(){ const val = document.getElementById('admin-premio-input').value; db.ref('room/premioActual').set(Number(val) || 0).then(() => alert('¡Premio actualizado con éxito!')); })()" class="px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white font-extrabold text-xs rounded-xl shadow">Guardar</button>
-                        </div>
-                    </div>
                 </div>
 
-                <!-- RESUMEN WHATSAPP -->
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-emerald-500/40 shadow-lg">
                     <div class="flex justify-between items-center flex-wrap gap-2">
-                        <div class="flex items-center gap-2">
-                            <span class="text-2xl">📱</span>
-                            <h3 class="font-bold text-emerald-400 text-lg">Resumen Automático para WhatsApp</h3>
-                        </div>
-                        <button onclick="copiarResumenWhatsApp()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-1.5">
-                            📋 Copiar Lista para WhatsApp
-                        </button>
+                        <h3 class="font-bold text-emerald-400 text-lg">📱 Resumen Automático para WhatsApp</h3>
+                        <button onclick="copiarResumenWhatsApp()" class="px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow">📋 Copiar Lista</button>
                     </div>
-                    <textarea id="texto-whatsapp-preview" readonly class="w-full h-32 bg-slate-900 border border-slate-700 rounded-2xl p-3 text-xs text-slate-300 font-mono resize-none focus:outline-none" placeholder="Generando resumen..."></textarea>
+                    <textarea id="texto-whatsapp-preview" readonly class="w-full h-32 bg-slate-900 border border-slate-700 rounded-2xl p-3 text-xs text-slate-300 font-mono resize-none"></textarea>
                 </div>
 
-                <!-- CARTONES PAGADOS EN JUEGO -->
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-emerald-500/40 shadow-lg">
-                    <div class="flex justify-between items-center flex-wrap gap-2">
-                        <div class="flex items-center gap-2">
-                            <span class="text-2xl">💰</span>
-                            <h3 class="font-bold text-emerald-400 text-lg">Cartones Pagados en Juego</h3>
-                        </div>
-                        <span id="admin-paid-count-badge" class="bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full text-xs font-bold">0 cartones pagados</span>
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-emerald-400 text-lg">💰 Cartones Pagados en Juego</h3>
+                        <span id="admin-paid-count-badge" class="bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full text-xs font-bold">0 pagados</span>
                     </div>
                     <div id="admin-paid-cards-window" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-56 overflow-y-auto p-3 bg-slate-900/80 rounded-2xl border border-slate-700/60">
-                        <span class="text-slate-500 text-xs col-span-2 text-center py-4">Esperando confirmación de pagos...</span>
+                        <span class="text-slate-500 text-xs col-span-2 text-center py-4">Esperando pagos...</span>
                     </div>
                 </div>
 
-                <!-- BILLETERAS -->
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-purple-500/40 shadow-lg">
-                    <h3 class="font-bold text-purple-300 text-lg">Control de Billeteras, Créditos y Exclusión</h3>
+                    <h3 class="font-bold text-purple-300 text-lg">Control de Billeteras y Créditos</h3>
                     <div id="admin-wallets-list" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto p-3 bg-slate-900/80 rounded-2xl border border-slate-700/60">
-                        <span class="text-slate-500 text-xs col-span-2 text-center py-4">Cargando billeteras...</span>
+                        <span class="text-slate-500 text-xs col-span-2 text-center py-4">Cargando...</span>
                     </div>
                 </div>
 
@@ -231,23 +235,10 @@
                     <div class="bg-slate-800 p-6 rounded-3xl flex flex-col items-center gap-4">
                         <h3 class="font-bold text-yellow-300">Última Bola</h3>
                         <div id="admin-current-ball" class="w-28 h-28 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-5xl flex items-center justify-center shadow-lg">--</div>
-                        
-                        <div class="w-full flex flex-col items-center gap-1.5 mt-1">
-                            <span class="text-[11px] text-slate-400 font-semibold">Últimas 5 salidas:</span>
-                            <div id="admin-history-balls" class="flex gap-2 items-center justify-center min-h-[42px]">
-                                <span class="text-xs text-slate-500">--</span>
-                            </div>
-                        </div>
-
-                        <button onclick="drawBallManually()" class="w-full py-3 bg-purple-600 hover:bg-purple-500 font-bold rounded-xl text-sm shadow mt-2">Sacar Bola (Manual)</button>
-                        <button id="auto-draw-btn" onclick="toggleAutoDraw()" class="w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold rounded-xl shadow">▶ Iniciar Auto (Cada 3s)</button>
-                        
-                        <div class="flex flex-col gap-2 w-full mt-2">
-                            <button onclick="probarVoz()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow">🔊 Anuncio de Inicio de Ronda</button>
-                            <button onclick="registrarYReiniciarSiguienteRonda()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow">🏁 Finalizar Ronda y Registrar</button>
-                            <button onclick="reiniciarBalotasParaSiguienteFigura()" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl shadow">🔄 Siguiente Figura (Mismos Cartones)</button>
-                            <button onclick="resetGame()" class="w-full py-2 bg-red-600/30 hover:bg-red-600/50 text-red-300 text-xs font-bold rounded-xl">🗑️ Reiniciar Juego Completo</button>
-                        </div>
+                        <div id="admin-history-balls" class="flex gap-2 items-center justify-center min-h-[42px]"></div>
+                        <button onclick="drawBallManually()" class="w-full py-3 bg-purple-600 font-bold rounded-xl text-sm shadow mt-2">Sacar Bola (Manual)</button>
+                        <button id="auto-draw-btn" onclick="toggleAutoDraw()" class="w-full py-2.5 bg-pink-600 text-white text-xs font-bold rounded-xl shadow">▶ Iniciar Auto (3s)</button>
+                        <button onclick="resetGame()" class="w-full py-2 bg-red-600/30 text-red-300 text-xs font-bold rounded-xl">🗑️ Reiniciar Juego</button>
                     </div>
 
                     <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
@@ -261,40 +252,12 @@
                             <option value="small_cross">Cruz Pequeña (Centro)</option>
                             <option value="letter_o">Letra O (Marco Exterior)</option>
                             <option value="full_card">Cartón Lleno (Apagón)</option>
-                            <option value="church">La Iglesia ⛪</option>
-                            <option value="letter_t">Letra T 🔤</option>
-                            <option value="letter_h">Letra H 🔤</option>
-                            <option value="anchor">El Ancla ⚓</option>
-                            <option value="plane">El Avión ✈️</option>
-                            <option value="rombo">Rombo Pequeño 💎</option>
                         </select>
                     </div>
 
                     <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
-                        <div class="flex justify-between items-center">
-                            <h3 class="font-bold text-yellow-300">Jugadoras Conectadas</h3>
-                            <span id="admin-active-players-count" class="bg-yellow-400/20 text-yellow-300 px-2 py-0.5 rounded-full text-[10px] font-bold">0 activas</span>
-                        </div>
-                        <div class="flex-grow overflow-y-auto max-h-40 bg-slate-900/60 p-3 rounded-xl text-xs flex flex-col gap-2.5" id="admin-players-list">
-                            <span class="text-slate-500 text-center py-4">Esperando conexiones...</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- RADAR -->
-                <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
-                    <h3 class="font-bold text-yellow-300 text-lg">📡 Radar de Cartones Cercanos</h3>
-                    <div id="admin-radar-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl">
-                        <span class="text-slate-500 text-xs col-span-2 text-center py-4">Analizando avance de cartones...</span>
-                    </div>
-                </div>
-
-                <!-- LIBERAR CARTONES -->
-                <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
-                    <h3 class="font-bold text-red-400 text-sm">🗑️ Sección para Liberar Cartones Ocupados</h3>
-                    <div class="flex gap-3 items-center">
-                        <select id="admin-liberar-select" class="flex-grow px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs font-bold"></select>
-                        <button onclick="liberarCartonSeleccionadoAdmin()" class="px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold text-xs shadow">Liberar Cartón</button>
+                        <h3 class="font-bold text-yellow-300">Jugadoras Conectadas</h3>
+                        <div class="flex-grow overflow-y-auto max-h-40 bg-slate-900/60 p-3 rounded-xl text-xs flex flex-col gap-2.5" id="admin-players-list"></div>
                     </div>
                 </div>
 
@@ -303,15 +266,12 @@
                     <div id="admin-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1.5"></div>
                 </div>
 
-                <!-- CHAT ADMIN -->
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-pink-500/40 shadow-lg">
-                    <h3 class="font-bold text-pink-400 text-lg flex items-center gap-2">💬 Chat de la Sala en Vivo (Admin)</h3>
-                    <div id="caja-chat-admin" class="bg-slate-900 h-36 overflow-y-auto p-3 rounded-xl border border-slate-700 text-xs text-left space-y-1.5">
-                        <p class="text-slate-500 text-center">Conectando al chat en vivo...</p>
-                    </div>
+                    <h3 class="font-bold text-pink-400 text-lg">💬 Chat de la Sala en Vivo</h3>
+                    <div id="caja-chat-admin" class="bg-slate-900 h-36 overflow-y-auto p-3 rounded-xl border border-slate-700 text-xs space-y-1.5"></div>
                     <div class="flex gap-2">
-                        <input type="text" id="input-mensaje-admin" placeholder="Escribe tu mensaje como Administradora..." class="flex-1 px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs" onkeypress="if(event.key === 'Enter') enviarMensajeChatAdmin()">
-                        <button onclick="enviarMensajeChatAdmin()" class="px-5 py-2 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl text-xs shadow transition">Enviar</button>
+                        <input type="text" id="input-mensaje-admin" placeholder="Escribe..." class="flex-1 px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs" onkeypress="if(event.key === 'Enter') enviarMensajeChatAdmin()">
+                        <button onclick="enviarMensajeChatAdmin()" class="px-5 py-2 bg-pink-600 text-white font-bold rounded-xl text-xs">Enviar</button>
                     </div>
                 </div>
             </div>
@@ -324,232 +284,167 @@
                         <p class="text-xs text-slate-400">Control ID: <span id="player-display-control">--</span></p>
                     </div>
                     <div class="flex flex-wrap gap-2 items-center">
-                        <div id="player-wallet-widget" class="bg-slate-900 border border-emerald-500/40 px-4 py-2 rounded-2xl flex items-center gap-3 shadow">
+                        <div class="bg-slate-900 border border-emerald-500/40 px-4 py-2 rounded-2xl flex items-center gap-3 shadow">
                             <div>
-                                <span id="wallet-label" class="text-[9px] text-slate-400 uppercase tracking-wider block font-bold">Mi Saldo</span>
+                                <span id="wallet-label" class="text-[9px] text-slate-400 uppercase font-bold">Mi Saldo</span>
                                 <span id="wallet-balance-display" class="text-lg font-black text-emerald-400">0</span>
                             </div>
                         </div>
-
-                        <button id="btn-toggle-audio" onclick="toggleAudioJugadora()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow flex items-center gap-1.5 transition">
-                            🔊 Sonido Activado
-                        </button>
-                        <div class="bg-slate-900/90 border border-pink-500/50 px-3 py-1.5 rounded-xl flex items-center gap-2">
-                            <div id="mini-diagram-grid" class="mini-grid-pattern"></div>
-                            <div class="flex flex-col">
-                                <span class="text-[9px] text-pink-400 font-bold uppercase">Figura</span>
-                                <span id="player-pattern-label" class="text-xs text-yellow-300 font-semibold">Línea</span>
-                            </div>
-                        </div>
+                        <button id="btn-toggle-audio" onclick="toggleAudioJugadora()" class="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl shadow">🔊 Sonido</button>
                         <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 text-xs rounded-xl">Salir</button>
                     </div>
                 </div>
 
-                <!-- MODAL VISTA PREVIA FULLSCREEN -->
                 <div id="modal-carton-fullscreen" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
                     <div class="bg-slate-900 border border-pink-500/50 p-6 rounded-3xl shadow-2xl flex flex-col gap-4 max-w-sm w-full text-center relative">
-                        <button onclick="cerrarVistaPreviaFullscreen()" class="absolute top-4 right-4 bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white w-8 h-8 rounded-full font-bold flex items-center justify-center transition">✕</button>
-                        <div>
-                            <h3 id="modal-preview-title" class="text-xl font-bold text-yellow-300">Cartón #--</h3>
-                            <p class="text-xs text-slate-400 mt-0.5">Inspección detallada antes de confirmar</p>
-                        </div>
+                        <button onclick="cerrarVistaPreviaFullscreen()" class="absolute top-4 right-4 bg-slate-800 text-white w-8 h-8 rounded-full font-bold">✕</button>
+                        <h3 id="modal-preview-title" class="text-xl font-bold text-yellow-300">Cartón #--</h3>
                         <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800">
                             <div class="grid grid-cols-5 gap-1 text-[11px] text-pink-400 font-bold mb-1">
-                                <div class="bg-slate-900 py-1 rounded">B</div>
-                                <div class="bg-slate-900 py-1 rounded">I</div>
-                                <div class="bg-slate-900 py-1 rounded">N</div>
-                                <div class="bg-slate-900 py-1 rounded">G</div>
-                                <div class="bg-slate-900 py-1 rounded">O</div>
+                                <div class="bg-slate-900 py-1">B</div><div class="bg-slate-900 py-1">I</div><div class="bg-slate-900 py-1">N</div><div class="bg-slate-900 py-1">G</div><div class="bg-slate-900 py-1">O</div>
                             </div>
                             <div id="modal-preview-grid" class="grid grid-cols-5 gap-1.5"></div>
                         </div>
-                        <button onclick="cerrarVistaPreviaFullscreen()" class="w-full py-2.5 bg-pink-600 hover:bg-pink-500 text-white font-bold text-xs rounded-xl shadow">Cerrar Inspección</button>
+                        <button onclick="cerrarVistaPreviaFullscreen()" class="w-full py-2.5 bg-pink-600 text-white font-bold text-xs rounded-xl">Cerrar</button>
                     </div>
                 </div>
 
-                <!-- MODAL BINGO VICTORIA -->
                 <div id="player-winner-notification" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-                    <div class="flash-winner text-slate-950 p-6 md:p-8 rounded-3xl font-extrabold text-center shadow-2xl alert-bingo flex flex-col gap-4 max-w-lg w-full">
-                        <div class="text-3xl md:text-4xl text-yellow-300 drop-shadow">👑 ¡B I N G O ! 👑</div>
-                        <div id="public-winner-text" class="text-base font-bold bg-white/20 py-2 px-4 rounded-xl text-slate-950">¡Tu cartón hizo bingo! El juego se ha detenido.</div>
-                        
-                        <div class="bg-slate-900 text-white p-4 rounded-2xl max-w-xs mx-auto w-full flex flex-col gap-2">
-                            <span class="text-xs text-yellow-300 font-bold" id="public-winner-card-title">Cartón Ganador</span>
-                            <div class="grid grid-cols-5 gap-1 text-[10px] text-pink-400 font-bold">
-                                <div class="bg-slate-800 py-1 rounded">B</div><div class="bg-slate-800 py-1 rounded">I</div><div class="bg-slate-800 py-1 rounded">N</div><div class="bg-slate-800 py-1 rounded">G</div><div class="bg-slate-800 py-1 rounded">O</div>
-                            </div>
-                            <div id="public-winning-card-grid" class="grid grid-cols-5 gap-1"></div>
-                        </div>
-
-                        <button onclick="cerrarModalJugadora()" class="mt-2 py-2 px-6 bg-slate-900 text-yellow-300 text-xs rounded-xl font-bold shadow mx-auto">Cerrar y Ver Tablero</button>
+                    <div class="flash-winner text-slate-950 p-6 rounded-3xl font-extrabold text-center shadow-2xl alert-bingo flex flex-col gap-4 max-w-lg w-full">
+                        <div class="text-3xl text-yellow-300">👑 ¡B I N G O ! 👑</div>
+                        <div id="public-winner-text" class="text-base font-bold bg-white/20 py-2 px-4 rounded-xl">¡Tu cartón hizo bingo!</div>
+                        <button onclick="cerrarModalJugadora()" class="py-2 px-6 bg-slate-900 text-yellow-300 text-xs rounded-xl font-bold mx-auto">Cerrar</button>
                     </div>
                 </div>
 
-                <!-- ÚLTIMA BOLA CANTADA -->
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 border-2 border-yellow-500/50 shadow-xl">
-                    <div class="flex flex-col items-center md:items-start text-center md:text-left">
-                        <span class="text-xs uppercase tracking-wider text-yellow-400 font-bold mb-1">🔥 Bola Actual en Juego</span>
-                        <h3 class="text-slate-300 text-sm">¡Mantén tu vista aquí para cantar rápido!</h3>
+                    <div class="text-center md:text-left">
+                        <span class="text-xs uppercase tracking-wider text-yellow-400 font-bold">🔥 Bola Actual en Juego</span>
                     </div>
                     <div class="flex items-center gap-6">
                         <div id="player-current-ball" class="w-24 h-24 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-4xl flex items-center justify-center shadow-lg animate-pulse">--</div>
-                        <div class="flex flex-col items-center gap-1.5">
-                            <span class="text-[11px] text-slate-400 font-semibold">Últimas 5 salidas:</span>
-                            <div id="player-history-balls" class="flex gap-2 items-center justify-center min-h-[38px]">
-                                <span class="text-xs text-slate-500">--</span>
-                            </div>
-                        </div>
+                        <div id="player-history-balls" class="flex gap-2 items-center justify-center min-h-[38px]"></div>
                     </div>
                 </div>
 
-                <!-- JUGADORAS EN LÍNEA -->
-                <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
-                    <div class="flex justify-between items-center">
-                        <h3 class="font-bold text-yellow-300 text-sm">👥 Jugadoras en Línea en la Sala</h3>
-                        <span id="player-active-count-badge" class="bg-yellow-400/20 text-yellow-300 px-2 py-0.5 rounded-full text-[10px] font-bold">0 activas</span>
-                    </div>
-                    <div id="player-room-online-list" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-3 bg-slate-900/60 rounded-2xl text-xs">
-                        <span class="text-slate-500 italic">Buscando compañeras conectadas...</span>
-                    </div>
-                </div>
-
-                <!-- MIS CARTONES EN JUEGO -->
                 <div class="flex flex-col gap-4">
-                    <div class="flex justify-between items-center">
-                        <h3 class="font-bold text-yellow-300 text-lg">Tus Cartones en Juego</h3>
-                        <span class="text-xs text-slate-400">Toca cualquier cartón tuyo para inspeccionarlo en grande</span>
-                    </div>
+                    <h3 class="font-bold text-yellow-300 text-lg">Tus Cartones en Juego</h3>
                     <div id="player-my-cards-container" class="grid grid-cols-2 gap-3">
-                        <span class="text-slate-500 text-sm col-span-2">Aún no has seleccionado cartones.</span>
+                        <span class="text-slate-500 text-sm col-span-2">Aún no tienes cartones.</span>
                     </div>
                 </div>
 
-                <!-- TABLERO GENERAL (1-75) -->
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-2">
                     <h3 class="font-bold text-pink-400 text-sm">Tablero General (1-75)</h3>
                     <div id="player-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1"></div>
                 </div>
 
-                <!-- CHAT SALA JUGADORA -->
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-pink-500/40 shadow-lg">
-                    <h3 class="font-bold text-pink-400 text-lg flex items-center gap-2">💬 Chat de la Sala en Vivo</h3>
-                    <div id="caja-chat-jugadoras" class="bg-slate-900 h-36 overflow-y-auto p-3 rounded-xl border border-slate-700 text-xs text-left space-y-1.5">
-                        <p class="text-slate-500 text-center">Conectando al chat en vivo...</p>
-                    </div>
+                    <h3 class="font-bold text-pink-400 text-lg">💬 Chat de la Sala</h3>
+                    <div id="caja-chat-jugadoras" class="bg-slate-900 h-36 overflow-y-auto p-3 rounded-xl border border-slate-700 text-xs space-y-1.5"></div>
                     <div class="flex gap-2">
-                        <input type="text" id="input-mensaje-jugadora" placeholder="Escribe tu mensaje..." class="flex-1 px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs" onkeypress="if(event.key === 'Enter') enviarMensajeChatJugadora()">
-                        <button onclick="enviarMensajeChatJugadora()" class="px-5 py-2 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl text-xs shadow transition">Enviar</button>
+                        <input type="text" id="input-mensaje-jugadora" placeholder="Escribe..." class="flex-1 px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs" onkeypress="if(event.key === 'Enter') enviarMensajeChatJugadora()">
+                        <button onclick="enviarMensajeChatJugadora()" class="px-5 py-2 bg-pink-600 text-white font-bold rounded-xl text-xs">Enviar</button>
                     </div>
                 </div>
 
-                <!-- SELECCIÓN DE CARTONES (MERCADO) -->
                 <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (<span id="available-count">100</span> Disponibles)</h3>
-                            <p id="market-status-msg" class="text-xs text-slate-400">Toca el número para seleccionarlo, o toca el botón 🔍 para inspeccionarlo.</p>
-                        </div>
-                    </div>
+                    <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (100 Disponibles)</h3>
                     <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
-                    
-                    <button onclick="cargarMisCartones()" id="btn-cargar-cartones" class="w-full py-3.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-extrabold text-sm rounded-2xl shadow-lg transition transform active:scale-95 cursor-pointer">
-                        📥 Cargar / Confirmar Mis Cartones
-                    </button>
+                    <button onclick="cargarMisCartones()" id="btn-cargar-cartones" class="w-full py-3.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-extrabold text-sm rounded-2xl shadow-lg cursor-pointer">📥 Cargar / Confirmar Mis Cartones</button>
                 </div>
             </div>
         </div>
 
         <!-- ================================================================= -->
-        <!-- SECCIÓN 2: GAME OBJETOS YUNE (CIRCUITO PERIMETRAL Y CENTRO VACÍO) -->
+        <!-- SECCIÓN 2: GAME OBJETOS YUNE (CUADRO PERIMETRAL Y CENTRO REFLEJADO) -->
         <!-- ================================================================= -->
         <div id="section-objetos-main" class="w-full flex-col gap-6 hidden">
             <div class="bg-slate-800 p-6 rounded-3xl card-shadow flex flex-col gap-6 max-w-3xl mx-auto w-full">
                 <div class="text-center">
                     <h2 class="text-2xl font-bold text-yellow-300">🎰 Game Objetos Yune 🎰</h2>
-                    <p class="text-xs text-slate-400">Ruleta de circuito perimetral con centro de premios en vivo</p>
+                    <p class="text-xs text-slate-400">Ruleta de cuadro perimetral con centro de premios en vivo</p>
                 </div>
 
-                <!-- TABLERO / CIRCUITO DE CASINO (MARCO EXTERIOR CON CENTRO LIMPIO) -->
+                <!-- TABLERO / CUADRO PERIMETRAL (GRID 4x4: Las 10 figuras en los bordes y el centro vacío) -->
                 <div class="bg-slate-950 p-4 md:p-6 rounded-3xl border-4 border-yellow-400 shadow-2xl relative">
-                    <div class="text-center mb-3">
+                    <div class="text-center mb-4">
                         <span class="text-xs text-yellow-300 font-bold uppercase tracking-widest bg-slate-900 px-3 py-1 rounded-full border border-yellow-500/40">
                             🏆 Premio Actual: <span id="premio-actual-titulo" class="text-pink-400 font-extrabold">1er Premio (Ronda en Curso)</span>
                         </span>
                     </div>
 
-                    <!-- GRILLA EN CUADRO PERIMETRAL (10 CASILLAS Y CENTRO VACÍO PARA EL RESULTADO) -->
-                    <div class="grid grid-cols-2 md:grid-cols-5 gap-2.5 items-center">
-                        <!-- Casilla 1: La Escalera -->
+                    <!-- CUADRO PERIMETRAL REAL (4x4) -->
+                    <div class="ruleta-marco-grid">
+                        <!-- FILA SUPERIOR (3 objetos: 1, 2, 3) -->
                         <div id="card-objeto-el-1" onclick="seleccionarObjetoYune(1)" class="objeto-card">
                             <span class="text-2xl block">🪜</span>
-                            <span class="text-[10px] font-bold text-slate-200 block truncate">La Escalera</span>
-                            <span class="text-[9px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-1">0</span>/5</span>
+                            <span class="text-[9px] font-bold text-slate-200 block truncate">La Escalera</span>
+                            <span class="text-[8px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-1">0</span>/5</span>
                         </div>
-                        <!-- Casilla 2: El Anillo -->
                         <div id="card-objeto-el-2" onclick="seleccionarObjetoYune(2)" class="objeto-card">
                             <span class="text-2xl block">💍</span>
-                            <span class="text-[10px] font-bold text-slate-200 block truncate">El Anillo</span>
-                            <span class="text-[9px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-2">0</span>/5</span>
+                            <span class="text-[9px] font-bold text-slate-200 block truncate">El Anillo</span>
+                            <span class="text-[8px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-2">0</span>/5</span>
                         </div>
-                        <!-- Casilla 3: La Llave -->
                         <div id="card-objeto-el-3" onclick="seleccionarObjetoYune(3)" class="objeto-card">
                             <span class="text-2xl block">🔑</span>
-                            <span class="text-[10px] font-bold text-slate-200 block truncate">La Llave</span>
-                            <span class="text-[9px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-3">0</span>/5</span>
+                            <span class="text-[9px] font-bold text-slate-200 block truncate">La Llave</span>
+                            <span class="text-[8px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-3">0</span>/5</span>
                         </div>
-                        <!-- Casilla 4: La Estrella -->
                         <div id="card-objeto-el-4" onclick="seleccionarObjetoYune(4)" class="objeto-card">
                             <span class="text-2xl block">⭐</span>
-                            <span class="text-[10px] font-bold text-slate-200 block truncate">La Estrella</span>
-                            <span class="text-[9px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-4">0</span>/5</span>
-                        </div>
-                        <!-- Casilla 5: La Corona -->
-                        <div id="card-objeto-el-5" onclick="seleccionarObjetoYune(5)" class="objeto-card">
-                            <span class="text-2xl block">👑</span>
-                            <span class="text-[10px] font-bold text-slate-200 block truncate">La Corona</span>
-                            <span class="text-[9px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-5">0</span>/5</span>
+                            <span class="text-[9px] font-bold text-slate-200 block truncate">La Estrella</span>
+                            <span class="text-[8px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-4">0</span>/5</span>
                         </div>
 
-                        <!-- CENTRO DEL TABLERO: AQUÍ APARECE EL OBJETO SELECCIONADO CON SUS ESTRELLAS EN VIVO -->
-                        <div class="col-span-2 md:col-span-3 bg-slate-900 border-2 border-pink-500/60 p-4 rounded-2xl text-center shadow-inner flex flex-col items-center justify-center min-h-[140px]">
-                            <span class="text-[10px] text-pink-400 uppercase tracking-widest font-bold block mb-1">🎯 Resultado del Sorteo</span>
+                        <!-- LADO DERECHO (Objeto 5 arriba, Objeto 6 abajo) -->
+                        <div id="card-objeto-el-5" onclick="seleccionarObjetoYune(5)" class="objeto-card">
+                            <span class="text-2xl block">👑</span>
+                            <span class="text-[9px] font-bold text-slate-200 block truncate">La Corona</span>
+                            <span class="text-[8px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-5">0</span>/5</span>
+                        </div>
+                        
+                        <!-- CENTRO DEL CUADRO (VACÍO LISTO PARA REFLEJAR EL SORTEO) -->
+                        <div class="centro-visor-cuadro">
+                            <span class="text-[9px] text-pink-400 uppercase tracking-widest font-bold block mb-1">🎯 Sorteo en Vivo</span>
                             <div id="visor-objeto-central" class="flex flex-col items-center justify-center">
-                                <span class="text-5xl block mb-1" id="visor-emoji">⭐</span>
-                                <span class="text-xl md:text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-pink-400" id="visor-nombre">¡Listo para Girar!</span>
-                                <div id="visor-estrellas-centro" class="text-sm font-bold text-yellow-400 mt-1">⭐ 0 / 5 Estrellas</div>
-                                <div id="visor-dueno-centro" class="text-xs text-slate-400 mt-0.5">Dueño: Ninguno</div>
+                                <span class="text-4xl block mb-1" id="visor-emoji">⭐</span>
+                                <span class="text-base md:text-lg font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-pink-400" id="visor-nombre">¡Listo para Girar!</span>
+                                <div id="visor-estrellas-centro" class="text-xs font-bold text-yellow-400 mt-0.5">⭐ 0 / 5 Estrellas</div>
+                                <div id="visor-dueno-centro" class="text-[10px] text-slate-400">Dueño: Ninguno</div>
                             </div>
                         </div>
 
-                        <!-- Casilla 6: El Carro -->
                         <div id="card-objeto-el-6" onclick="seleccionarObjetoYune(6)" class="objeto-card">
                             <span class="text-2xl block">🚗</span>
-                            <span class="text-[10px] font-bold text-slate-200 block truncate">El Carro</span>
-                            <span class="text-[9px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-6">0</span>/5</span>
+                            <span class="text-[9px] font-bold text-slate-200 block truncate">El Carro</span>
+                            <span class="text-[8px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-6">0</span>/5</span>
                         </div>
-                        <!-- Casilla 7: El Sombrero -->
-                        <div id="card-objeto-el-7" onclick="seleccionarObjetoYune(7)" class="objeto-card">
-                            <span class="text-2xl block">🎩</span>
-                            <span class="text-[10px] font-bold text-slate-200 block truncate">El Sombrero</span>
-                            <span class="text-[9px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-7">0</span>/5</span>
-                        </div>
-                        <!-- Casilla 8: La Botella -->
-                        <div id="card-objeto-el-8" onclick="seleccionarObjetoYune(8)" class="objeto-card">
-                            <span class="text-2xl block">🍼</span>
-                            <span class="text-[10px] font-bold text-slate-200 block truncate">La Botella</span>
-                            <span class="text-[9px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-8">0</span>/5</span>
-                        </div>
-                        <!-- Casilla 9: La Casa -->
-                        <div id="card-objeto-el-9" onclick="seleccionarObjetoYune(9)" class="objeto-card">
-                            <span class="text-2xl block">🏠</span>
-                            <span class="text-[10px] font-bold text-slate-200 block truncate">La Casa</span>
-                            <span class="text-[9px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-9">0</span>/5</span>
-                        </div>
-                        <!-- Casilla 10: El Sol -->
+
+                        <!-- LADO IZQUIERDO -->
                         <div id="card-objeto-el-10" onclick="seleccionarObjetoYune(10)" class="objeto-card">
                             <span class="text-2xl block">☀️</span>
-                            <span class="text-[10px] font-bold text-slate-200 block truncate">El Sol</span>
-                            <span class="text-[9px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-10">0</span>/5</span>
+                            <span class="text-[9px] font-bold text-slate-200 block truncate">El Sol</span>
+                            <span class="text-[8px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-10">0</span>/5</span>
+                        </div>
+                        
+                        <div id="card-objeto-el-9" onclick="seleccionarObjetoYune(9)" class="objeto-card">
+                            <span class="text-2xl block">🏠</span>
+                            <span class="text-[9px] font-bold text-slate-200 block truncate">La Casa</span>
+                            <span class="text-[8px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-9">0</span>/5</span>
+                        </div>
+
+                        <!-- FILA INFERIOR (3 objetos: 8, 7) -->
+                        <div id="card-objeto-el-8" onclick="seleccionarObjetoYune(8)" class="objeto-card">
+                            <span class="text-2xl block">🍼</span>
+                            <span class="text-[9px] font-bold text-slate-200 block truncate">La Botella</span>
+                            <span class="text-[8px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-8">0</span>/5</span>
+                        </div>
+                        <div id="card-objeto-el-7" onclick="seleccionarObjetoYune(7)" class="objeto-card">
+                            <span class="text-2xl block">🎩</span>
+                            <span class="text-[9px] font-bold text-slate-200 block truncate">El Sombrero</span>
+                            <span class="text-[8px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-7">0</span>/5</span>
                         </div>
                     </div>
 
@@ -744,8 +639,8 @@
             });
         }
 
-        // CIRCUITO PERIMETRAL: El orden de las casillas alrededor de la matriz
-        const ordenCircuitoLuces = [1, 2, 3, 4, 5, 10, 9, 8, 7, 6];
+        // ORDEN DEL CIRCUITO EN EL CUADRO CUADRADO (1 al 10 formando el marco)
+        const ordenCircuitoCuadrado = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
         function sortearObjetoCasino() {
             if (juegoPausadoPorGanador) {
@@ -753,11 +648,11 @@
                 return;
             }
 
-            let totalPasos = ordenCircuitoLuces.length;
+            let totalPasos = ordenCircuitoCuadrado.length;
             let pasadas = 0;
-            let maxPasadas = 35; // Cantidad de vueltas por el marco exterior
+            let maxPasadas = 35; // Vueltas completas alrededor del cuadro
             let indiceSecuencia = 0;
-            let velocidadActual = 50; // Inicia rápido
+            let velocidadActual = 50;
 
             let visorEmoji = document.getElementById('visor-emoji');
             let visorNombre = document.getElementById('visor-nombre');
@@ -766,20 +661,18 @@
             let btnGirar = document.getElementById('btn-girar-ruleta');
             if (btnGirar) btnGirar.disabled = true;
 
-            function ejecutarPasoRuleta() {
-                // Apagar todas las luces del borde
+            function ejecutarPasoRuletaCuadrada() {
                 for (let id = 1; id <= 10; id++) {
                     let el = document.getElementById(`card-objeto-el-${id}`);
                     if (el) el.classList.remove('titling');
                 }
 
-                let idActual = ordenCircuitoLuces[indiceSecuencia];
+                let idActual = ordenCircuitoCuadrado[indiceSecuencia];
                 let objActual = listaObjetosYune.find(o => o.id === idActual);
                 let elActual = document.getElementById(`card-objeto-el-${idActual}`);
                 
                 if (elActual) elActual.classList.add('titling');
                 
-                // Mostrar en el centro el objeto por el que va pasando la luz rápidamente
                 if (visorEmoji) visorEmoji.innerText = objActual.emoji;
                 if (visorNombre) visorNombre.innerText = objActual.nombre;
                 if (visorEstrellas) visorEstrellas.innerText = "⭐ ...";
@@ -788,14 +681,12 @@
                 indiceSecuencia = (indiceSecuencia + 1) % totalPasos;
                 pasadas++;
 
-                // EFECTO DESACELERACIÓN: Se va poniendo más lento conforme se acerca al final
                 if (pasadas < maxPasadas) {
                     if (pasadas > maxPasadas - 10) {
                         velocidadActual += 20; // Pierde fuerza y frena poco a poco
                     }
-                    setTimeout(ejecutarPasoRuleta, velocidadActual);
+                    setTimeout(ejecutarPasoRuletaCuadrada, velocidadActual);
                 } else {
-                    // FRENADO FINAL EN EL GANADOR
                     for (let id = 1; id <= 10; id++) {
                         let el = document.getElementById(`card-objeto-el-${id}`);
                         if (el) el.classList.remove('titling');
@@ -809,7 +700,6 @@
 
                     cantarTextoVoz(objGanador.nombre);
 
-                    // Consultar en Firebase el estado actual de estrellas y dueño de este objeto ganador
                     db.ref(`room/objetosData/${objGanador.id}`).once('value').then((snap) => {
                         let d = snap.val() || { hits: 0, owner: null };
                         let hits = (d.hits || 0) + 1;
@@ -819,13 +709,12 @@
                         db.ref(`room/objetosData/${objGanador.id}/hits`).set(hits).then(() => {
                             renderizarObjetosYune();
 
-                            // MOSTRAR EN EL CENTRO LIMPIO EL RESULTADO FINAL CON SUS ESTRELLAS
+                            // REFLEJAR EN EL CENTRO DEL CUADRO EL RESULTADO FINAL
                             if (visorEmoji) visorEmoji.innerText = objGanador.emoji;
                             if (visorNombre) visorNombre.innerText = objGanador.nombre;
                             if (visorEstrellas) visorEstrellas.innerText = `⭐ ${hits} / 5 Estrellas`;
                             if (visorDueno) visorDueno.innerText = `Dueño: ${duenoActual}`;
 
-                            // SI LLEGA A 5 ESTRELLAS, PAUSA AUTOMÁTICA Y VICTORIA
                             if (hits >= 5) {
                                 juegoPausadoPorGanador = true;
                                 cantarTextoVoz(`¡Tenemos ganador para el premio número ${etapaPremioActual}! El objeto ${objGanador.nombre} completó sus cinco estrellas. ¡Felicidades a ${duenoActual}!`);
@@ -850,8 +739,7 @@
                 }
             }
 
-            // Iniciar la secuencia de giro
-            ejecutarPasoRuleta();
+            ejecutarPasoRuletaCuadrada();
         }
 
         function avanzarSiguientePremio() {
@@ -884,7 +772,6 @@
                 }
                 if (btnSiguiente) btnSiguiente.classList.add('hidden');
 
-                // Limpiar centro
                 let visorEmoji = document.getElementById('visor-emoji');
                 let visorNombre = document.getElementById('visor-nombre');
                 let visorEstrellas = document.getElementById('visor-estrellas-centro');
@@ -2032,7 +1919,7 @@
 
         function enviarMensajeChatAdmin() {
             let input = document.getElementById('input-mensaje-admin');
-            if (-1 !== -1 || !input || !input.value.trim()) return; // Fallback
+            if (!input || !input.value.trim()) return;
             db.ref('chatSala').push({ nombre: "Administradora ⭐", mensaje: input.value.trim(), tiempo: Date.now() }, () => { input.value = ""; });
         }
 
