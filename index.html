@@ -761,7 +761,6 @@
                     let estadoObj = objetosState[obj.id] || { owner: null, ownerControl: null, hits: 0 };
                     let esMio = currentUser.control && estadoObj.ownerControl === currentUser.control;
                     let hitsActuales = estadoObj.hits || 0;
-                    // 🔥 Condición estricta de bloqueo si ya ganó o tiene 3 estrellas
                     let yaGanoRonda = hitsActuales >= 3;
 
                     let cardEl = document.getElementById(`card-objeto-el-${obj.id}`);
@@ -930,22 +929,6 @@
             });
         }
 
-        function seleccionarObjetoEquitativo(objetosState, ganadoresPremios) {
-            let objetosDisponibles = [];
-            // Lista de nombres de objetos que ya ganaron en los 4 premios
-            let nombresGanadoresPremios = Object.values(ganadoresPremios || {}).map(g => g.nombre);
-
-            listaObjetosYune.forEach(obj => {
-                let estado = objetosState[obj.id] || { hits: 0 };
-                // 🔥 FILTRO BLINDADO: Se descarta si ya tiene 3 estrellas o si ya ganó en el panel de premios
-                if (estado.hits < 3 && !nombresGanadoresPremios.includes(obj.nombre)) {
-                    objetosDisponibles.push(obj);
-                }
-            });
-            if (objetosDisponibles.length === 0) return null;
-            return objetosDisponibles[Math.floor(Math.random() * objetosDisponibles.length)];
-        }
-
         function iniciarGiroAutomaticoContinuo() {
             if (!currentUser.isAdmin) return;
             if (juegoPausadoPorGanador) {
@@ -954,19 +937,34 @@
             }
             if (estaGirandoSolo) return;
 
-            // Consultar tanto los objetos como los ganadores ya registrados para asegurar cero repeticiones
             Promise.all([
                 db.ref('room/objetosData').once('value'),
                 db.ref('room/ganadoresPremios').once('value')
             ]).then(([snapObjetos, snapGanadores]) => {
                 let objetosState = snapObjetos.val() || {};
                 let ganadoresPremios = snapGanadores.val() || {};
-                let objGanador = seleccionarObjetoEquitativo(objetosState, ganadoresPremios);
+                let nombresGanadoresPremios = Object.values(ganadoresPremios).map(g => g.nombre);
 
-                if (!objGanador) {
+                // 🔥 CREAR CAMINO DINÁMICO EXCLUYENDO TOTALMENTE A LOS OBJETOS QUE YA GANARON
+                let caminoDisponibleIds = [];
+                ordenPerimetroRuleta.forEach(id => {
+                    let obj = listaObjetosYune.find(o => o.id === id);
+                    let estado = objetosState[id] || { hits: 0 };
+                    let yaGano = estado.hits >= 3 || nombresGanadoresPremios.includes(obj.nombre);
+                    if (!yaGano) {
+                        caminoDisponiblesIds = caminoDisponibleIds || [];
+                        caminoDisponibleIds.push(id);
+                    }
+                });
+
+                if (caminoDisponibleIds.length === 0) {
                     alert("🏆 ¡Todos los objetos disponibles ya han ganado sus 3 estrellas en esta ronda! Presiona 'Siguiente Premio' o 'Reiniciar Ronda'.");
                     return;
                 }
+
+                // Elegir un ganador al azar estrictamente de los disponibles
+                let targetId = caminoDisponibleIds[Math.floor(Math.random() * caminoDisponibleIds.length)];
+                let objGanador = listaObjetosYune.find(o => o.id === targetId);
 
                 estaGirandoSolo = true;
                 let btnIniciar = document.getElementById('btn-iniciar-auto');
@@ -974,10 +972,9 @@
                 if (btnIniciar) btnIniciar.classList.add('hidden');
                 if (btnPausar) btnPausar.classList.remove('hidden');
 
-                let targetId = objGanador.id;
-                let targetPerimetroIndex = ordenPerimetroRuleta.indexOf(targetId);
-                let vueltasAzar = Math.floor(Math.random() * 3) + 2; 
-                let totalPasosVueltas = (vueltasAzar * ordenPerimetroRuleta.length) + targetPerimetroIndex;
+                let targetIndexEnCamino = caminoDisponibleIds.indexOf(targetId);
+                let vueltasAzar = Math.floor(Math.random() * 2) + 2;
+                let totalPasosVueltas = (vueltasAzar * caminoDisponibleIds.length) + targetIndexEnCamino;
                 let pasoActual = 0;
 
                 intervaloGiroContinuo = setInterval(() => {
@@ -987,7 +984,8 @@
                     }
                     reproducirSonidoTrrr();
 
-                    let idActual = ordenPerimetroRuleta[pasoActual % ordenPerimetroRuleta.length];
+                    // 🔥 LA RULETA PASA ÚNICAMENTE POR LOS OBJETOS DISPONIBLES (SE SALTA LOS BLOQUEADOS)
+                    let idActual = caminoDisponibleIds[pasoActual % caminoDisponibleIds.length];
                     
                     db.ref('room/ruletaAnimacion').set({
                         estado: 'girando',
