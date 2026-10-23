@@ -29,7 +29,7 @@
             font-weight: 800; font-size: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
 
-        /* RULETA CUADRADA PERIMETRAL 4x4 */
+        /* RULETA CUADRADA PERIMETRAL 4x4 (ESTABLE Y SIN TEMBLORES) */
         .ruleta-cuadrada-4x4 {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -41,35 +41,30 @@
             background: #1e1e3f; border: 2px solid #333366; border-radius: 10px;
             padding: 6px; text-align: center; cursor: pointer;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            min-height: 70px; transition: all 0.15s ease; position: relative;
+            min-height: 70px; position: relative;
         }
         .objeto-card.active-step {
             border: 3px solid #38bdf8 !important;
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.6) !important;
-            background: #0c4a6e !important; transform: scale(1.03); z-index: 10;
+            background: #0c4a6e !important; z-index: 10;
         }
         .objeto-card.titling {
             border: 3px solid #facc15 !important;
-            box-shadow: 0 0 20px rgba(250, 204, 21, 0.7) !important;
-            background: #3730a3 !important; z-index: 20; transform: scale(1.05);
+            background: #3730a3 !important; z-index: 20;
         }
         .objeto-card.selected-by-user {
             border-color: #38bdf8; background: #0d3b66;
         }
+        /* OBJETO GANADOR COMPLETAMENTE SOMBREADO Y BLOQUEADO */
         .objeto-card.objeto-ganador-ronda {
             background: #020617 !important; border-color: #1e293b !important;
-            opacity: 0.35; filter: grayscale(90%); cursor: not-allowed;
+            opacity: 0.3; filter: grayscale(100%); cursor: not-allowed; pointer-events: none;
         }
 
         .centro-visor-cuadrado {
             grid-column: 2 / span 2; grid-row: 2 / span 2;
             background: #060913; border: 2px dashed #334155; border-radius: 14px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 8px; text-align: center; transition: all 0.3s ease;
-        }
-        .centro-visor-cuadrado.activo {
-            border: 2px solid #ec4899; background: #0b0f19;
-            box-shadow: inset 0 0 15px rgba(236, 72, 153, 0.3); border-style: solid;
+            padding: 8px; text-align: center;
         }
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -406,7 +401,6 @@
         let isAutoRunning = false;
         let adminSecretKey = 'June 2026';
         let lastSpokenBallCount = 0;
-        let lastAnnouncementId = 0;
         let presenceRef = null;
         let audioHabilitado = true;
         let audioCtx = null;
@@ -562,7 +556,6 @@
             sincronizarObjetosYune();
         }
 
-        // MOTOR COMPLETO DE VERIFICACIÓN DE FIGURAS (8 PATRONES)
         function verificarFiguraGanadora(grid, drawnArray, patron) {
             let resultado = obtenerNumerosFaltantesGanar(grid, drawnArray, patron);
             return resultado.count === 0;
@@ -623,7 +616,7 @@
                 for (let c = 0; c < 5; c++) { marco.push({r: 0, c, num: grid[0][c]}); marco.push({r: 4, c, num: grid[4][c]}); }
                 for (let r = 1; r < 4; r++) { marco.push({r, c: 0, num: grid[r][0]}); marco.push({r, c: 4, num: grid[r][4]}); }
                 lineasPosibles.push(marco);
-            } else { // full_card (Apagón)
+            } else {
                 let linea = [];
                 for (let r = 0; r < 5; r++) {
                     for (let c = 0; c < 5; c++) linea.push({r, c, num: grid[r][c]});
@@ -643,40 +636,32 @@
             return { faltantes: mejorFaltantes, count: menorFaltasCount };
         }
 
-        /* EFECTO SONIDO CLICK / TICK MECÁNICO DE RULETA ANIMADA */
         function reproducirSonidoTrrr() {
             if (!audioHabilitado) return;
             try {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 if (audioCtx.state === 'suspended') audioCtx.resume();
                 
-                let bufferSize = audioCtx.sampleRate * 0.012; // Click súper rápido
+                let bufferSize = audioCtx.sampleRate * 0.015;
                 let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
                 let data = buffer.getChannelData(0);
-                for (let i = 0; i < bufferSize; i++) {
-                    data[i] = Math.random() * 2 - 1; // Ruido blanco corto tipo impacto mecánico
-                }
+                for (let i = 0; i < bufferSize; i++) { data[i] = Math.random() * 2 - 1; }
 
                 let noise = audioCtx.createBufferSource();
                 noise.buffer = buffer;
-
                 let filter = audioCtx.createBiquadFilter();
                 filter.type = 'highpass';
-                filter.frequency.setValueAtTime(1200, audioCtx.currentTime); // Filtro metálico/plástico seco
+                filter.frequency.setValueAtTime(1400, audioCtx.currentTime);
 
                 let gain = audioCtx.createGain();
-                gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.012);
+                gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.015);
 
-                noise.connect(filter);
-                filter.connect(gain);
-                gain.connect(audioCtx.destination);
-
+                noise.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
                 noise.start();
             } catch(e){}
         }
 
-        /* SONIDO FINAL REPIQUE CORTO */
         function reproducirSonidoCampanaFinal() {
             if (!audioHabilitado) return;
             try {
@@ -686,9 +671,9 @@
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(800, audioCtx.currentTime);
                 gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
                 osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.25);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
             } catch(e){}
         }
 
@@ -768,13 +753,13 @@
                             <span class="text-xl block">${obj.emoji}</span>
                             <span class="text-[9px] font-bold text-slate-200 block truncate w-full">${obj.nombre}</span>
                             <span class="text-[8px] text-yellow-400 font-bold block mt-0.5">⭐ ${hitsActuales}/5</span>
-                            ${estadoObj.owner ? `<span class="text-[7px] text-pink-300 truncate w-full mt-0.5">👤 ${estadoObj.owner}</span>` : `<span class="text-[7px] text-emerald-400 font-semibold">Libre</span>`}
+                            ${yaGanoRonda ? `<span class="text-[7px] text-red-400 font-bold">🚫 Ganador</span>` : estadoObj.owner ? `<span class="text-[7px] text-pink-300 truncate w-full mt-0.5">👤 ${estadoObj.owner}</span>` : `<span class="text-[7px] text-emerald-400 font-semibold">Libre</span>`}
                         `;
                     }
 
-                    let duenoTexto = estadoObj.owner ? `<strong class="text-pink-300">${estadoObj.owner}</strong>` : `<span class="text-slate-500">Disponible</span>`;
+                    let duenoTexto = yaGanoRonda ? `<strong class="text-red-400">¡Ganador Premio! (Bloqueado)</strong>` : estadoObj.owner ? `<strong class="text-pink-300">${estadoObj.owner}</strong>` : `<span class="text-slate-500">Disponible</span>`;
                     listaRespaldoHTML += `
-                        <div class="bg-slate-950 p-2 rounded-xl border border-slate-800 flex flex-col items-center text-center">
+                        <div class="bg-slate-950 p-2 rounded-xl border border-slate-800 flex flex-col items-center text-center ${yaGanoRonda ? 'opacity-40 grayscale' : ''}">
                             <span class="text-lg">${obj.emoji}</span>
                             <span class="text-[10px] font-bold text-white truncate w-full">${obj.nombre}</span>
                             <div class="text-[10px] mt-1">${duenoTexto}</div>
@@ -797,7 +782,7 @@
                 let data = snap.val() || { owner: null, ownerControl: null, hits: 0 };
                 
                 if (data.hits >= 5) {
-                    alert("⚠️ Este objeto ya ganó su premio en esta ronda y está fuera de juego.");
+                    alert("⚠️ Este objeto ya ganó su premio en esta ronda y está bloqueado.");
                     return;
                 }
 
@@ -825,15 +810,16 @@
             });
         }
 
-        function seleccionarObjetoEquitativo() {
+        /* SELECCIONA ÚNICAMENTE OBJETOS DISPONIBLES QUE NO HAYAN GANADO (HITS < 5) */
+        function seleccionarObjetoEquitativo(objetosState) {
             let objetosDisponibles = [];
             listaObjetosYune.forEach(obj => {
-                let cardEl = document.getElementById(`card-objeto-el-${obj.id}`);
-                if (!cardEl || !cardEl.classList.contains('objeto-ganador-ronda')) {
+                let estado = objetosState[obj.id] || { hits: 0 };
+                if (estado.hits < 5) {
                     objetosDisponibles.push(obj);
                 }
             });
-            if (objetosDisponibles.length === 0) return listaObjetosYune[0];
+            if (objetosDisponibles.length === 0) return null;
             return objetosDisponibles[Math.floor(Math.random() * objetosDisponibles.length)];
         }
 
@@ -844,115 +830,128 @@
                 return;
             }
             if (estaGirandoSolo) return;
-            estaGirandoSolo = true;
 
-            let btnIniciar = document.getElementById('btn-iniciar-auto');
-            let btnPausar = document.getElementById('btn-pausar-auto');
-            if (btnIniciar) btnIniciar.classList.add('hidden');
-            if (btnPausar) btnPausar.classList.remove('hidden');
+            db.ref('room/objetosData').once('value').then((snap) => {
+                let objetosState = snap.val() || {};
+                let objGanador = seleccionarObjetoEquitativo(objetosState);
 
-            let objGanador = seleccionarObjetoEquitativo();
-            let targetId = objGanador.id;
-            let targetPerimetroIndex = ordenPerimetroRuleta.indexOf(targetId);
-
-            let currentIndex = 0;
-            let totalPasosVueltas = 16 + targetPerimetroIndex; 
-            let pasoActual = 0;
-
-            intervaloGiroContinuo = setInterval(() => {
-                if (juegoPausadoPorGanador) {
-                    clearInterval(intervaloGiroContinuo);
+                if (!objGanador) {
+                    alert("🏆 ¡Todos los objetos disponibles ya han ganado sus 5 estrellas en esta ronda! Presiona 'Siguiente Premio' o 'Reiniciar Ronda'.");
                     return;
                 }
-                reproducirSonidoTrrr();
 
-                for (let i = 1; i <= 10; i++) {
-                    let c = document.getElementById(`card-objeto-el-${i}`);
-                    if (c && !c.classList.contains('objeto-ganador-ronda')) c.classList.remove('active-step', 'titling');
-                }
+                estaGirandoSolo = true;
+                let btnIniciar = document.getElementById('btn-iniciar-auto');
+                let btnPausar = document.getElementById('btn-pausar-auto');
+                if (btnIniciar) btnIniciar.classList.add('hidden');
+                if (btnPausar) btnPausar.classList.remove('hidden');
 
-                let idActual = ordenPerimetroRuleta[currentIndex];
-                let cardActual = document.getElementById(`card-objeto-el-${idActual}`);
-                if (cardActual && !cardActual.classList.contains('objeto-ganador-ronda')) {
-                    cardActual.classList.add('active-step');
-                }
+                let targetId = objGanador.id;
+                let targetPerimetroIndex = ordenPerimetroRuleta.indexOf(targetId);
 
-                let objTemp = listaObjetosYune.find(o => o.id === idActual);
-                if (document.getElementById('visor-emoji')) document.getElementById('visor-emoji').innerText = objTemp.emoji;
-                if (document.getElementById('visor-nombre')) document.getElementById('visor-nombre').innerText = objTemp.nombre;
+                let currentIndex = 0;
+                let totalPasosVueltas = 10 + targetPerimetroIndex;
+                let pasoActual = 0;
 
-                currentIndex = (currentIndex + 1) % ordenPerimetroRuleta.length;
-                pasoActual++;
-
-                if (pasoActual >= totalPasosVueltas) {
-                    clearInterval(intervaloGiroContinuo);
-                    estaGirandoSolo = false;
+                intervaloGiroContinuo = setInterval(() => {
+                    if (juegoPausadoPorGanador) {
+                        clearInterval(intervaloGiroContinuo);
+                        return;
+                    }
+                    reproducirSonidoTrrr();
 
                     for (let i = 1; i <= 10; i++) {
                         let c = document.getElementById(`card-objeto-el-${i}`);
-                        if (c) c.classList.remove('active-step');
+                        if (c && !c.classList.contains('objeto-ganador-ronda')) c.classList.remove('active-step', 'titling');
                     }
 
-                    let cardGanadora = document.getElementById(`card-objeto-el-${targetId}`);
-                    if (cardGanadora) cardGanadora.classList.add('titling');
+                    let idActual = ordenPerimetroRuleta[currentIndex];
+                    let cardActual = document.getElementById(`card-objeto-el-${idActual}`);
+                    if (cardActual && !cardActual.classList.contains('objeto-ganador-ronda')) {
+                        cardActual.classList.add('active-step');
+                    }
 
-                    reproducirSonidoCampanaFinal();
+                    let objTemp = listaObjetosYune.find(o => o.id === idActual);
+                    if (objTemp && document.getElementById('visor-emoji')) {
+                        document.getElementById('visor-emoji').innerText = objTemp.emoji;
+                        document.getElementById('visor-nombre').innerText = objTemp.nombre;
+                    }
 
-                    /* VOZ CANTANTE DEL OBJETO OBTENIDO */
-                    cantarTextoVoz(`¡${objGanador.nombre}!`);
+                    currentIndex = (currentIndex + 1) % ordenPerimetroRuleta.length;
+                    pasoActual++;
 
-                    db.ref(`room/objetosData/${targetId}`).once('value').then((snap) => {
-                        let d = snap.val() || { hits: 0, owner: null };
-                        let hits = (d.hits || 0) + 1;
-                        if (hits > 5) hits = 5;
-                        let duenoActual = d.owner || "Sin Dueño";
+                    if (pasoActual >= totalPasosVueltas) {
+                        clearInterval(intervaloGiroContinuo);
+                        estaGirandoSolo = false;
 
-                        db.ref(`room/objetosData/${targetId}/hits`).set(hits).then(() => {
-                            if (document.getElementById('visor-estrellas-centro')) {
-                                document.getElementById('visor-estrellas-centro').innerText = `⭐ ${hits} / 5 Estrellas`;
-                                document.getElementById('visor-estrellas-centro').classList.remove('hidden');
-                            }
-                            if (document.getElementById('visor-dueno-centro')) {
-                                document.getElementById('visor-dueno-centro').innerText = `Dueño: ${duenoActual}`;
-                                document.getElementById('visor-dueno-centro').classList.remove('hidden');
-                            }
+                        for (let i = 1; i <= 10; i++) {
+                            let c = document.getElementById(`card-objeto-el-${i}`);
+                            if (c) c.classList.remove('active-step');
+                        }
 
-                            if (hits >= 5) {
-                                juegoPausadoPorGanador = true;
-                                document.getElementById('premio-actual-titulo').innerHTML = `🎉 ¡GANADOR PREMIO ${etapaPremioActual}! (${objGanador.emoji} ${objGanador.nombre})`;
-                                
-                                if (btnIniciar) btnIniciar.classList.add('hidden');
-                                if (btnPausar) btnPausar.classList.add('hidden');
-                                document.getElementById('btn-siguiente-premio').classList.remove('hidden');
+                        let cardGanadora = document.getElementById(`card-objeto-el-${targetId}`);
+                        if (cardGanadora) cardGanadora.classList.add('titling');
 
-                                let spanPremio = document.getElementById(`ganador-premio-${etapaPremioActual}`);
-                                if (spanPremio) {
-                                    spanPremio.innerText = `${objGanador.emoji} ${objGanador.nombre} (Dueño: ${duenoActual})`;
-                                    spanPremio.className = "text-yellow-300 font-bold";
+                        if (document.getElementById('visor-emoji')) document.getElementById('visor-emoji').innerText = objGanador.emoji;
+                        if (document.getElementById('visor-nombre')) document.getElementById('visor-nombre').innerText = objGanador.nombre;
+
+                        reproducirSonidoCampanaFinal();
+                        cantarTextoVoz(`¡${objGanador.nombre}!`);
+
+                        db.ref(`room/objetosData/${targetId}`).once('value').then((snapObj) => {
+                            let d = snapObj.val() || { hits: 0, owner: null };
+                            let hits = (d.hits || 0) + 1;
+                            if (hits > 5) hits = 5;
+                            let duenoActual = d.owner || "Sin Dueño";
+
+                            db.ref(`room/objetosData/${targetId}/hits`).set(hits).then(() => {
+                                if (document.getElementById('visor-estrellas-centro')) {
+                                    document.getElementById('visor-estrellas-centro').innerText = `⭐ ${hits} / 5 Estrellas`;
+                                    document.getElementById('visor-estrellas-centro').classList.remove('hidden');
+                                }
+                                if (document.getElementById('visor-dueno-centro')) {
+                                    document.getElementById('visor-dueno-centro').innerText = `Dueño: ${duenoActual}`;
+                                    document.getElementById('visor-dueno-centro').classList.remove('hidden');
                                 }
 
-                                /* VOZ CANTANTE DE PREMIO COMPLETADO */
-                                setTimeout(() => {
-                                    cantarTextoVoz(`¡Felicidades a ${duenoActual}! Ganó el premio con ${objGanador.nombre}`);
-                                }, 1200);
+                                if (hits >= 5) {
+                                    juegoPausadoPorGanador = true;
+                                    document.getElementById('premio-actual-titulo').innerHTML = `🎉 ¡GANADOR PREMIO ${etapaPremioActual}! (${objGanador.emoji} ${objGanador.nombre})`;
+                                    
+                                    if (btnIniciar) btnIniciar.classList.add('hidden');
+                                    if (btnPausar) btnPausar.classList.add('hidden');
+                                    document.getElementById('btn-siguiente-premio').classList.remove('hidden');
 
-                            } else {
-                                setTimeout(() => {
-                                    if (!juegoPausadoPorGanador) iniciarGiroAutomaticoContinuo();
-                                }, 1800);
-                            }
+                                    let spanPremio = document.getElementById(`ganador-premio-${etapaPremioActual}`);
+                                    if (spanPremio) {
+                                        spanPremio.innerText = `${objGanador.emoji} ${objGanador.nombre} (Dueño: ${duenoActual})`;
+                                        spanPremio.className = "text-yellow-300 font-bold";
+                                    }
+
+                                    setTimeout(() => {
+                                        cantarTextoVoz(`¡Felicidades a ${duenoActual}! Ganó el premio con ${objGanador.nombre}`);
+                                    }, 1200);
+
+                                } else {
+                                    setTimeout(() => {
+                                        if (!juegoPausadoPorGanador) iniciarGiroAutomaticoContinuo();
+                                    }, 2200);
+                                }
+                            });
                         });
-                    });
-                }
-            }, 85);
+                    }
+                }, 220);
+            });
         }
 
         function detenerGiroAutomaticoContinuo() {
             if (!estaGirandoSolo) return;
             estaGirandoSolo = false;
             clearInterval(intervaloGiroContinuo);
-            document.getElementById('btn-iniciar-auto').classList.remove('hidden');
-            document.getElementById('btn-pausar-auto').classList.add('hidden');
+            let btnI = document.getElementById('btn-iniciar-auto');
+            let btnP = document.getElementById('btn-pausar-auto');
+            if (btnI) btnI.classList.remove('hidden');
+            if (btnP) btnP.classList.add('hidden');
         }
 
         function avanzarSiguientePremio() {
@@ -971,8 +970,12 @@
                 let nombresFases = ["1er Premio", "2do Premio", "3er Premio", "4to Premio (Mayor)"];
                 document.getElementById('premio-actual-titulo').innerText = nombresFases[etapaPremioActual - 1] + " (Ronda en Curso)";
                 
-                document.getElementById('btn-iniciar-auto').classList.remove('hidden');
-                document.getElementById('btn-siguiente-premio').classList.add('hidden');
+                let btnI = document.getElementById('btn-iniciar-auto');
+                let btnS = document.getElementById('btn-siguiente-premio');
+                let btnP = document.getElementById('btn-pausar-auto');
+                if (btnI) btnI.classList.remove('hidden');
+                if (btnP) btnP.classList.add('hidden');
+                if (btnS) btnS.classList.add('hidden');
             } else {
                 alert("🏆 ¡Los 4 premios de esta ronda ya fueron entregados!");
             }
@@ -980,17 +983,27 @@
 
         function reiniciarObjetosRonda() {
             if (!currentUser.isAdmin) return;
-            if (confirm("¿Reiniciar ronda de objetos por completo?")) {
+            if (confirm("¿Reiniciar ronda de objetos por completo y liberar todas las figuras?")) {
                 db.ref('room/objetosData').remove().then(() => {
                     etapaPremioActual = 1;
                     juegoPausadoPorGanador = false;
                     estaGirandoSolo = false;
                     clearInterval(intervaloGiroContinuo);
                     document.getElementById('premio-actual-titulo').innerText = "1er Premio (Ronda en Curso)";
-                    document.getElementById('btn-iniciar-auto').classList.remove('hidden');
-                    document.getElementById('btn-pausar-auto').classList.add('hidden');
-                    document.getElementById('btn-siguiente-premio').classList.add('hidden');
-                    alert("¡Ronda de objetos reiniciada desde cero!");
+                    
+                    let btnI = document.getElementById('btn-iniciar-auto');
+                    let btnP = document.getElementById('btn-pausar-auto');
+                    let btnS = document.getElementById('btn-siguiente-premio');
+                    if (btnI) btnI.classList.remove('hidden');
+                    if (btnP) btnP.classList.add('hidden');
+                    if (btnS) btnS.classList.add('hidden');
+
+                    for(let i=1; i<=4; i++) {
+                        let spanP = document.getElementById(`ganador-premio-${i}`);
+                        if (spanP) { spanP.innerText = "Por sortear"; spanP.className = "text-slate-400 font-semibold"; }
+                    }
+
+                    alert("¡Ronda de objetos reiniciada desde cero y figuras disponibles!");
                 });
             }
         }
