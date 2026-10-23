@@ -10,10 +10,12 @@
         body { font-family: 'Poppins', sans-serif; background: #0f172a; color: #f8fafc; }
         .neon-glow { text-shadow: 0 0 10px rgba(236, 72, 153, 0.7), 0 0 20px rgba(236, 72, 153, 0.5); }
         .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5); }
-        @keyframes pulse-slow { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.9; transform: scale(1.02); } }
-        .alert-bingo { animation: pulse-slow 1.2s infinite; }
-        @keyframes flash-bg { 0%, 100% { background-color: rgba(234, 179, 8, 0.9); } 50% { background-color: rgba(219, 39, 119, 0.9); } }
-        .flash-winner { animation: flash-bg 1s infinite; }
+
+        .aviso-ganador-suave {
+            background: linear-gradient(135deg, #1e1b4b, #311b92);
+            border: 2px solid #facc15;
+            box-shadow: 0 10px 30px rgba(250, 204, 21, 0.3);
+        }
 
         .bola-b { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; border: 2px solid #60a5fa; }
         .bola-i { background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; border: 2px solid #f87171; }
@@ -27,14 +29,7 @@
             font-weight: 800; font-size: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
 
-        .mini-grid-pattern {
-            display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px;
-            width: 50px; height: 50px; background: rgba(0, 0, 0, 0.4); padding: 2px; border-radius: 4px;
-        }
-        .mini-cell { background: rgba(255, 255, 255, 0.1); border-radius: 1px; }
-        .mini-cell.active { background: #22c55e; box-shadow: 0 0 4px #22c55e; }
-
-        /* CUADRO PERIMETRAL 4x4 CON 10 OBJETOS EN EL MARCO Y CENTRO VACÍO 2x2 */
+        /* RULETA CUADRADA PERIMETRAL 4x4 */
         .ruleta-cuadrada-4x4 {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -49,15 +44,17 @@
             min-height: 70px; transition: all 0.15s ease; position: relative;
         }
         .objeto-card.active-step {
-            border: 4px solid #05d9e8 !important; box-shadow: 0 0 25px #05d9e8 !important;
-            background: #164e63 !important; transform: scale(1.05); z-index: 10;
+            border: 3px solid #38bdf8 !important;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.6) !important;
+            background: #0c4a6e !important; transform: scale(1.03); z-index: 10;
         }
         .objeto-card.titling {
-            border: 4px solid #facc15 !important; box-shadow: 0 0 40px #facc15, inset 0 0 20px #facc15 !important;
-            background: #3730a3 !important; z-index: 20; transform: scale(1.08);
+            border: 3px solid #facc15 !important;
+            box-shadow: 0 0 20px rgba(250, 204, 21, 0.7) !important;
+            background: #3730a3 !important; z-index: 20; transform: scale(1.05);
         }
         .objeto-card.selected-by-user {
-            border-color: #05d9e8; background: #0d3b66;
+            border-color: #38bdf8; background: #0d3b66;
         }
         .objeto-card.objeto-ganador-ronda {
             background: #020617 !important; border-color: #1e293b !important;
@@ -66,13 +63,13 @@
 
         .centro-visor-cuadrado {
             grid-column: 2 / span 2; grid-row: 2 / span 2;
-            background: #060913; border: 3px dashed #334155; border-radius: 14px;
+            background: #060913; border: 2px dashed #334155; border-radius: 14px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             padding: 8px; text-align: center; transition: all 0.3s ease;
         }
         .centro-visor-cuadrado.activo {
-            border: 3px solid #ec4899; background: #0b0f19;
-            box-shadow: inset 0 0 20px rgba(236, 72, 153, 0.4); border-style: solid;
+            border: 2px solid #ec4899; background: #0b0f19;
+            box-shadow: inset 0 0 15px rgba(236, 72, 153, 0.3); border-style: solid;
         }
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -99,7 +96,7 @@
             <p id="main-subtitle" class="text-slate-400 text-sm mt-1">El sistema oficial en tiempo real con voz cantante y billetera digital</p>
         </header>
 
-        <!-- PANTALLAS DE ACCESO -->
+        <!-- HOME -->
         <div id="view-home" class="w-full bg-slate-800/80 backdrop-blur border border-slate-700 p-6 md:p-8 rounded-3xl card-shadow flex flex-col items-center gap-6 max-w-md mx-auto">
             <h2 class="text-2xl font-bold text-yellow-300">¡Bienvenida a la Diversión!</h2>
             <div id="home-room-status-badge" class="w-full text-center py-2 px-4 rounded-xl text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">🟢 Sala Abierta a Jugadoras</div>
@@ -150,9 +147,9 @@
                     </div>
                 </div>
 
-                <div id="admin-winner-alert" class="hidden bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-950 p-6 rounded-3xl font-extrabold text-center text-xl shadow-xl alert-bingo flex flex-col gap-3">
-                    <div>🎉 ¡BINGO VALIDADO! (Juego Detenido) 🎉</div>
-                    <div id="admin-winner-text" class="text-base font-bold bg-white/25 py-2.5 px-4 rounded-xl flex flex-col gap-1">Ganadores...</div>
+                <div id="admin-winner-alert" class="hidden aviso-ganador-suave p-6 rounded-3xl font-bold text-center text-xl shadow-xl flex flex-col gap-3">
+                    <div class="text-yellow-300 font-extrabold">🎉 ¡BINGO VALIDADO! (Juego Detenido) 🎉</div>
+                    <div id="admin-winner-text" class="text-base font-bold bg-white/10 text-white py-2.5 px-4 rounded-xl flex flex-col gap-1">Ganadores...</div>
                     <div class="flex gap-2 justify-center mt-2 flex-wrap">
                         <button onclick="clearWinnerAlert()" class="py-2 px-4 bg-slate-900 text-yellow-300 text-xs rounded-xl font-bold shadow">Cerrar Alerta</button>
                         <button onclick="registrarYReiniciarSiguienteRonda()" class="py-2 px-4 bg-emerald-600 text-white text-xs rounded-xl font-bold shadow">🏁 Finalizar Ronda y Registrar</button>
@@ -283,9 +280,9 @@
                 </div>
 
                 <div id="player-winner-notification" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-                    <div class="flash-winner text-slate-950 p-6 rounded-3xl font-extrabold text-center shadow-2xl alert-bingo flex flex-col gap-4 max-w-lg w-full">
-                        <div class="text-3xl text-yellow-300">👑 ¡B I N G O ! 👑</div>
-                        <div id="public-winner-text" class="text-base font-bold bg-white/20 py-2 px-4 rounded-xl">¡Tu cartón hizo bingo!</div>
+                    <div class="aviso-ganador-suave text-white p-6 rounded-3xl font-bold text-center shadow-2xl flex flex-col gap-4 max-w-lg w-full">
+                        <div class="text-3xl text-yellow-300 font-extrabold">👑 ¡B I N G O ! 👑</div>
+                        <div id="public-winner-text" class="text-base font-bold bg-white/10 py-2 px-4 rounded-xl">¡Tu cartón hizo bingo!</div>
                         <button onclick="cerrarModalJugadora()" class="py-2 px-6 bg-slate-900 text-yellow-300 text-xs rounded-xl font-bold mx-auto">Cerrar</button>
                     </div>
                 </div>
@@ -295,7 +292,7 @@
                         <span class="text-xs uppercase tracking-wider text-yellow-400 font-bold">🔥 Bola Actual en Juego</span>
                     </div>
                     <div class="flex items-center gap-6">
-                        <div id="player-current-ball" class="w-24 h-24 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-4xl flex items-center justify-center shadow-lg animate-pulse">--</div>
+                        <div id="player-current-ball" class="w-24 h-24 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-4xl flex items-center justify-center shadow-lg">--</div>
                         <div id="player-history-balls" class="flex gap-2 items-center justify-center min-h-[38px]"></div>
                     </div>
                 </div>
@@ -646,21 +643,40 @@
             return { faltantes: mejorFaltantes, count: menorFaltasCount };
         }
 
+        /* EFECTO SONIDO CLICK / TICK MECÁNICO DE RULETA ANIMADA */
         function reproducirSonidoTrrr() {
             if (!audioHabilitado) return;
             try {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 if (audioCtx.state === 'suspended') audioCtx.resume();
-                let osc = audioCtx.createOscillator();
+                
+                let bufferSize = audioCtx.sampleRate * 0.012; // Click súper rápido
+                let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                let data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1; // Ruido blanco corto tipo impacto mecánico
+                }
+
+                let noise = audioCtx.createBufferSource();
+                noise.buffer = buffer;
+
+                let filter = audioCtx.createBiquadFilter();
+                filter.type = 'highpass';
+                filter.frequency.setValueAtTime(1200, audioCtx.currentTime); // Filtro metálico/plástico seco
+
                 let gain = audioCtx.createGain();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(200, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.012);
+
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                noise.start();
             } catch(e){}
         }
 
+        /* SONIDO FINAL REPIQUE CORTO */
         function reproducirSonidoCampanaFinal() {
             if (!audioHabilitado) return;
             try {
@@ -668,10 +684,11 @@
                 let osc = audioCtx.createOscillator();
                 let gain = audioCtx.createGain();
                 osc.type = 'triangle';
-                osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.8, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
                 osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.25);
             } catch(e){}
         }
 
@@ -881,6 +898,9 @@
 
                     reproducirSonidoCampanaFinal();
 
+                    /* VOZ CANTANTE DEL OBJETO OBTENIDO */
+                    cantarTextoVoz(`¡${objGanador.nombre}!`);
+
                     db.ref(`room/objetosData/${targetId}`).once('value').then((snap) => {
                         let d = snap.val() || { hits: 0, owner: null };
                         let hits = (d.hits || 0) + 1;
@@ -910,6 +930,12 @@
                                     spanPremio.innerText = `${objGanador.emoji} ${objGanador.nombre} (Dueño: ${duenoActual})`;
                                     spanPremio.className = "text-yellow-300 font-bold";
                                 }
+
+                                /* VOZ CANTANTE DE PREMIO COMPLETADO */
+                                setTimeout(() => {
+                                    cantarTextoVoz(`¡Felicidades a ${duenoActual}! Ganó el premio con ${objGanador.nombre}`);
+                                }, 1200);
+
                             } else {
                                 setTimeout(() => {
                                     if (!juegoPausadoPorGanador) iniciarGiroAutomaticoContinuo();
@@ -1177,10 +1203,10 @@
                 if (drawnBalls.length > 0) {
                     let ultima = drawnBalls[drawnBalls.length - 1];
                     currentBallEl.innerText = ultima;
-                    currentBallEl.className = `w-24 h-24 rounded-full font-extrabold text-4xl flex items-center justify-center shadow-lg animate-pulse ${obtenerClaseBolaColor(ultima)}`;
+                    currentBallEl.className = `w-24 h-24 rounded-full font-extrabold text-4xl flex items-center justify-center shadow-lg ${obtenerClaseBolaColor(ultima)}`;
                 } else {
                     currentBallEl.innerText = "--";
-                    currentBallEl.className = "w-24 h-24 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-4xl flex items-center justify-center shadow-lg animate-pulse";
+                    currentBallEl.className = "w-24 h-24 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-4xl flex items-center justify-center shadow-lg";
                 }
 
                 renderizarHistorialJugadora();
