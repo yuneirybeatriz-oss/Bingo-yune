@@ -364,16 +364,16 @@
         </div>
 
         <!-- ================================================================= -->
-        <!-- SECCIÓN 2: GAME OBJETOS YUNE (CUADRO PERIMETRAL 4x4 CON LOS 10 OBJETOS) -->
+        <!-- SECCIÓN 2: GAME OBJETOS YUNE (RULETA 4x4 CON SONIDO DE GIRO Y FRENADO) -->
         <!-- ================================================================= -->
         <div id="section-objetos-main" class="w-full flex-col gap-6 hidden">
             <div class="bg-slate-800 p-6 rounded-3xl card-shadow flex flex-col gap-6 max-w-lg mx-auto w-full">
                 <div class="text-center">
                     <h2 class="text-2xl font-bold text-yellow-300">🎰 Game Objetos Yune 🎰</h2>
-                    <p class="text-xs text-slate-400">Ruleta de cuadro perimetral con las 10 figuras oficiales</p>
+                    <p class="text-xs text-slate-400">Ruleta con sonido interactivo de giro y frenado</p>
                 </div>
 
-                <!-- TABLERO CUADRADO PERIMETRAL 4x4 (Las 10 figuras en el marco y centro 2x2 vacío) -->
+                <!-- TABLERO CUADRADO PERIMETRAL 4x4 -->
                 <div class="bg-slate-950 p-4 rounded-3xl border-4 border-yellow-400 shadow-2xl relative">
                     <div class="text-center mb-3">
                         <span class="text-xs text-yellow-300 font-bold uppercase tracking-widest bg-slate-900 px-3 py-1 rounded-full border border-yellow-500/40">
@@ -412,7 +412,7 @@
                             <span class="text-[7px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-10">0</span>/5</span>
                         </div>
 
-                        <!-- CENTRO DEL CUADRO: OCUPA LAS 4 CELDAS DEL MEDIO (2x2) Y ESTÁ VACÍO Y OSCURO -->
+                        <!-- CENTRO DEL CUADRO: OCUPA LAS 4 CELDAS DEL MEDIO (2x2) -->
                         <div id="centro-visor" class="centro-visor-cuadrado">
                             <span class="text-[9px] text-slate-500 uppercase tracking-wider font-bold block mb-0.5" id="visor-estado-txt">Sorteo en Vivo</span>
                             <div id="visor-objeto-central" class="flex flex-col items-center justify-center">
@@ -517,6 +517,7 @@
 
         let etapaPremioActual = 1;
         let juegoPausadoPorGanador = false;
+        let audioCtx = null;
 
         // LAS 10 FIGURAS OFICIALES DE TUS OBJETOS YUNE
         const listaObjetosYune = [
@@ -548,6 +549,35 @@
             'plane': 'El Avión ✈️',
             'rombo': 'Rombo Pequeño 💎'
         };
+
+        // GENERADOR DE SONIDO DE CLIC TIPO RULETA / MÁQUINA
+        function reproducirSonidoClic(esFinal = false) {
+            if (!audioHabilitado) return;
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                
+                osc.type = esFinal ? 'triangle' : 'sine';
+                osc.frequency.setValueAtTime(esFinal ? 300 : 800, audioCtx.currentTime);
+                
+                gain.gain.setValueAtTime(esFinal ? 0.3 : 0.08, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (esFinal ? 0.25 : 0.04));
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + (esFinal ? 0.25 : 0.04));
+            } catch(e) {
+                // Silencioso si el navegador bloquea audio sin interacción previa
+            }
+        }
 
         function switchGameMode(modo) {
             let sectionBingo = document.getElementById('section-bingo-main');
@@ -649,7 +679,7 @@
             });
         }
 
-        // CIRCUITO 4x4 (Las 10 figuras ordenadas una tras otra alrededor del marco perimetral)
+        // CIRCUITO 4x4 (Las 10 figuras en orden alrededor del marco)
         const ordenCircuito4x4 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
         function sortearObjetoCasinoAutomatico() {
@@ -658,7 +688,7 @@
                 return;
             }
 
-            // LIMPIAR CENTRO ANTES DE EMPEZAR EL GIRO (QUEDA OSCURO Y VACÍO)
+            // LIMPIAR CENTRO ANTES DE EMPEZAR EL GIRO
             let centroDiv = document.getElementById('centro-visor');
             let visorEmoji = document.getElementById('visor-emoji');
             let visorNombre = document.getElementById('visor-nombre');
@@ -675,9 +705,9 @@
 
             let totalPasos = ordenCircuito4x4.length;
             let pasadas = 0;
-            let maxPasadas = 45; // Da bastantes vueltas completas por las 10 figuras
+            let maxPasadas = 45; 
             let indiceSecuencia = 0;
-            let velocidad = 60; // Velocidad perfecta
+            let velocidad = 55; 
 
             let btnGirar = document.getElementById('btn-girar-ruleta');
             if (btnGirar) btnGirar.disabled = true;
@@ -692,13 +722,16 @@
                 let cardActual = document.getElementById(`card-objeto-el-${idActual}`);
                 if (cardActual) cardActual.classList.add('titling');
 
+                // Reproducir sonido de clic de avance
+                reproducirSonidoClic(false);
+
                 indiceSecuencia = (indiceSecuencia + 1) % totalPasos;
                 pasadas++;
 
                 if (pasadas < maxPasadas) {
                     // DESACELERACIÓN PROGRESIVA Y SUAVE (Frena de forma realista)
                     if (pasadas > maxPasadas - 15) {
-                        velocidad += 25; 
+                        velocidad += 30; 
                     }
                     setTimeout(pasoGiro, velocidad);
                 } else {
@@ -714,9 +747,10 @@
                     let cardGanadora = document.getElementById(`card-objeto-el-${objGanador.id}`);
                     if (cardGanadora) cardGanadora.classList.add('titling');
 
+                    // Sonido especial de victoria al detenerse
+                    reproducirSonidoClic(true);
                     cantarTextoVoz(objGanador.nombre);
 
-                    // Consultar Firebase para actualizar estrellas y dueño
                     db.ref(`room/objetosData/${objGanador.id}`).once('value').then((snap) => {
                         let d = snap.val() || { hits: 0, owner: null };
                         let hits = (d.hits || 0) + 1;
@@ -726,7 +760,6 @@
                         db.ref(`room/objetosData/${objGanador.id}/hits`).set(hits).then(() => {
                             renderizarObjetosYune();
 
-                            // EL OBJETO SE REFLEJA EN EL CENTRO Y SE QUEDA QUIETO UN BUEN RATO
                             if (centroDiv) centroDiv.classList.add('activo');
                             if (visorEstado) visorEstado.innerText = "¡Resultado!";
                             if (visorEmoji) { visorEmoji.innerText = objGanador.emoji; visorEmoji.className = "text-4xl block mb-0.5 animate-bounce"; }
@@ -791,7 +824,6 @@
                 }
                 if (btnSiguiente) btnSiguiente.classList.add('hidden');
 
-                // Volver a oscurecer el centro para la siguiente ronda
                 let centroDiv = document.getElementById('centro-visor');
                 let visorEmoji = document.getElementById('visor-emoji');
                 let visorNombre = document.getElementById('visor-nombre');
@@ -854,6 +886,12 @@
             if ('speechSynthesis' in window && audioHabilitado) {
                 let utterance = new SpeechSynthesisUtterance("");
                 window.speechSynthesis.speak(utterance);
+            }
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
             }
         }
 
@@ -1908,6 +1946,7 @@
             container.innerHTML = '';
             let misCartones = [];
             for (let id in marketCards) {
+                id = Number(id);
                 if (marketCards[id].ownerControl === currentUser.control && marketCards[id].loaded) {
                     let analisis = obtenerNumerosFaltantesGanar(marketCards[id].grid, drawnBalls, gamePattern);
                     misCartones.push({ card: marketCards[id], analisis: analisis });
@@ -1936,7 +1975,7 @@
         function enviarMensajeChatAdmin() {
             let input = document.getElementById('input-mensaje-admin');
             if (!input || !input.value.trim()) return;
-            db.ref('chatSala').push({ nombre: "Administradora ⭐", mensaje: input.value.trim(), tiempo: Date.now() }, () => { input.value = ""; });
+            db.ref('chatSala': 'chatSala').push({ nombre: "Administradora ⭐", mensaje: input.value.trim(), tiempo: Date.now() }, () => { input.value = ""; });
         }
 
         function escucharChatEnVivo() {
