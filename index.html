@@ -322,11 +322,11 @@
             </div>
         </div>
 
-        <!-- SALA JUGADORA -->
+                <!-- SALA JUGADORA -->
         <div id="view-player-room" class="w-full flex flex-col gap-6 hidden">
-            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="bg-slate-800 p-6 rounded-3xl flex flex-col md:flex-row justify-between items-center gap-4 shadow-xl border border-slate-700">
                 <div>
-                    <h2 class="text-2xl font-bold text-yellow-300">¡Hola, <span id="player-display-name">Jugadora</span>!</h2>
+                    <h2 class="text-2xl font-bold text-yellow-300">¡Hola, <span id="player-display-name">Jugadora</span>! 👋✨</h2>
                     <p class="text-xs text-slate-400">Control ID: <span id="player-display-control">--</span></p>
                 </div>
                 <div class="flex flex-wrap gap-2 items-center">
@@ -348,9 +348,31 @@
                             <span id="player-pattern-label" class="text-xs text-yellow-300 font-semibold">Línea</span>
                         </div>
                     </div>
-                    <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 text-xs rounded-xl">Salir</button>
+                    <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-xs text-white rounded-xl font-bold transition">Salir</button>
                 </div>
             </div>
+
+            <!-- MENÚ DE SELECCIÓN DE JUEGO PARA LA JUGADORA -->
+            <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button onclick="mostrarJuegoJugador('bingo')" class="bg-gradient-to-r from-pink-600 to-purple-700 hover:from-pink-500 hover:to-purple-600 p-5 rounded-2xl border border-pink-400/30 text-left shadow-lg flex items-center justify-between transition transform active:scale-95">
+                    <div>
+                        <span class="text-2xl">🎰</span>
+                        <h3 class="text-lg font-bold text-white">Bingo Lineal Yune</h3>
+                        <p class="text-xs text-pink-200">Ver líneas, cartones y jugadas en vivo</p>
+                    </div>
+                    <span class="bg-pink-500/30 text-pink-200 text-xs px-3 py-1 rounded-lg border border-pink-300/40">Entrar ➔</span>
+                </button>
+
+                <button onclick="mostrarJuegoJugador('objetos')" class="bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 p-5 rounded-2xl border border-yellow-400/30 text-left shadow-lg flex items-center justify-between transition transform active:scale-95">
+                    <div>
+                        <span class="text-2xl">🎲</span>
+                        <h3 class="text-lg font-bold text-white">Game Objetos Yune</h3>
+                        <p class="text-xs text-yellow-100">Seleccionar objetos, disponibilidad y ganadoras</p>
+                    </div>
+                    <span class="bg-yellow-500/30 text-yellow-100 text-xs px-3 py-1 rounded-lg border border-yellow-300/40">Entrar ➔</span>
+                </button>
+            </div>
+
 
             <!-- MODAL DE VISTA PREVIA DE CARTÓN A PANTALLA COMPLETA -->
             <div id="modal-carton-fullscreen" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
