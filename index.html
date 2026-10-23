@@ -690,7 +690,6 @@
                 }
             });
         }
-
         function seleccionarObjetoYune(idObj) {
             if (!currentUser.control) {
                 alert("Por favor ingresa primero con tu nombre para seleccionar un objeto.");
@@ -718,6 +717,31 @@
             });
         }
 
+        // FUNCIÓN EQUITATIVA: EXCLUYE OBJETOS QUE YA TIENEN 5 ESTRELLAS (GANADORES)
+        function seleccionarObjetoEquitativo() {
+            let objetosDisponibles = [];
+
+            listaObjetosYune.forEach(obj => {
+                let cardEl = document.getElementById(`hits-obj-${obj.id}`);
+                let hitsActuales = 0;
+                if (cardEl && !isNaN(parseInt(cardEl.innerText))) {
+                    hitsActuales = parseInt(cardEl.innerText);
+                }
+
+                // Solo entran al sorteo los que tienen menos de 5 hits/estrellas
+                if (hitsActuales < 5) {
+                    objetosDisponibles.push(obj);
+                }
+            });
+
+            if (objetosDisponibles.length === 0) {
+                return listaObjetosYune[0];
+            }
+
+            let elegido = objetosDisponibles[Math.floor(Math.random() * objetosDisponibles.length)];
+            return elegido;
+        }
+
         // GIRO AUTOMÁTICO CONTINUO CON SALTO DE LUZ EN EL PERÍMETRO HASTA CAER EN EL GANADOR
         function iniciarGiroAutomaticoContinuo() {
             if (juegoPausadoPorGanador) {
@@ -738,14 +762,13 @@
             if (centroDiv) centroDiv.classList.add('activo');
             if (visorEstado) visorEstado.innerText = "Trrr... Sorteando en Vivo";
 
-            // Sorteamos de una vez el ganador secreto hacia donde irá frenando
-            let ganadorIndex = Math.floor(Math.random() * listaObjetosYune.length);
-            let objGanador = listaObjetosYune[ganadorIndex];
+            // Usamos la selección equitativa para no repetir ganadores
+            let objGanador = seleccionarObjetoEquitativo();
             let targetId = objGanador.id;
             let targetPerimetroIndex = ordenPerimetroRuleta.indexOf(targetId);
 
             let currentIndex = 0;
-            let totalPasosVueltas = 20 + targetPerimetroIndex; // Da varias vueltas de emoción antes de llegar al ganador
+            let totalPasosVueltas = 20 + targetPerimetroIndex; 
             let pasoActual = 0;
 
             intervaloGiroContinuo = setInterval(() => {
@@ -753,6 +776,8 @@
                     clearInterval(intervaloGiroContinuo);
                     return;
                 }
+
+        
 
                 reproducirSonidoTrrr();
 
