@@ -63,8 +63,6 @@
         }
 
         /* Estilos específicos para Game Objetos Yune */
-        .game-section { display: none; }
-        .game-section.active-section { display: block; }
         .objeto-card {
             background: #1a1a40;
             border: 2px solid #2a2a60;
@@ -76,10 +74,10 @@
             cursor: pointer;
         }
         .objeto-card.titling {
-            border-color: #ffd700;
-            box-shadow: 0 0 25px #ffd700;
+            border-color: #ffd700 !important;
+            box-shadow: 0 0 25px #ffd700 !important;
             transform: scale(1.08);
-            background: #2b2b60;
+            background: #2b2b60 !important;
         }
         .objeto-card.selected-by-user {
             border-color: #05d9e8;
@@ -93,7 +91,7 @@
     <div id="app" class="w-full max-w-4xl mx-auto flex flex-col items-center flex-grow">
         
         <!-- BARRA SUPERIOR CON RELOJ Y BOTÓN DE CAMBIO DE MODO -->
-        <div class="w-full flex justify-between items-center px-2 pt-2">
+        <div id="top-bar-nav" class="w-full flex justify-between items-center px-2 pt-2 hidden">
             <div class="flex gap-2">
                 <button onclick="switchGameMode('bingo')" id="btn-mode-bingo" class="px-4 py-1.5 bg-gradient-to-r from-pink-600 to-purple-600 font-bold text-xs rounded-xl shadow cursor-pointer transition">🎲 Modo Bingo</button>
                 <button onclick="switchGameMode('objetos')" id="btn-mode-objetos" class="px-4 py-1.5 bg-slate-800 border border-slate-700 text-slate-300 font-bold text-xs rounded-xl shadow cursor-pointer transition">⭐ Objetos Yune</button>
@@ -111,53 +109,55 @@
         </header>
 
         <!-- ========================================== -->
+        <!-- PANTALLAS DE ACCESO (HOME Y LOGINS)        -->
+        <!-- ========================================== -->
+        <div id="view-home" class="w-full bg-slate-800/80 backdrop-blur border border-slate-700 p-6 md:p-8 rounded-3xl card-shadow flex flex-col items-center gap-6 max-w-md mx-auto">
+            <h2 class="text-2xl font-bold text-yellow-300">¡Bienvenida a la Diversión!</h2>
+            
+            <div id="home-room-status-badge" class="w-full text-center py-2 px-4 rounded-xl text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                🟢 Sala Abierta a Jugadoras
+            </div>
+
+            <button onclick="showPlayerLogin()" class="w-full py-4 bg-gradient-to-r from-pink-600 to-purple-600 font-bold text-lg rounded-2xl shadow-lg cursor-pointer">🎮 Entrar como Jugadora</button>
+            <button onclick="showAdminLogin()" class="w-full py-3 bg-slate-700 text-slate-300 font-semibold text-sm rounded-2xl cursor-pointer">🔐 Acceso Administradora</button>
+        </div>
+
+        <!-- LOGIN ADMIN -->
+        <div id="view-admin-login" class="w-full bg-slate-800/80 p-6 rounded-3xl card-shadow flex flex-col items-center gap-6 max-w-md mx-auto hidden">
+            <h2 class="text-2xl font-bold text-pink-400">Panel de Administradora</h2>
+            <p id="admin-login-msg" class="text-xs text-slate-400 text-center">Ingresa tu clave secreta maestra.</p>
+            <input type="password" id="admin-password-input" placeholder="Clave secreta" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-center text-xl text-white">
+            <div class="flex gap-3 w-full">
+                <button onclick="backToHome()" class="w-1/2 py-3 bg-slate-700 rounded-xl font-semibold">Volver</button>
+                <button onclick="verifyAdminPassword()" class="w-1/2 py-3 bg-pink-600 rounded-xl font-bold">Ingresar</button>
+            </div>
+        </div>
+
+        <!-- REGISTRO JUGADORA -->
+        <div id="view-player-register" class="w-full bg-slate-800/80 p-6 rounded-3xl card-shadow flex flex-col items-center gap-6 max-w-md mx-auto hidden">
+            <h2 class="text-2xl font-bold text-yellow-300 text-center">Registro de Jugadora</h2>
+            <div id="welcome-back-msg" class="text-green-400 font-semibold text-center hidden"></div>
+            
+            <div id="room-closed-warning" class="hidden w-full bg-red-950/80 border border-red-600 text-red-200 p-4 rounded-2xl text-center font-bold text-xs flex flex-col gap-1">
+                <span>🔒 ¡La sala de juego está cerrada por la Administradora en este momento!</span>
+                <span class="text-[10px] text-slate-300 font-normal">No se permiten nuevos ingresos ni accesos hasta nuevo aviso.</span>
+            </div>
+
+            <div class="w-full flex flex-col gap-4" id="player-register-form-fields">
+                <input type="text" id="player-name-input" placeholder="Tu Nombre o Apodo" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                <input type="text" id="player-control-input" placeholder="Número de Control (Cédula o Teléfono)" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono">
+                <input type="password" id="player-access-code-input" placeholder="🔑 Código de Acceso de Sala" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-center text-white tracking-widest font-bold">
+            </div>
+            <div class="flex gap-3 w-full">
+                <button onclick="backToHome()" class="w-1/2 py-3 bg-slate-700 rounded-xl font-semibold">Volver</button>
+                <button id="btn-submit-player-login" onclick="registerPlayer()" class="w-1/2 py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-bold cursor-pointer">Entrar al Juego</button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
         <!-- SECCIÓN 1: BINGO LINEAL TRADICIONAL        -->
         <!-- ========================================== -->
-        <div id="section-bingo-main" class="w-full flex flex-col gap-6">
-            <!-- PANTALLA INICIAL -->
-            <div id="view-home" class="w-full bg-slate-800/80 backdrop-blur border border-slate-700 p-6 md:p-8 rounded-3xl card-shadow flex flex-col items-center gap-6 max-w-md mx-auto">
-                <h2 class="text-2xl font-bold text-yellow-300">¡Bienvenida a la Diversión!</h2>
-                
-                <div id="home-room-status-badge" class="w-full text-center py-2 px-4 rounded-xl text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                    🟢 Sala Abierta a Jugadoras
-                </div>
-
-                <button onclick="showPlayerLogin()" class="w-full py-4 bg-gradient-to-r from-pink-600 to-purple-600 font-bold text-lg rounded-2xl shadow-lg cursor-pointer">🎮 Entrar como Jugadora</button>
-                <button onclick="showAdminLogin()" class="w-full py-3 bg-slate-700 text-slate-300 font-semibold text-sm rounded-2xl cursor-pointer">🔐 Acceso Administradora</button>
-            </div>
-
-            <!-- LOGIN ADMIN -->
-            <div id="view-admin-login" class="w-full bg-slate-800/80 p-6 rounded-3xl card-shadow flex flex-col items-center gap-6 max-w-md mx-auto hidden">
-                <h2 class="text-2xl font-bold text-pink-400">Panel de Administradora</h2>
-                <p id="admin-login-msg" class="text-xs text-slate-400 text-center">Ingresa tu clave secreta maestra.</p>
-                <input type="password" id="admin-password-input" placeholder="Clave secreta" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-center text-xl text-white">
-                <div class="flex gap-3 w-full">
-                    <button onclick="backToHome()" class="w-1/2 py-3 bg-slate-700 rounded-xl font-semibold">Volver</button>
-                    <button onclick="verifyAdminPassword()" class="w-1/2 py-3 bg-pink-600 rounded-xl font-bold">Ingresar</button>
-                </div>
-            </div>
-
-            <!-- REGISTRO JUGADORA -->
-            <div id="view-player-register" class="w-full bg-slate-800/80 p-6 rounded-3xl card-shadow flex flex-col items-center gap-6 max-w-md mx-auto hidden">
-                <h2 class="text-2xl font-bold text-yellow-300 text-center">Registro de Jugadora</h2>
-                <div id="welcome-back-msg" class="text-green-400 font-semibold text-center hidden"></div>
-                
-                <div id="room-closed-warning" class="hidden w-full bg-red-950/80 border border-red-600 text-red-200 p-4 rounded-2xl text-center font-bold text-xs flex flex-col gap-1">
-                    <span>🔒 ¡La sala de juego está cerrada por la Administradora en este momento!</span>
-                    <span class="text-[10px] text-slate-300 font-normal">No se permiten nuevos ingresos ni accesos hasta nuevo aviso.</span>
-                </div>
-
-                <div class="w-full flex flex-col gap-4" id="player-register-form-fields">
-                    <input type="text" id="player-name-input" placeholder="Tu Nombre o Apodo" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white">
-                    <input type="text" id="player-control-input" placeholder="Número de Control (Cédula o Teléfono)" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono">
-                    <input type="password" id="player-access-code-input" placeholder="🔑 Código de Acceso de Sala" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-center text-white tracking-widest font-bold">
-                </div>
-                <div class="flex gap-3 w-full">
-                    <button onclick="backToHome()" class="w-1/2 py-3 bg-slate-700 rounded-xl font-semibold">Volver</button>
-                    <button id="btn-submit-player-login" onclick="registerPlayer()" class="w-1/2 py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-bold cursor-pointer">Entrar al Juego</button>
-                </div>
-            </div>
-
+        <div id="section-bingo-main" class="w-full flex-col gap-6 hidden">
             <!-- PANEL ADMIN BINGO -->
             <div id="view-admin-panel" class="w-full flex flex-col gap-6 hidden">
                 <div class="bg-slate-800 p-6 rounded-3xl flex justify-between items-center flex-wrap gap-3">
@@ -479,7 +479,7 @@
         <!-- ========================================== -->
         <!-- SECCIÓN 2: GAME OBJETOS YUNE               -->
         <!-- ========================================== -->
-        <div id="section-objetos-main" class="w-full flex flex-col gap-6 game-section">
+        <div id="section-objetos-main" class="w-full flex-col gap-6 hidden">
             <div class="bg-slate-800 p-6 rounded-3xl card-shadow flex flex-col gap-6">
                 <div class="text-center">
                     <h2 class="text-2xl font-bold text-yellow-300">🎰 Game Objetos Yune 🎰</h2>
@@ -489,8 +489,9 @@
                 <!-- PANTALLA GIGANTE CON LAS 5 ESTRELLAS -->
                 <div class="bg-gradient-to-r from-indigo-950 to-slate-900 border-2 border-cyan-400 p-6 rounded-2xl text-center shadow-lg">
                     <span class="text-xs text-slate-400 uppercase tracking-widest font-bold">Tus Objetos en Juego</span>
-                    <div id="my-object-big-view" class="text-2xl font-black text-white my-2">Ninguno seleccionado</div>
-                    <div id="my-object-stars" class="text-3xl tracking-widest text-slate-600 mt-2">⭐⭐⭐⭐⭐</div>
+                    <div id="mis-objetos-juego-grid" class="mt-2">
+                        <div class="text-slate-400 text-sm py-2">No has seleccionado ningún objeto. Toca un objeto abajo para apartarlo.</div>
+                    </div>
                 </div>
 
                 <!-- PANEL DE ADMIN PARA SORTEAR Y LIBERAR -->
@@ -506,9 +507,12 @@
                     </div>
                 </div>
 
+                <!-- RESUMEN VERTICAL ESTILO WHATSAPP -->
+                <div id="resumen-vertical-objetos"></div>
+
                 <!-- GRILLA DE LOS 10 OBJETOS -->
                 <div>
-                    <h3 class="text-sm font-bold text-pink-400 mb-2">🎁 Lista de Objetos Disponibles (Toca para Apartar):</h3>
+                    <h3 class="text-sm font-bold text-pink-400 mb-2">🎁 Selecciona tu Objeto:</h3>
                     <div id="grid-objetos-yune" class="grid grid-cols-2 md:grid-cols-5 gap-3">
                         <!-- Se llena con JS -->
                     </div>
@@ -595,13 +599,13 @@
             let btnObjetos = document.getElementById('btn-mode-objetos');
 
             if (modo === 'bingo') {
-                sectionBingo.classList.remove('hidden');
-                sectionObjetos.classList.add('hidden');
+                sectionBingo.style.display = 'flex';
+                sectionObjetos.style.display = 'none';
                 btnBingo.className = "px-4 py-1.5 bg-gradient-to-r from-pink-600 to-purple-600 font-bold text-xs rounded-xl shadow cursor-pointer transition";
                 btnObjetos.className = "px-4 py-1.5 bg-slate-800 border border-slate-700 text-slate-300 font-bold text-xs rounded-xl shadow cursor-pointer transition";
             } else {
-                sectionBingo.classList.add('hidden');
-                sectionObjetos.classList.remove('hidden');
+                sectionBingo.style.display = 'none';
+                sectionObjetos.style.display = 'flex';
                 btnObjetos.className = "px-4 py-1.5 bg-gradient-to-r from-pink-600 to-purple-600 font-bold text-xs rounded-xl shadow cursor-pointer transition";
                 btnBingo.className = "px-4 py-1.5 bg-slate-800 border border-slate-700 text-slate-300 font-bold text-xs rounded-xl shadow cursor-pointer transition";
                 renderizarObjetosYune();
@@ -622,9 +626,8 @@
                 let misObjetosEnJuego = [];
                 let asignadosCount = 0;
 
-                // Inicio del formato lista vertical estilo WhatsApp
                 let listaVerticalHTML = `
-                    <div class="bg-slate-950 p-4 rounded-2xl border border-pink-500/40 mb-4 text-left font-mono text-xs shadow-lg">
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-pink-500/40 mb-2 text-left font-mono text-xs shadow-lg">
                         <div class="text-center font-bold text-yellow-300 text-sm mb-3">🎁 LISTA DE OBJETOS EN JUEGO 🎁</div>
                         <div class="flex flex-col gap-1.5">
                 `;
@@ -639,7 +642,6 @@
                         misObjetosEnJuego.push({ ...obj, hits: estadoObj.hits || 0 });
                     }
 
-                    // Formato idéntico a WhatsApp: Numero Emoji Nombre - Dueña/Disponible
                     let estadoTexto = estadoObj.owner 
                         ? `<span class="text-yellow-300 font-bold">${estadoObj.owner}</span>` 
                         : `<span class="text-emerald-400 italic">Disponible</span>`;
@@ -651,9 +653,10 @@
                         </div>
                     `;
 
-                    // Renderizar Tarjeta de Objeto en el Mercado General
+                    // Renderizar Tarjeta de Objeto
                     let card = document.createElement('div');
                     card.className = `objeto-card ${esMio ? 'selected-by-user border-cyan-400' : 'bg-slate-900 border-slate-800'}`;
+                    card.dataset.id = obj.id;
                     card.onclick = () => seleccionarObjetoYune(obj.id);
                     card.innerHTML = `
                         <span class="text-3xl block mb-1">${obj.emoji}</span>
@@ -662,7 +665,7 @@
                     `;
                     gridContainer.appendChild(card);
 
-                    // Renderizar Control de Administradora
+                    // Renderizar Admin Control
                     if (adminControlList) {
                         let row = document.createElement('div');
                         row.className = "flex justify-between items-center bg-slate-900 p-2 rounded-lg text-xs";
@@ -682,54 +685,32 @@
                     </div>
                 `;
 
-                // Insertar o actualizar la lista vertical
-                let existingResumen = document.getElementById('resumen-vertical-objetos');
-                if (existingResumen) {
-                    existingResumen.outerHTML = `<div id="resumen-vertical-objetos">${listaVerticalHTML}</div>`;
-                } else {
-                    let containerPadre = document.getElementById('grid-objetos-yune').parentNode;
-                    let divResumen = document.createElement('div');
-                    divResumen.id = 'resumen-vertical-objetos';
-                    divResumen.innerHTML = listaVerticalHTML;
-                    containerPadre.insertBefore(divResumen, document.getElementById('grid-objetos-yune'));
+                let resContainer = document.getElementById('resumen-vertical-objetos');
+                if (resContainer) resContainer.innerHTML = listaVerticalHTML;
+
+                // Renderizar Mis Objetos
+                let misObjGrid = document.getElementById('mis-objetos-juego-grid');
+                if (misObjGrid) {
+                    if (misObjetosEnJuego.length === 0) {
+                        misObjGrid.innerHTML = '<div class="text-slate-400 text-sm py-2">No has seleccionado ningún objeto. Toca un objeto abajo para apartarlo.</div>';
+                    } else {
+                        let htmlMis = '<div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">';
+                        misObjetosEnJuego.forEach(mObj => {
+                            let hits = mObj.hits || 0;
+                            let estrellasHTML = '<span class="text-yellow-400 drop-shadow">' + '⭐'.repeat(hits) + '</span><span class="text-slate-600">' + '☆'.repeat(5 - hits) + '</span>';
+                            htmlMis += `
+                                <div class="bg-slate-900 border border-cyan-400/60 p-3 rounded-xl flex flex-col items-center justify-center gap-1 shadow">
+                                    <span class="text-2xl">${mObj.emoji}</span>
+                                    <span class="text-sm font-bold text-white">${mObj.nombre}</span>
+                                    <div class="text-xl tracking-widest mt-1">${estrellasHTML}</div>
+                                </div>
+                            `;
+                        });
+                        htmlMis += '</div>';
+                        misObjGrid.innerHTML = htmlMis;
+                    }
                 }
 
-                // Renderizar "Mis Objetos en Juego" (cada uno con sus 5 estrellas)
-                let bigViewContainer = document.getElementById('my-object-big-view').parentNode;
-                let misObjetosHTML = '<div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">';
-                
-                if (misObjetosEnJuego.length === 0) {
-                    misObjetosHTML = '<div class="text-slate-400 text-sm py-2">No has seleccionado ningún objeto. Toca un objeto abajo para apartarlo.</div>';
-                } else {
-                    misObjetosEnJuego.forEach(mObj => {
-                        let estrellasCount = mObj.hits || 0;
-                        let estrellasHTML = '<span class="text-yellow-400 drop-shadow">' + '⭐'.repeat(estrellasCount) + '</span><span class="text-slate-600">' + '☆'.repeat(5 - estrellasCount) + '</span>';
-                        
-                        misObjetosHTML += `
-                            <div class="bg-slate-900 border border-cyan-400/60 p-3 rounded-xl flex flex-col items-center justify-center gap-1 shadow">
-                                <span class="text-2xl">${mObj.emoji}</span>
-                                <span class="text-sm font-bold text-white">${mObj.nombre}</span>
-                                <div class="text-xl tracking-widest mt-1">${estrellasHTML}</div>
-                            </div>
-                        `;
-                    });
-                    misObjetosHTML += '</div>';
-                }
-
-                document.getElementById('my-object-big-view').style.display = 'none';
-                document.getElementById('my-object-stars').style.display = 'none';
-                
-                let existingMisObjetosGrid = document.getElementById('mis-objetos-juego-grid');
-                if (existingMisObjetosGrid) {
-                    existingMisObjetosGrid.outerHTML = `<div id="mis-objetos-juego-grid">${misObjetosHTML}</div>`;
-                } else {
-                    let divMisObj = document.createElement('div');
-                    divMisObj.id = 'mis-objetos-juego-grid';
-                    divMisObj.innerHTML = misObjetosHTML;
-                    bigViewContainer.appendChild(divMisObj);
-                }
-
-                // Mostrar panel admin si es Yune o Admin
                 if (currentUser.isAdmin || (currentUser.name && currentUser.name.toLowerCase() === 'yune')) {
                     let adminPanelObj = document.getElementById('admin-objetos-panel');
                     if (adminPanelObj) adminPanelObj.classList.remove('hidden');
@@ -765,9 +746,10 @@
         }
 
         function liberarObjetoYuneAdmin(idObj) {
-            db.ref(`room/objetosData/${idObj}`).update({ owner: null, ownerControl: null });
-            alert(`¡Objeto #${idObj} liberado con éxito!`);
-            renderizarObjetosYune();
+            db.ref(`room/objetosData/${idObj}`).update({ owner: null, ownerControl: null }).then(() => {
+                alert(`¡Objeto #${idObj} liberado con éxito!`);
+                renderizarObjetosYune();
+            });
         }
 
         function sortearObjetoCasino() {
@@ -787,7 +769,8 @@
                     
                     let ganadorIdx = Math.floor(Math.random() * listaObjetosYune.length);
                     let objGanador = listaObjetosYune[ganadorIdx];
-                    cards[ganadorIdx].classList.add('titling');
+                    
+                    if (cards[ganadorIdx]) cards[ganadorIdx].classList.add('titling');
 
                     cantarTextoVoz("Salió el objeto: " + objGanador.nombre);
 
@@ -1227,11 +1210,14 @@
                 presenceRef.remove();
                 presenceRef = null;
             }
+            document.getElementById('top-bar-nav').classList.add('hidden');
             document.getElementById('view-home').classList.remove('hidden');
             document.getElementById('view-admin-login').classList.add('hidden');
             document.getElementById('view-player-register').classList.add('hidden');
             document.getElementById('view-admin-panel').classList.add('hidden');
             document.getElementById('view-player-room').classList.add('hidden');
+            document.getElementById('section-bingo-main').style.display = 'none';
+            document.getElementById('section-objetos-main').style.display = 'none';
             if (autoDrawInterval) clearInterval(autoDrawInterval);
             isAutoRunning = false;
         }
@@ -1243,6 +1229,8 @@
                 currentUser.isAdmin = true;
                 currentUser.name = "Administradora";
                 document.getElementById('view-admin-login').classList.add('hidden');
+                document.getElementById('top-bar-nav').classList.remove('hidden');
+                document.getElementById('section-bingo-main').style.display = 'flex';
                 document.getElementById('view-admin-panel').classList.remove('hidden');
                 inicializarMercadoCartones();
                 sincronizarDatosAdmin();
@@ -1289,6 +1277,8 @@
             currentUser.isAdmin = false;
 
             document.getElementById('view-player-register').classList.add('hidden');
+            document.getElementById('top-bar-nav').classList.remove('hidden');
+            document.getElementById('section-bingo-main').style.display = 'flex';
             document.getElementById('view-player-room').classList.remove('hidden');
 
             document.getElementById('player-display-name').innerText = name;
