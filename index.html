@@ -364,7 +364,7 @@
         </div>
 
         <!-- ================================================================= -->
-        <!-- SECCIÓN 2: GAME OBJETOS YUNE (RULETA 4x4 CON SONIDO DE GIRO Y FRENADO) -->
+        <!-- SECCIÓN 2: GAME OBJETOS YUNE (RULETA 4x4 CON SONIDO Y BOTONES LIBRES) -->
         <!-- ================================================================= -->
         <div id="section-objetos-main" class="w-full flex-col gap-6 hidden">
             <div class="bg-slate-800 p-6 rounded-3xl card-shadow flex flex-col gap-6 max-w-lg mx-auto w-full">
@@ -575,7 +575,7 @@
                 osc.start();
                 osc.stop(audioCtx.currentTime + (esFinal ? 0.25 : 0.04));
             } catch(e) {
-                // Silencioso si el navegador bloquea audio sin interacción previa
+                // Silencioso si el navegador bloquea audio
             }
         }
 
@@ -688,7 +688,6 @@
                 return;
             }
 
-            // LIMPIAR CENTRO ANTES DE EMPEZAR EL GIRO
             let centroDiv = document.getElementById('centro-visor');
             let visorEmoji = document.getElementById('visor-emoji');
             let visorNombre = document.getElementById('visor-nombre');
@@ -722,20 +721,17 @@
                 let cardActual = document.getElementById(`card-objeto-el-${idActual}`);
                 if (cardActual) cardActual.classList.add('titling');
 
-                // Reproducir sonido de clic de avance
                 reproducirSonidoClic(false);
 
                 indiceSecuencia = (indiceSecuencia + 1) % totalPasos;
                 pasadas++;
 
                 if (pasadas < maxPasadas) {
-                    // DESACELERACIÓN PROGRESIVA Y SUAVE (Frena de forma realista)
                     if (pasadas > maxPasadas - 15) {
                         velocidad += 30; 
                     }
                     setTimeout(pasoGiro, velocidad);
                 } else {
-                    // FRENADO FINAL: Seleccionar el ganador real
                     for (let i = 0; i < ordenCircuito4x4.length; i++) {
                         let card = document.getElementById(`card-objeto-el-${ordenCircuito4x4[i]}`);
                         if (card) card.classList.remove('titling');
@@ -747,7 +743,6 @@
                     let cardGanadora = document.getElementById(`card-objeto-el-${objGanador.id}`);
                     if (cardGanadora) cardGanadora.classList.add('titling');
 
-                    // Sonido especial de victoria al detenerse
                     reproducirSonidoClic(true);
                     cantarTextoVoz(objGanador.nombre);
 
@@ -1946,7 +1941,7 @@
             container.innerHTML = '';
             let misCartones = [];
             for (let id in marketCards) {
-                id = Number(id);
+                let cardIdNum = Number(id);
                 if (marketCards[id].ownerControl === currentUser.control && marketCards[id].loaded) {
                     let analisis = obtenerNumerosFaltantesGanar(marketCards[id].grid, drawnBalls, gamePattern);
                     misCartones.push({ card: marketCards[id], analisis: analisis });
@@ -1975,7 +1970,7 @@
         function enviarMensajeChatAdmin() {
             let input = document.getElementById('input-mensaje-admin');
             if (!input || !input.value.trim()) return;
-            db.ref('chatSala': 'chatSala').push({ nombre: "Administradora ⭐", mensaje: input.value.trim(), tiempo: Date.now() }, () => { input.value = ""; });
+            db.ref('chatSala').push({ nombre: "Administradora ⭐", mensaje: input.value.trim(), tiempo: Date.now() }, () => { input.value = ""; });
         }
 
         function escucharChatEnVivo() {
