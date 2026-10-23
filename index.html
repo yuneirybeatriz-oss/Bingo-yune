@@ -47,7 +47,6 @@
             border: 3px solid #38bdf8 !important;
             background: #0c4a6e !important; z-index: 10;
         }
-        /* TITILEO CLARO Y FIJO SINCRONIZADO */
         @keyframes titileoFuerte {
             0% { border-color: #ffffff; box-shadow: 0 0 25px #ffffff, inset 0 0 15px #38bdf8; background: #0284c7; transform: scale(1.08); }
             50% { border-color: #facc15; box-shadow: 0 0 40px #facc15, inset 0 0 25px #facc15; background: #4338ca; transform: scale(1.12); }
@@ -60,7 +59,6 @@
         .objeto-card.selected-by-user {
             border-color: #38bdf8; background: #0d3b66;
         }
-        /* OBJETO GANADOR BLOQUEADO Y OSCURECIDO */
         .objeto-card.objeto-ganador-ronda {
             background: #020617 !important; border-color: #dc2626 !important;
             opacity: 0.35; filter: grayscale(100%); cursor: not-allowed; pointer-events: none;
@@ -344,6 +342,17 @@
                 <div class="text-center">
                     <h2 class="text-2xl font-bold text-yellow-300">🎰 Game Objetos Yune 🎰</h2>
                     <p class="text-xs text-slate-400">Selecciona tu objeto, sigue el sorteo en vivo y gana los 4 premios</p>
+                </div>
+
+                <!-- 🔥 NUEVA VENTANA DE PERSONAS CONECTADAS EN VIVO (VISIBLE PARA TODOS) -->
+                <div class="bg-slate-900 p-4 rounded-2xl border border-emerald-500/40 shadow">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider">🟢 Personas Conectadas en Vivo</h3>
+                        <span id="contador-conectadas-badge" class="bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full text-[10px] font-bold">0 en línea</span>
+                    </div>
+                    <div id="lista-personas-conectadas-vivo" class="flex flex-wrap gap-2 max-h-24 overflow-y-auto p-2 bg-slate-950 rounded-xl">
+                        <span class="text-slate-500 text-xs italic">Esperando que ingresen jugadoras...</span>
+                    </div>
                 </div>
 
                 <!-- TABLERO CUADRADO PERIMETRAL 4x4 -->
@@ -739,11 +748,10 @@
             `;
         }
 
-        // 🔥 SINCRONIZACIÓN EN TIEMPO REAL DEL ESTADO VISUAL DE LA RULETA (GIRO Y TITILEO EN TODOS LOS TELÉFONOS)
+        // 🔥 SINCRONIZACIÓN EN TIEMPO REAL DE OBJETOS, GANADORES Y PERSONAS CONECTADAS
         function sincronizarObjetosYune() {
             construirEstructuraRuletaHTML();
             
-            // Escuchar cambios en los datos de los objetos y estrellas
             db.ref('room/objetosData').on('value', (snap) => {
                 let objetosState = snap.val() || {};
                 let listaRespaldoHTML = '';
@@ -790,11 +798,49 @@
                 if (respaldoEl) respaldoEl.innerHTML = listaRespaldoHTML;
             });
 
-            // Escuchar el estado actual del giro en vivo para que TODOS los teléfonos vean qué objeto va iluminado o titilando
+            // Sincronizar ganadores de los 4 premios
+            db.ref('room/ganadoresPremios').on('value', (snap) => {
+                let ganadores = snap.val() || {};
+                for (let i = 1; i <= 4; i++) {
+                    let spanPremio = document.getElementById(`ganador-premio-${i}`);
+                    if (spanPremio) {
+                        if (ganadores[i]) {
+                            spanPremio.innerText = `${ganadores[i].emoji} ${ganadores[i].nombre} (Dueño: ${ganadores[i].dueno})`;
+                            spanPremio.className = "text-yellow-300 font-bold";
+                        } else {
+                            spanPremio.innerText = "Por sortear";
+                            spanPremio.className = "text-slate-400 font-semibold";
+                        }
+                    }
+                }
+            });
+
+            // 🔥 SINCRONIZAR PERSONAS CONECTADAS EN VIVO EN AMBOS PANELES
+            db.ref('room/connectedPlayers').on('value', (snap) => {
+                let players = snap.val() || {};
+                let lista = Object.values(players);
+                let containerVivo = document.getElementById('lista-personas-conectadas-vivo');
+                let badgeConectadas = document.getElementById('contador-conectadas-badge');
+
+                if (badgeConectadas) badgeConectadas.innerText = `${lista.length} en línea`;
+
+                if (containerVivo) {
+                    if (lista.length === 0) {
+                        containerVivo.innerHTML = '<span class="text-slate-500 text-xs italic">No hay personas conectadas en este momento.</span>';
+                    } else {
+                        let html = '';
+                        lista.forEach(p => {
+                            html += `<div class="bg-slate-900 border border-emerald-500/30 px-3 py-1.5 rounded-lg flex items-center gap-2 text-xs"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span class="font-bold text-pink-300">${p.name}</span></div>`;
+                        });
+                        containerVivo.innerHTML = html;
+                    }
+                }
+            });
+
+            // Sincronizar animación de la ruleta
             db.ref('room/ruletaAnimacion').on('value', (snap) => {
                 let anim = snap.val();
                 
-                // Limpiar luces anteriores en todos los cuadros
                 for (let i = 1; i <= 10; i++) {
                     let c = document.getElementById(`card-objeto-el-${i}`);
                     if (c) c.classList.remove('active-step', 'titling');
@@ -894,7 +940,6 @@
             return objetosDisponibles[Math.floor(Math.random() * objetosDisponibles.length)];
         }
 
-        // 🔥 GIRO AUTOMÁTICO SINCRONIZADO EN FIREBASE PARA QUE SE VEA EN TODOS LOS TELÉFONOS
         function iniciarGiroAutomaticoContinuo() {
             if (!currentUser.isAdmin) return;
             if (juegoPausadoPorGanador) {
@@ -933,7 +978,6 @@
 
                     let idActual = ordenPerimetroRuleta[pasoActual % ordenPerimetroRuleta.length];
                     
-                    // Enviar a Firebase el paso actual para que todos los dispositivos lo muestren
                     db.ref('room/ruletaAnimacion').set({
                         estado: 'girando',
                         idActual: idActual
@@ -954,7 +998,6 @@
                             let duenoActual = d.owner || "Sin Dueño";
 
                             db.ref(`room/objetosData/${targetId}/hits`).set(hits).then(() => {
-                                // Enviar a Firebase el estado de TITILEO para que todos los dispositivos lo muestren y titilen a la vez
                                 db.ref('room/ruletaAnimacion').set({
                                     estado: 'titilando',
                                     targetId: targetId,
@@ -972,20 +1015,19 @@
                                     if (btnPausar) btnPausar.classList.add('hidden');
                                     document.getElementById('btn-siguiente-premio').classList.remove('hidden');
 
-                                    let spanPremio = document.getElementById(`ganador-premio-${etapaPremioActual}`);
-                                    if (spanPremio) {
-                                        spanPremio.innerText = `${objGanador.emoji} ${objGanador.nombre} (Dueño: ${duenoActual})`;
-                                        spanPremio.className = "text-yellow-300 font-bold";
-                                    }
+                                    db.ref(`room/ganadoresPremios/${etapaPremioActual}`).set({
+                                        emoji: objGanador.emoji,
+                                        nombre: objGanador.nombre,
+                                        dueno: duenoActual
+                                    });
 
                                     setTimeout(() => {
                                         cantarTextoVoz(`¡Felicidades a ${duenoActual}! Ganó el premio con ${objGanador.nombre}`);
                                     }, 1000);
 
                                 } else {
-                                    // ⏱️ SE QUEDA TITILANDO 2.5 SEGUNDOS Y LUEGO VUELVE A ARRANCAR AUTOMÁTICAMENTE
                                     setTimeout(() => {
-                                        db.ref('room/ruletaAnimacion').remove(); // Quitar animación
+                                        db.ref('room/ruletaAnimacion').remove();
                                         if (!juegoPausadoPorGanador) iniciarGiroAutomaticoContinuo();
                                     }, 2500);
                                 }
@@ -1038,6 +1080,7 @@
 
         function reiniciarObjetosRonda() {
             db.ref('room/ruletaAnimacion').remove();
+            db.ref('room/ganadoresPremios').remove();
 
             if (!currentUser.isAdmin) return;
             if (confirm("¿Reiniciar ronda de objetos por completo y liberar todas las figuras?")) {
