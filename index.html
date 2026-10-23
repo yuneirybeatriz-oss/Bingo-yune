@@ -59,9 +59,10 @@
         .objeto-card.selected-by-user {
             border-color: #38bdf8; background: #0d3b66;
         }
+        /* BLOQUEO ESTRICTO DE OBJETOS GANADORES */
         .objeto-card.objeto-ganador-ronda {
             background: #020617 !important; border-color: #dc2626 !important;
-            opacity: 0.35; filter: grayscale(100%); cursor: not-allowed; pointer-events: none;
+            opacity: 0.3; filter: grayscale(100%); cursor: not-allowed; pointer-events: none;
         }
 
         .centro-visor-cuadrado {
@@ -344,7 +345,7 @@
                     <p class="text-xs text-slate-400">Selecciona tu objeto, sigue el sorteo en vivo y gana los 4 premios</p>
                 </div>
 
-                <!-- 🔥 NUEVA VENTANA DE PERSONAS CONECTADAS EN VIVO (VISIBLE PARA TODOS) -->
+                <!-- PERSONAS CONECTADAS EN VIVO -->
                 <div class="bg-slate-900 p-4 rounded-2xl border border-emerald-500/40 shadow">
                     <div class="flex justify-between items-center mb-2">
                         <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider">🟢 Personas Conectadas en Vivo</h3>
@@ -748,7 +749,7 @@
             `;
         }
 
-        // 🔥 SINCRONIZACIÓN EN TIEMPO REAL DE OBJETOS, GANADORES Y PERSONAS CONECTADAS
+        // 🔥 SINCRONIZACIÓN EN TIEMPO REAL CON BLOQUEO ABSOLUTO DE OBJETOS GANADORES
         function sincronizarObjetosYune() {
             construirEstructuraRuletaHTML();
             
@@ -760,6 +761,7 @@
                     let estadoObj = objetosState[obj.id] || { owner: null, ownerControl: null, hits: 0 };
                     let esMio = currentUser.control && estadoObj.ownerControl === currentUser.control;
                     let hitsActuales = estadoObj.hits || 0;
+                    // 🔥 Condición estricta de bloqueo si ya ganó o tiene 3 estrellas
                     let yaGanoRonda = hitsActuales >= 3;
 
                     let cardEl = document.getElementById(`card-objeto-el-${obj.id}`);
@@ -786,7 +788,7 @@
 
                     let duenoTexto = yaGanoRonda ? `<strong class="text-red-400">🏆 ¡Ganó Premio!</strong>` : estadoObj.owner ? `<strong class="text-pink-300">${estadoObj.owner}</strong>` : `<span class="text-slate-500">Disponible</span>`;
                     listaRespaldoHTML += `
-                        <div class="bg-slate-950 p-2 rounded-xl border border-slate-800 flex flex-col items-center text-center ${yaGanoRonda ? 'opacity-40 grayscale' : ''}">
+                        <div class="bg-slate-950 p-2 rounded-xl border border-slate-800 flex flex-col items-center text-center ${yaGanoRonda ? 'opacity-30 grayscale' : ''}">
                             <span class="text-lg">${obj.emoji}</span>
                             <span class="text-[10px] font-bold text-white truncate w-full">${obj.nombre}</span>
                             <div class="text-[10px] mt-1">${duenoTexto}</div>
@@ -815,7 +817,7 @@
                 }
             });
 
-            // 🔥 SINCRONIZAR PERSONAS CONECTADAS EN VIVO EN AMBOS PANELES
+            // Sincronizar personas conectadas en vivo
             db.ref('room/connectedPlayers').on('value', (snap) => {
                 let players = snap.val() || {};
                 let lista = Object.values(players);
@@ -928,11 +930,15 @@
             });
         }
 
-        function seleccionarObjetoEquitativo(objetosState) {
+        function seleccionarObjetoEquitativo(objetosState, ganadoresPremios) {
             let objetosDisponibles = [];
+            // Lista de nombres de objetos que ya ganaron en los 4 premios
+            let nombresGanadoresPremios = Object.values(ganadoresPremios || {}).map(g => g.nombre);
+
             listaObjetosYune.forEach(obj => {
                 let estado = objetosState[obj.id] || { hits: 0 };
-                if (estado.hits < 3) {
+                // 🔥 FILTRO BLINDADO: Se descarta si ya tiene 3 estrellas o si ya ganó en el panel de premios
+                if (estado.hits < 3 && !nombresGanadoresPremios.includes(obj.nombre)) {
                     objetosDisponibles.push(obj);
                 }
             });
@@ -948,9 +954,14 @@
             }
             if (estaGirandoSolo) return;
 
-            db.ref('room/objetosData').once('value').then((snap) => {
-                let objetosState = snap.val() || {};
-                let objGanador = seleccionarObjetoEquitativo(objetosState);
+            // Consultar tanto los objetos como los ganadores ya registrados para asegurar cero repeticiones
+            Promise.all([
+                db.ref('room/objetosData').once('value'),
+                db.ref('room/ganadoresPremios').once('value')
+            ]).then(([snapObjetos, snapGanadores]) => {
+                let objetosState = snapObjetos.val() || {};
+                let ganadoresPremios = snapGanadores.val() || {};
+                let objGanador = seleccionarObjetoEquitativo(objetosState, ganadoresPremios);
 
                 if (!objGanador) {
                     alert("🏆 ¡Todos los objetos disponibles ya han ganado sus 3 estrellas en esta ronda! Presiona 'Siguiente Premio' o 'Reiniciar Ronda'.");
