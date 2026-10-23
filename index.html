@@ -565,6 +565,7 @@
             sincronizarObjetosYune();
         }
 
+        // MOTOR COMPLETO DE VERIFICACIÓN DE FIGURAS (8 PATRONES)
         function verificarFiguraGanadora(grid, drawnArray, patron) {
             let resultado = obtenerNumerosFaltantesGanar(grid, drawnArray, patron);
             return resultado.count === 0;
@@ -573,6 +574,7 @@
         function obtenerNumerosFaltantesGanar(grid, drawnArray, patron) {
             let isChecked = (num) => num === 0 || drawnArray.includes(num);
             let lineasPosibles = [];
+
             if (patron === 'line') {
                 for (let r = 0; r < 5; r++) {
                     let linea = [];
@@ -584,13 +586,54 @@
                     for (let r = 0; r < 5; r++) linea.push({r, c, num: grid[r][c]});
                     lineasPosibles.push(linea);
                 }
-            } else {
+            } else if (patron === 'letter_l') {
+                let linea = [];
+                for (let r = 0; r < 5; r++) linea.push({r, c: 0, num: grid[r][0]});
+                for (let c = 1; c < 5; c++) linea.push({r: 4, c, num: grid[4][c]});
+                lineasPosibles.push(linea);
+            } else if (patron === 'cross_x') {
+                let diag1 = [];
+                let diag2 = [];
+                for (let i = 0; i < 5; i++) {
+                    diag1.push({r: i, c: i, num: grid[i][i]});
+                    diag2.push({r: i, c: 4 - i, num: grid[i][4 - i]});
+                }
+                lineasPosibles.push(diag1);
+                lineasPosibles.push(diag2);
+            } else if (patron === 'four_corners') {
+                let esquinas = [
+                    {r: 0, c: 0, num: grid[0][0]},
+                    {r: 0, c: 4, num: grid[0][4]},
+                    {r: 4, c: 0, num: grid[4][0]},
+                    {r: 4, c: 4, num: grid[4][4]}
+                ];
+                lineasPosibles.push(esquinas);
+            } else if (patron === 'diagonal') {
+                let diag1 = [];
+                for (let i = 0; i < 5; i++) diag1.push({r: i, c: i, num: grid[i][i]});
+                lineasPosibles.push(diag1);
+            } else if (patron === 'small_cross') {
+                let cruz = [
+                    {r: 2, c: 1, num: grid[2][1]},
+                    {r: 2, c: 2, num: grid[2][2]},
+                    {r: 2, c: 3, num: grid[2][3]},
+                    {r: 1, c: 2, num: grid[1][2]},
+                    {r: 3, c: 2, num: grid[3][2]}
+                ];
+                lineasPosibles.push(cruz);
+            } else if (patron === 'letter_o') {
+                let marco = [];
+                for (let c = 0; c < 5; c++) { marco.push({r: 0, c, num: grid[0][c]}); marco.push({r: 4, c, num: grid[4][c]}); }
+                for (let r = 1; r < 4; r++) { marco.push({r, c: 0, num: grid[r][0]}); marco.push({r, c: 4, num: grid[r][4]}); }
+                lineasPosibles.push(marco);
+            } else { // full_card (Apagón)
                 let linea = [];
                 for (let r = 0; r < 5; r++) {
                     for (let c = 0; c < 5; c++) linea.push({r, c, num: grid[r][c]});
                 }
                 lineasPosibles.push(linea);
             }
+
             let mejorFaltantes = [];
             let menorFaltasCount = 99;
             lineasPosibles.forEach(linea => {
