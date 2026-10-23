@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Objetos Yune 🎯🪜💍🔑</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: #0f172a; color: #f8fafc; }
+        .neon-glow { text-shadow: 0 0 10px rgba(236, 72, 153, 0.7), 0 0 20px rgba(236, 72, 153, 0.5); }
+        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5); }
+        @keyframes pulse-slow { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.9; transform: scale(1.02); } }
+        .alert-winner { animation: pulse-slow 1.2s infinite; }
+    </style>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between p-4">
+
+    <div class="w-full max-w-4xl mx-auto flex flex-col items-center flex-grow">
+        <!-- Encabezado -->
+        <header class="w-full text-center py-4 mb-4 border-b border-slate-700">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-pink-500 neon-glow">🎯 Game Objetos Yune 🪜💍🔑</h1>
+            <p class="text-sm text-slate-400 mt-1">¡El juego express de 5 marcas! ¡Llega a la meta y gana!</p>
+            <div class="flex justify-center gap-4 mt-2 text-xs text-slate-300">
+                <span>👥 Conectadas: <strong id="contador-conectadas" class="text-emerald-400">1</strong></span>
+                <span>👑 Administradora: <strong class="text-amber-400">Yuneiry</strong></span>
+            </div>
+        </header>
+
+        <!-- Panel de Control Administradora (Oculto inicialmente) -->
+        <div id="panel-admin" class="w-full bg-slate-800 border border-amber-500/50 p-4 rounded-xl mb-6 shadow-xl hidden">
+            <h2 class="text-amber-400 font-bold text-lg mb-2 flex items-center gap-2">🛠️ Panel de Control de Yune</h2>
+            <div class="flex flex-wrap gap-3 items-center">
+                <select id="select-objeto-sorteo" class="bg-slate-900 border border-slate-700 text-white p-2 rounded-lg text-sm">
+                    <option value="0">🪜 Escalera</option>
+                    <option value="1">💍 Anillo</option>
+                    <option value="2">🔑 Llave</option>
+                    <option value="3">⭐ Estrella</option>
+                    <option value="4">👑 Corona</option>
+                    <option value="5">🚗 Carro</option>
+                    <option value="6">🎩 Sombrero</option>
+                    <option value="7">🍼 Botella</option>
+                    <option value="8">🏠 Casa</option>
+                    <option value="9">☀️ Sol</option>
+                </select>
+                <button onclick="registrarSalidaAdmin()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-lg text-sm transition">
+                    ⚡ Registrar Salida (+1 Marca)
+                </button>
+                <button onclick="reiniciarJuego()" class="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-2 rounded-lg text-sm transition">
+                    🔄 Reiniciar Juego
+                </button>
+            </div>
+        </div>
+
+        <!-- Botón para abrir panel de admin -->
+        <div class="w-full text-right mb-4">
+            <button onclick="pedirClaveAdmin()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-400 px-3 py-1.5 rounded-lg border border-slate-700 transition">
+                🔐 Modo Administradora
+            </button>
+        </div>
+
+        <!-- Cuadrícula de los 10 Objetos -->
+        <div class="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mb-8" id="grid-objetos">
+            <!-- Los objetos se cargan aquí automáticamente -->
+        </div>
+
+        <!-- Podio de Ganadores -->
+        <div class="w-full bg-slate-800/80 border border-emerald-500/40 p-4 rounded-xl mb-6 shadow-lg">
+            <h3 class="text-emerald-400 font-bold text-base mb-2 text-center">🏆 Podio de Ganadores (Primeros 4 Lugares)</h3>
+            <div id="podio-lista" class="grid grid-cols-1 sm:grid-cols-4 gap-2 text-center text-sm text-slate-300">
+                <div class="bg-slate-900 p-2 rounded border border-slate-700">🥇 1.º: <span id="podio-0" class="text-amber-400 font-semibold">Esperando...</span></div>
+                <div class="bg-slate-900 p-2 rounded border border-slate-700">🥈 2.º: <span id="podio-1" class="text-slate-300 font-semibold">Esperando...</span></div>
+                <div class="bg-slate-900 p-2 rounded border border-slate-700">🥉 3.º: <span id="podio-2" class="text-amber-600 font-semibold">Esperando...</span></div>
+                <div class="bg-slate-900 p-2 rounded border border-slate-700">🏅 4.º: <span id="podio-slate" class="text-emerald-400 font-semibold">Esperando...</span></div>
+            </div>
+        </div>
+
+        <!-- Chat en Vivo -->
+        <div class="w-full bg-slate-800 border border-slate-700 rounded-xl p-4 shadow-xl flex flex-col h-64">
+            <h3 class="text-sm font-bold text-pink-400 mb-2">💬 Chat en Vivo de las Jugadoras</h3>
+            <div id="chat-mensajes" class="flex-grow overflow-y-auto space-y-2 text-xs bg-slate-900/60 p-3 rounded-lg mb-3 border border-slate-800">
+                <!-- Mensajes del chat -->
+            </div>
+            <div class="flex gap-2">
+                <input type="text" id="chat-nombre" placeholder="Tu nombre..." class="w-1/3 bg-slate-900 border border-slate-700 text-white px-3 py-2 rounded-lg text-xs">
+                <input type="text" id="chat-texto" placeholder="Escribe un mensaje..." class="w-2/3 bg-slate-900 border border-slate-700 text-white px-3 py-2 rounded-lg text-xs" onkeypress="if(event.key === 'Enter') enviarMensaje()">
+                <button onclick="enviarMensaje()" class="bg-pink-600 hover:bg-pink-700 text-white font-bold px-4 py-2 rounded-lg text-xs transition">Enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de Configuración y Firebase -->
+    <script>
+        // Tus credenciales reales de Firebase extraídas de tu Bingo
+        const firebaseConfig = {
+            apiKey: "AIzaSyByHk5Bv_33SjU9v9_7-VqK-...", // (Tus llaves reales configuradas aquí)
+            authDomain: "bingo-lineal-yune.firebaseapp.com",
+            databaseURL: "https://bingo-lineal-yune-default-rtdb.firebaseio.com",
+            projectId: "bingo-lineal-yune",
+            storageBucket: "bingo-lineal-yune.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:1234:web:abcd"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // Lista de los 10 objetos del juego
+        const listaObjetos = [
+            { id: 0, nombre: "Escalera", icono: "🪜" },
+            { id: 1, nombre: "Anillo", icono: "💍" },
+            { id: 2, nombre: "Llave", icono: "🔑" },
+            { id: 3, nombre: "Estrella", icono: "⭐" },
+            { id: 4, nombre: "Corona", icono: "👑" },
+            { id: 5, nombre: "Carro", icono: "🚗" },
+            { id: 6, nombre: "Sombrero", icono: "🎩" },
+            { id: 7, nombre: "Botella", icono: "🍼" },
+            { id: 8, nombre: "Casa", icono: "🏠" },
+            { id: 9, nombre: "Sol", icono: "☀️" }
+        ];
+
+        let datosJuego = {
+            objetos: {}
+        };
+
+        // Inicializar datos predeterminados en Firebase si no existen
+        db.ref('game_objetos').once('value', (snapshot) => {
+            if (!snapshot.exists()) {
+                let inicial = {};
+                listaObjetos.forEach(obj => {
+                    inicial[obj.id] = {
+                        marcas: 0, // de 0 a 5
+                        estado: "Disponible", // Disponible, Reservado, Pagado
+                        jugadora: ""
+                    };
+                });
+                db.ref('game_objetos').set(inicial);
+            }
+        });
+
+        // Escuchar cambios en tiempo real desde Firebase
+        db.ref('game_objetos').on('value', (snapshot) => {
+            if (snapshot.exists()) {
+                datosJuego.objetos = snapshot.val();
+                renderizarPantalla();
+            }
+        });
+
+        // Renderizar la interfaz visual
+        function renderizarPantalla() {
+            const contenedor = document.getElementById('grid-objetos');
+            contenedor.innerHTML = '';
+
+            let ganadores = [];
+
+            listaObjetos.forEach(obj => {
+                let info = datosJuego.objetos[obj.id] || { marcas: 0, estado: "Disponible", jugadora: "" };
+                
+                if (info.marcas >= 5) {
+                    ganadores.push({ nombre: obj.nombre, icono: obj.icono, jugadora: info.jugadora });
+                }
+
+                // Generar estrellitas de progreso (5 marcas)
+                let estrellasHTML = '';
+                for (let i = 1; i <= 5; i++) {
+                    let activa = i <= info.marcas;
+                    estrellasHTML += `<span class="text-lg">${activa ? '⭐' : '⚪'}</span>`;
+                }
+
+                let colorEstado = "text-slate-400";
+                if (info.estado === "Reservado") colorEstado = "text-amber-400";
+                if (info.estado === "Pagado") colorEstado = "text-emerald-400";
+
+                let tarjetaHTML = `
+                    <div class="bg-slate-800 border ${info.marcas >= 5 ? 'border-emerald-500 alert-winner' : 'border-slate-700'} rounded-xl p-4 flex flex-col justify-between card-shadow relative">
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-3xl">${obj.icono}</span>
+                                <span class="text-xs font-bold px-2 py-0.5 rounded bg-slate-900 ${colorEstado}">${info.estado}</span>
+                            </div>
+                            <h3 class="font-bold text-base text-white">${obj.nombre}</h3>
+                            <p class="text-xs text-slate-400 mb-3">${info.jugadora ? 'Jugadora: ' + info.jugadora : 'Sin asignar'}</p>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-center gap-1 mb-3 bg-slate-900/60 p-2 rounded-lg">
+                                ${estrellasHTML}
+                            </div>
+                            <div class="text-center text-xs text-slate-300 mb-3">Progreso: <strong class="text-pink-400">${info.marcas}/5</strong></div>
+                            
+                            <div class="flex flex-col gap-1.5">
+                                <button onclick="pedirAsignacion(${obj.id}, '${obj.nombre}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 rounded-lg text-xs transition">
+                                    ${info.estado === 'Disponible' ? 'Elegir Objeto' : 'Modificar'}
+                                </button>
+                                <!-- Botón exclusivo de liberación de Yune -->
+                                <button onclick="liberarObjetoAdmin(${obj.id})" class="w-full bg-slate-900 hover:bg-red-950 text-red-400 border border-red-900/50 py-1 rounded text-[11px] transition">
+                                    🗑️ Liberar (Admin)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                contenedor.innerHTML += tarjetaHTML;
+            });
+
+            // Actualizar podio
+            actualizarPodio(ganadores);
+        }
+
+        function actualizarPodio(ganadores) {
+            for (let i = 0; i < 4; i++) {
+                let span = document.getElementById(`podio-${i}`);
+                if (ganadores[i]) {
+                    span.innerText = `${ganadores[i].icono} ${ganadores[i].nombre} (${ganadores[i].jugadora || 'Ganador'})`;
+                    span.classList.add('text-emerald-400');
+                } else {
+                    span.innerText = "Esperando...";
+                    span.classList.remove('text-emerald-400');
+                }
+            }
+        }
+
+        // Acciones de Usuario (Elegir Objeto)
+        function pedirAsignacion(idObj, nombreObj) {
+            let nombreJugadora = prompt(`Indica tu nombre para apartar el objeto (${nombreObj}):`);
+            if (!nombreJugadora) return;
+
+            let estadoSeleccionado = prompt("Escribe '1' si ya lo pagaste o '2' si solo lo vas a reservar:", "1");
+            let estado = estadoSeleccionado === "1" ? "Pagado" : "Reservado";
+
+            db.ref('game_objetos/' + idObj).update({
+                estado: estado,
+                jugadora: nombreJugadora
+            });
+        }
+
+        // Control de Administradora (Yune)
+        function pedirClaveAdmin() {
+            let clave = prompt("Introduce la clave de Administradora de Yune:");
+            if (clave === "1234" || clave === "yune2026") {
+                document.getElementById('panel-admin').classList.remove('hidden');
+                alert("¡Acceso concedido, Yune! Ya puedes registrar salidas o reiniciar.");
+            } else {
+                alert("Clave incorrecta.");
+            }
+        }
+
+        function registrarSalidaAdmin() {
+            let idObj = document.getElementById('select-objeto-sorteo').value;
+            let refObj = db.ref('game_objetos/' + idObj);
+            
+            refObj.once('value', (snapshot) => {
+                let actual = snapshot.val().marcas || 0;
+                if (actual < 5) {
+                    refObj.update({ marcas: actual + 1 });
+                } else {
+                    alert("¡Este objeto ya llegó al límite de 5 marcas!");
+                }
+            });
+        }
+
+        function liberarObjetoAdmin(idObj) {
+            let clave = prompt("Introduce tu clave de Admin para liberar este objeto:");
+            if (clave === "1234" || clave === "yune2026") {
+                db.ref('game_objetos/' + idObj).update({
+                    marcas: 0,
+                    estado: "Disponible",
+                    jugadora: ""
+                });
+                alert("¡Objeto liberado con éxito!");
+            } else if (clave !== null) {
+                alert("Clave incorrecta.");
+            }
+        }
+
+        function reiniciarJuego() {
+            let clave = prompt("Introduce tu clave para reiniciar todo el juego:");
+            if (clave === "1234" || clave === "yune2026") {
+                let reinicializado = {};
+                listaObjetos.forEach(obj => {
+                    reinicializado[obj.id] = { marcas: 0, estado: "Disponible", jugadora: "" };
+                });
+                db.ref('game_objetos').set(reinicializado);
+                alert("¡Juego reiniciado desde cero!");
+            } else if (clave !== null) {
+                alert("Clave incorrecta.");
+            }
+        }
+
+        // Chat en Vivo sincronizado con Firebase
+        function enviarMensaje() {
+            let nombre = document.getElementById('chat-nombre').value.trim();
+            let texto = document.getElementById('chat-texto').value.trim();
+            if (!nombre || !texto) return;
+
+            db.ref('chat_objetos').push({
+                nombre: nombre,
+                texto: texto,
+                tiempo: Date.now()
+            });
+
+            document.getElementById('chat-texto').value = '';
+        }
+
+        db.ref('chat_objetos').limitToLast(20).on('value', (snapshot) => {
+            let contenedorChat = document.getElementById('chat-mensajes');
+            contenedorChat.innerHTML = '';
+            snapshot.forEach((child) => {
+                let msg = child.val();
+                contenedorChat.innerHTML += `<div><strong class="text-pink-400">${msg.nombre}:</strong> <span class="text-slate-200">${msg.texto}</span></div>`;
+            });
+            contenedorChat.scrollTop = contenedorChat.scrollHeight;
+        });
+
+        // Contador de conectadas en tiempo real
+        let miConexion = db.ref('conectadas_objetos').push();
+        miConexion.onDisconnect().remove();
+        miConexion.set(true);
+
+        db.ref('conectadas_objetos').on('value', (snapshot) => {
+            let total = snapshot.numChildren();
+            document.getElementById('contador-conectadas').innerText = total;
+        });
+    </script>
+</body>
+</html>
