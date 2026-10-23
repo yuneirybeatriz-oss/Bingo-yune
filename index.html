@@ -46,22 +46,22 @@
         .mini-cell { background: rgba(255, 255, 255, 0.1); border-radius: 1px; }
         .mini-cell.active { background: #22c55e; box-shadow: 0 0 4px #22c55e; }
 
-        /* CUADRO PERIMETRAL PERFECTO SIN ESPACIOS (GRID 3x3) */
-        .ruleta-cuadrada-3x3 {
+        /* CUADRO PERIMETRAL 4x4 CON 10 OBJETOS EN EL MARCO Y CENTRO VACÍO 2x2 */
+        .ruleta-cuadrada-4x4 {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: 8px;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 6px;
             width: 100%;
-            max-width: 360px;
+            max-width: 420px;
             margin: 0 auto;
         }
 
         .objeto-card {
             background: #1e1e3f;
             border: 2px solid #333366;
-            border-radius: 12px;
-            padding: 8px;
+            border-radius: 10px;
+            padding: 6px;
             text-align: center;
             transition: all 0.08s ease-in-out;
             cursor: pointer;
@@ -69,7 +69,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 75px;
+            min-height: 70px;
         }
         .objeto-card.titling {
             border: 4px solid #facc15 !important;
@@ -83,10 +83,10 @@
             background: #0d3b66;
         }
 
-        /* CENTRO DEL CUADRO */
+        /* CENTRO DEL CUADRO (OCUPA LAS 4 CELDAS DEL MEDIO 2x2) */
         .centro-visor-cuadrado {
-            grid-column: 2;
-            grid-row: 2;
+            grid-column: 2 / span 2;
+            grid-row: 2 / span 2;
             background: #060913;
             border: 3px dashed #334155;
             border-radius: 14px;
@@ -94,7 +94,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 6px;
+            padding: 8px;
             text-align: center;
             transition: all 0.3s ease;
         }
@@ -364,16 +364,16 @@
         </div>
 
         <!-- ================================================================= -->
-        <!-- SECCIÓN 2: GAME OBJETOS YUNE (CUADRO PERIMETRAL 3x3 Y CENTRO LIMPIO) -->
+        <!-- SECCIÓN 2: GAME OBJETOS YUNE (CUADRO PERIMETRAL 4x4 CON LOS 10 OBJETOS) -->
         <!-- ================================================================= -->
         <div id="section-objetos-main" class="w-full flex-col gap-6 hidden">
-            <div class="bg-slate-800 p-6 rounded-3xl card-shadow flex flex-col gap-6 max-w-md mx-auto w-full">
+            <div class="bg-slate-800 p-6 rounded-3xl card-shadow flex flex-col gap-6 max-w-lg mx-auto w-full">
                 <div class="text-center">
                     <h2 class="text-2xl font-bold text-yellow-300">🎰 Game Objetos Yune 🎰</h2>
-                    <p class="text-xs text-slate-400">Ruleta de cuadro perimetral con tiempo perfecto</p>
+                    <p class="text-xs text-slate-400">Ruleta de cuadro perimetral con las 10 figuras oficiales</p>
                 </div>
 
-                <!-- TABLERO CUADRADO PERIMETRAL PERFECTO (3x3) -->
+                <!-- TABLERO CUADRADO PERIMETRAL 4x4 (Las 10 figuras en el marco y centro 2x2 vacío) -->
                 <div class="bg-slate-950 p-4 rounded-3xl border-4 border-yellow-400 shadow-2xl relative">
                     <div class="text-center mb-3">
                         <span class="text-xs text-yellow-300 font-bold uppercase tracking-widest bg-slate-900 px-3 py-1 rounded-full border border-yellow-500/40">
@@ -381,33 +381,38 @@
                         </span>
                     </div>
 
-                    <!-- GRILLA 3x3 EXACTA -->
-                    <div class="ruleta-cuadrada-3x3">
-                        <!-- Fila Superior -->
+                    <!-- GRILLA 4x4 EXACTA -->
+                    <div class="ruleta-cuadrada-4x4">
+                        <!-- FILA SUPERIOR (4 objetos: 1, 2, 3, 4) -->
                         <div id="card-objeto-el-1" onclick="seleccionarObjetoYune(1)" class="objeto-card">
-                            <span class="text-xl block">🪜</span>
-                            <span class="text-[9px] font-bold text-slate-200 block truncate">La Escalera</span>
-                            <span class="text-[8px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-1">0</span>/5</span>
+                            <span class="text-lg block">🪜</span>
+                            <span class="text-[8px] font-bold text-slate-200 block truncate">La Escalera</span>
+                            <span class="text-[7px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-1">0</span>/5</span>
                         </div>
                         <div id="card-objeto-el-2" onclick="seleccionarObjetoYune(2)" class="objeto-card">
-                            <span class="text-xl block">💍</span>
-                            <span class="text-[9px] font-bold text-slate-200 block truncate">El Anillo</span>
-                            <span class="text-[8px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-2">0</span>/5</span>
+                            <span class="text-lg block">💍</span>
+                            <span class="text-[8px] font-bold text-slate-200 block truncate">El Anillo</span>
+                            <span class="text-[7px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-2">0</span>/5</span>
                         </div>
                         <div id="card-objeto-el-3" onclick="seleccionarObjetoYune(3)" class="objeto-card">
-                            <span class="text-xl block">🔑</span>
-                            <span class="text-[9px] font-bold text-slate-200 block truncate">La Llave</span>
-                            <span class="text-[8px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-3">0</span>/5</span>
+                            <span class="text-lg block">🔑</span>
+                            <span class="text-[8px] font-bold text-slate-200 block truncate">La Llave</span>
+                            <span class="text-[7px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-3">0</span>/5</span>
+                        </div>
+                        <div id="card-objeto-el-4" onclick="seleccionarObjetoYune(4)" class="objeto-card">
+                            <span class="text-lg block">⭐</span>
+                            <span class="text-[8px] font-bold text-slate-200 block truncate">La Estrella</span>
+                            <span class="text-[7px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-4">0</span>/5</span>
                         </div>
 
-                        <!-- Lado Izquierdo (Objeto 8) -->
-                        <div id="card-objeto-el-8" onclick="seleccionarObjetoYune(8)" class="objeto-card">
-                            <span class="text-xl block">🍼</span>
-                            <span class="text-[9px] font-bold text-slate-200 block truncate">La Botella</span>
-                            <span class="text-[8px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-8">0</span>/5</span>
+                        <!-- LADO IZQUIERDO (Objeto 10) -->
+                        <div id="card-objeto-el-10" onclick="seleccionarObjetoYune(10)" class="objeto-card">
+                            <span class="text-lg block">☀️</span>
+                            <span class="text-[8px] font-bold text-slate-200 block truncate">El Sol</span>
+                            <span class="text-[7px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-10">0</span>/5</span>
                         </div>
 
-                        <!-- CENTRO DEL CUADRO: OSCURO/VACÍO HASTA QUE CAE EL RESULTADO -->
+                        <!-- CENTRO DEL CUADRO: OCUPA LAS 4 CELDAS DEL MEDIO (2x2) Y ESTÁ VACÍO Y OSCURO -->
                         <div id="centro-visor" class="centro-visor-cuadrado">
                             <span class="text-[9px] text-slate-500 uppercase tracking-wider font-bold block mb-0.5" id="visor-estado-txt">Sorteo en Vivo</span>
                             <div id="visor-objeto-central" class="flex flex-col items-center justify-center">
@@ -418,28 +423,37 @@
                             </div>
                         </div>
 
-                        <!-- Lado Derecho (Objeto 4) -->
-                        <div id="card-objeto-el-4" onclick="seleccionarObjetoYune(4)" class="objeto-card">
-                            <span class="text-xl block">⭐</span>
-                            <span class="text-[9px] font-bold text-slate-200 block truncate">La Estrella</span>
-                            <span class="text-[8px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-4">0</span>/5</span>
+                        <!-- LADO DERECHO (Objeto 5) -->
+                        <div id="card-objeto-el-5" onclick="seleccionarObjetoYune(5)" class="objeto-card">
+                            <span class="text-lg block">👑</span>
+                            <span class="text-[8px] font-bold text-slate-200 block truncate">La Corona</span>
+                            <span class="text-[7px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-5">0</span>/5</span>
                         </div>
 
-                        <!-- Fila Inferior -->
-                        <div id="card-objeto-el-7" onclick="seleccionarObjetoYune(7)" class="objeto-card">
-                            <span class="text-xl block">🎩</span>
-                            <span class="text-[9px] font-bold text-slate-200 block truncate">El Sombrero</span>
-                            <span class="text-[8px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-7">0</span>/5</span>
+                        <!-- LADO IZQUIERDO (Objeto 9) -->
+                        <div id="card-objeto-el-9" onclick="seleccionarObjetoYune(9)" class="objeto-card">
+                            <span class="text-lg block">🏠</span>
+                            <span class="text-[8px] font-bold text-slate-200 block truncate">La Casa</span>
+                            <span class="text-[7px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-9">0</span>/5</span>
                         </div>
+
+                        <!-- LADO DERECHO (Objeto 6) -->
                         <div id="card-objeto-el-6" onclick="seleccionarObjetoYune(6)" class="objeto-card">
-                            <span class="text-xl block">🚗</span>
-                            <span class="text-[9px] font-bold text-slate-200 block truncate">El Carro</span>
-                            <span class="text-[8px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-6">0</span>/5</span>
+                            <span class="text-lg block">🚗</span>
+                            <span class="text-[8px] font-bold text-slate-200 block truncate">El Carro</span>
+                            <span class="text-[7px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-6">0</span>/5</span>
                         </div>
-                        <div id="card-objeto-el-5" onclick="seleccionarObjetoYune(5)" class="objeto-card">
-                            <span class="text-xl block">👑</span>
-                            <span class="text-[9px] font-bold text-slate-200 block truncate">La Corona</span>
-                            <span class="text-[8px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-5">0</span>/5</span>
+
+                        <!-- FILA INFERIOR (4 objetos: 8, 7, etc.) -->
+                        <div id="card-objeto-el-8" onclick="seleccionarObjetoYune(8)" class="objeto-card">
+                            <span class="text-lg block">🍼</span>
+                            <span class="text-[8px] font-bold text-slate-200 block truncate">La Botella</span>
+                            <span class="text-[7px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-8">0</span>/5</span>
+                        </div>
+                        <div id="card-objeto-el-7" onclick="seleccionarObjetoYune(7)" class="objeto-card">
+                            <span class="text-lg block">🎩</span>
+                            <span class="text-[8px] font-bold text-slate-200 block truncate">El Sombrero</span>
+                            <span class="text-[7px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-7">0</span>/5</span>
                         </div>
                     </div>
 
@@ -504,6 +518,7 @@
         let etapaPremioActual = 1;
         let juegoPausadoPorGanador = false;
 
+        // LAS 10 FIGURAS OFICIALES DE TUS OBJETOS YUNE
         const listaObjetosYune = [
             { id: 1, emoji: "🪜", nombre: "La Escalera" },
             { id: 2, emoji: "💍", nombre: "El Anillo" },
@@ -512,7 +527,9 @@
             { id: 5, emoji: "👑", nombre: "La Corona" },
             { id: 6, emoji: "🚗", nombre: "El Carro" },
             { id: 7, emoji: "🎩", nombre: "El Sombrero" },
-            { id: 8, emoji: "🍼", nombre: "La Botella" }
+            { id: 8, emoji: "🍼", nombre: "La Botella" },
+            { id: 9, emoji: "🏠", nombre: "La Casa" },
+            { id: 10, emoji: "☀️", nombre: "El Sol" }
         ];
 
         const nombresPatrones = {
@@ -632,8 +649,8 @@
             });
         }
 
-        // CIRCUITO 3x3 (Las 8 casillas del marco en orden alrededor del centro)
-        const ordenCircuito3x3 = [1, 2, 3, 4, 5, 6, 7, 8];
+        // CIRCUITO 4x4 (Las 10 figuras ordenadas una tras otra alrededor del marco perimetral)
+        const ordenCircuito4x4 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
         function sortearObjetoCasinoAutomatico() {
             if (juegoPausadoPorGanador) {
@@ -641,7 +658,7 @@
                 return;
             }
 
-            // LIMPIAR CENTRO ANTES DE EMPEZAR EL GIRO
+            // LIMPIAR CENTRO ANTES DE EMPEZAR EL GIRO (QUEDA OSCURO Y VACÍO)
             let centroDiv = document.getElementById('centro-visor');
             let visorEmoji = document.getElementById('visor-emoji');
             let visorNombre = document.getElementById('visor-nombre');
@@ -656,22 +673,22 @@
             if (visorEstrellas) visorEstrellas.classList.add('hidden');
             if (visorDueno) visorDueno.classList.add('hidden');
 
-            let totalPasos = ordenCircuito3x3.length;
+            let totalPasos = ordenCircuito4x4.length;
             let pasadas = 0;
-            let maxPasadas = 40; // Más de 5 vueltas completas para que dure buen rato
+            let maxPasadas = 45; // Da bastantes vueltas completas por las 10 figuras
             let indiceSecuencia = 0;
-            let velocidad = 70; // Velocidad inicial ideal (ni muy rápido ni muy lento)
+            let velocidad = 60; // Velocidad perfecta
 
             let btnGirar = document.getElementById('btn-girar-ruleta');
             if (btnGirar) btnGirar.disabled = true;
 
             function pasoGiro() {
-                for (let i = 0; i < ordenCircuito3x3.length; i++) {
-                    let card = document.getElementById(`card-objeto-el-${ordenCircuito3x3[i]}`);
+                for (let i = 0; i < ordenCircuito4x4.length; i++) {
+                    let card = document.getElementById(`card-objeto-el-${ordenCircuito4x4[i]}`);
                     if (card) card.classList.remove('titling');
                 }
 
-                let idActual = ordenCircuito3x3[indiceSecuencia];
+                let idActual = ordenCircuito4x4[indiceSecuencia];
                 let cardActual = document.getElementById(`card-objeto-el-${idActual}`);
                 if (cardActual) cardActual.classList.add('titling');
 
@@ -679,15 +696,15 @@
                 pasadas++;
 
                 if (pasadas < maxPasadas) {
-                    // DESACELERACIÓN PROGRESIVA Y SUAVE (Frena de forma realista y emocionante)
+                    // DESACELERACIÓN PROGRESIVA Y SUAVE (Frena de forma realista)
                     if (pasadas > maxPasadas - 15) {
-                        velocidad += 20; 
+                        velocidad += 25; 
                     }
                     setTimeout(pasoGiro, velocidad);
                 } else {
                     // FRENADO FINAL: Seleccionar el ganador real
-                    for (let i = 0; i < ordenCircuito3x3.length; i++) {
-                        let card = document.getElementById(`card-objeto-el-${ordenCircuito3x3[i]}`);
+                    for (let i = 0; i < ordenCircuito4x4.length; i++) {
+                        let card = document.getElementById(`card-objeto-el-${ordenCircuito4x4[i]}`);
                         if (card) card.classList.remove('titling');
                     }
 
