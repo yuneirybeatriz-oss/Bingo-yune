@@ -372,6 +372,7 @@
             </div>
         </div>
 
+        <!-- SECCIÓN 2: GAME OBJETOS YUNE -->
         <div id="section-objetos-main" class="w-full flex-col gap-6 hidden">
             <div class="bg-slate-800 p-6 rounded-3xl card-shadow flex flex-col gap-6 max-w-lg mx-auto w-full">
                 <div class="text-center">
@@ -389,7 +390,7 @@
 
                     <!-- GRILLA 4x4 EXACTA -->
                     <div class="ruleta-cuadrada-4x4">
-                        <!-- FILA SUPERIOR (4 objetos: ordenados en el perímetro: 1, 2, 3, 4) -->
+                        <!-- FILA SUPERIOR (4 objetos: 1, 2, 3, 4) -->
                         <div id="card-objeto-el-1" onclick="seleccionarObjetoYune(1)" class="objeto-card">
                             <span class="text-lg block">🪜</span>
                             <span class="text-[8px] font-bold text-slate-200 block truncate">La Escalera</span>
@@ -450,7 +451,7 @@
                             <span class="text-[7px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-6">0</span>/5</span>
                         </div>
 
-                        <!-- FILA INFERIOR (4 objetos: ordenados en el perímetro: 8, 7 / o 7, 8 según el orden de las manecillas del reloj) -->
+                        <!-- FILA INFERIOR (Objetos: 8, 7) -->
                         <div id="card-objeto-el-8" onclick="seleccionarObjetoYune(8)" class="objeto-card">
                             <span class="text-lg block">🍼</span>
                             <span class="text-[8px] font-bold text-slate-200 block truncate">La Botella</span>
@@ -528,7 +529,7 @@
         let intervaloGiroContinuo = null;
         let estaGirandoSolo = false;
 
-        // ORDEN EXACTO EN EL PERÍMETRO DE LA RULETA (SIGUIENDO LAS MANECILLAS DEL RELOJ)
+        // ORDEN EXACTO EN EL PERÍMETRO DE LA RULETA
         const ordenPerimetroRuleta = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
         // LAS 10 FIGURAS OFICIALES DE TUS OBJETOS YUNE
@@ -562,7 +563,7 @@
             'rombo': 'Rombo Pequeño 💎'
         };
 
-        // EFECTO DE SONIDO TIPO TRRR (CARRACA DE CASINO A TODO VOLUMEN)
+        // EFECTO DE SONIDO TIPO TRRR
         function reproducirSonidoTrrr() {
             if (!audioHabilitado) return;
             try {
@@ -690,6 +691,7 @@
                 }
             });
         }
+
         function seleccionarObjetoYune(idObj) {
             if (!currentUser.control) {
                 alert("Por favor ingresa primero con tu nombre para seleccionar un objeto.");
@@ -777,8 +779,6 @@
                     return;
                 }
 
-        
-
                 reproducirSonidoTrrr();
 
                 // Apagar todos los bordes activos
@@ -791,7 +791,7 @@
                 let cardActual = document.getElementById(`card-objeto-el-${idActual}`);
                 if (cardActual) cardActual.classList.add('active-step');
 
-                // Mostrar nombre y emoji provisional en el centro mientras corre
+                // Mostrar nombre y emoji provisional en el centro
                 let objTemp = listaObjetosYune.find(o => o.id === idActual);
                 let visorEmoji = document.getElementById('visor-emoji');
                 let visorNombre = document.getElementById('visor-nombre');
@@ -801,7 +801,7 @@
                 currentIndex = (currentIndex + 1) % ordenPerimetroRuleta.length;
                 pasoActual++;
 
-                // Cuando llega al final del recorrido programado, frena de golpe en el ganador
+                // Cuando llega al final del recorrido programado, frena en el ganador
                 if (pasoActual >= totalPasosVueltas) {
                     clearInterval(intervaloGiroContinuo);
                     estaGirandoSolo = false;
@@ -853,7 +853,6 @@
                                     spanPremio.className = "text-yellow-300 font-bold";
                                 }
                             } else {
-                                // Si no ha completado las 5 estrellas, vuelve a girar solito en 2 segundos
                                 setTimeout(() => {
                                     if (!juegoPausadoPorGanador) {
                                         iniciarGiroAutomaticoContinuo();
@@ -864,7 +863,7 @@
                     });
                 }
 
-            }, 90); // Velocidad rápida del salto entre casillas
+            }, 90);
         }
 
         function detenerGiroAutomaticoContinuo() {
@@ -1015,11 +1014,6 @@
             }
         }
 
-        function probarVoz() {
-            let mensajeAnuncio = "¡Bienvenidos al Bingo Lineal Yune! Damos inicio a la ronda. ¡Comenzamos, mucha suerte para todas!";
-            db.ref('room/announcement').set({ text: mensajeAnuncio, timestamp: Date.now() });
-        }
-
         function obtenerLetraYNumeroVoz(num) {
             let letra = '';
             if (num >= 1 && num <= 15) letra = 'B';
@@ -1149,7 +1143,6 @@
 
         window.onload = function() {
             iniciarRelojEnVivo();
-            inicializarMiniDiagrama();
             marketCards = generarMercadoLocalInicial();
             renderizarTablerosGarantizados();
 
@@ -1195,9 +1188,6 @@
                     gamePattern = data.gamePattern;
                     let selectPattern = document.getElementById('game-pattern-select');
                     if (selectPattern) selectPattern.value = gamePattern;
-                    let labelPatternEl = document.getElementById('player-pattern-label');
-                    if (labelPatternEl) labelPatternEl.innerText = nombresPatrones[gamePattern] || 'Línea';
-                    actualizarMiniDiagramaPatron(gamePattern);
                 }
             });
 
@@ -1404,11 +1394,8 @@
 
                 renderizarHistorialAdmin();
                 renderizarTableroAdmin();
-                renderizarResumenCartonesAdmin();
                 renderizarVentanaCartonesPagadosAdmin();
                 renderizarAdminWallets();
-                renderizarSelectLiberarAdmin();
-                renderizarRadarAdmin();
                 renderizarJugadorasConectadasAdmin(data.connectedPlayers || {});
                 actualizarPreviewWhatsApp();
                 verificarGanadoresEnVivoAdmin();
@@ -1459,7 +1446,6 @@
                 renderizarTableroJugadora();
                 renderizarMercadoJugadora();
                 renderizarMisCartones();
-                renderizarJugadorasConectadasJugadora(data.connectedPlayers || {});
                 renderizarObjetosYune();
             });
 
@@ -1723,48 +1709,11 @@
             }
         }
 
-        function renderizarResumenCartonesAdmin() {
-            let container = document.getElementById('admin-cards-summary');
-            if (!container) return;
-            container.innerHTML = '';
-        }
-
-        function renderizarSelectLiberarAdmin() {
-            let selectEl = document.getElementById('admin-liberar-select');
-            if (!selectEl) return;
-            selectEl.innerHTML = '';
-            let ocupados = [];
-            for (let id in marketCards) {
-                if (marketCards[id].owner) ocupados.push(marketCards[id]);
-            }
-            if (ocupados.length === 0) {
-                selectEl.innerHTML = '<option value="">-- No hay cartones ocupados --</option>';
-                return;
-            }
-            selectEl.innerHTML = '<option value="">-- Selecciona cartón a liberar --</option>';
-            ocupados.forEach(card => {
-                let opt = document.createElement('option');
-                opt.value = card.id;
-                opt.innerText = `Cartón #${card.id} (Dueña: ${card.owner})`;
-                selectEl.appendChild(opt);
-            });
-        }
-
-        function liberarCartonSeleccionadoAdmin() {
-            let selectEl = document.getElementById('admin-liberar-select');
-            let id = selectEl.value;
-            if (!id) return;
-            db.ref(`room/marketCards/${id}`).update({ owner: null, ownerControl: null, loaded: false, paid: false });
-            alert(`¡Cartón #${id} liberado!`);
-        }
-
         function renderizarJugadorasConectadasAdmin(connectedPlayers) {
             let container = document.getElementById('admin-players-list');
-            let counterBadge = document.getElementById('admin-active-players-count');
             if (!container) return;
             container.innerHTML = '';
             let listaConectadas = Object.values(connectedPlayers || {});
-            if (counterBadge) counterBadge.innerText = `${listaConectadas.length} activa(s)`;
             if (listaConectadas.length === 0) {
                 container.innerHTML = '<span class="text-slate-500 text-center py-4">No hay jugadoras conectadas.</span>';
                 return;
@@ -1780,58 +1729,6 @@
                     <button onclick="eliminarJugadorSistema('${jugadora.control}', '${jugadora.name}')" class="text-[10px] bg-red-600 text-white px-2 py-0.5 rounded font-bold cursor-pointer">🗑️ Expulsar</button>
                 `;
                 container.appendChild(div);
-            });
-        }
-
-        function renderizarJugadorasConectadasJugadora(connectedPlayers) {
-            let container = document.getElementById('player-room-online-list');
-            let counterBadge = document.getElementById('player-active-count-badge');
-            if (!container) return;
-            container.innerHTML = '';
-            let listaConectadas = Object.values(connectedPlayers || {});
-            if (counterBadge) counterBadge.innerText = `${listaConectadas.length} activa(s)`;
-            if (listaConectadas.length === 0) {
-                container.innerHTML = '<span class="text-slate-500 italic">Buscando compañeras...</span>';
-                return;
-            }
-            listaConectadas.forEach(jugadora => {
-                let badge = document.createElement('div');
-                badge.className = "bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs";
-                badge.innerHTML = `
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span class="font-bold text-pink-300">${jugadora.name}</span>
-                `;
-                container.appendChild(badge);
-            });
-        }
-
-        function renderizarRadarAdmin() {
-            let radarContainer = document.getElementById('admin-radar-container');
-            if (!radarContainer) return;
-            radarContainer.innerHTML = '';
-            let listaRadar = [];
-            for (let id in marketCards) {
-                let card = marketCards[id];
-                if (card.owner && card.loaded) {
-                    let analisis = obtenerNumerosFaltantesGanar(card.grid, drawnBalls, gamePattern);
-                    listaRadar.push({ card: card, analisis: analisis });
-                }
-            }
-            listaRadar.sort((a, b) => a.analisis.count - b.analisis.count);
-            if (listaRadar.length === 0) {
-                radarContainer.innerHTML = '<span class="text-slate-500 text-xs col-span-2 text-center py-4">Ningún jugador ha cargado cartones.</span>';
-                return;
-            }
-            listaRadar.forEach(item => {
-                let card = item.card;
-                let analisis = item.analisis;
-                let div = document.createElement('div');
-                div.className = `bg-slate-900 p-3 rounded-xl flex justify-between items-center border ${analisis.count === 1 ? 'border-yellow-400' : 'border-slate-700'} text-xs`;
-                div.innerHTML = `
-                    <span class="text-yellow-300 font-bold">Cartón #${card.id} (${card.owner})</span>
-                    <span class="${analisis.count === 1 ? 'text-yellow-400 font-extrabold animate-pulse' : 'text-pink-400'}">${analisis.count === 1 ? '🔥 ¡A UNA BOLITA!' : analisis.count + ' faltantes'}</span>
-                `;
-                radarContainer.appendChild(div);
             });
         }
 
@@ -1931,27 +1828,6 @@
         function updateCardPrice() {
             let price = parseFloat(document.getElementById('admin-card-price-input').value);
             if (!isNaN(price) && price >= 0) db.ref('room/cardPrice').set(price);
-        }
-
-        function inicializarMiniDiagrama() {
-            let gridContainer = document.getElementById('mini-diagram-grid');
-            if (!gridContainer) return;
-            gridContainer.innerHTML = '';
-            for (let i = 0; i < 25; i++) {
-                let cell = document.createElement('div');
-                cell.className = 'mini-cell';
-                gridContainer.appendChild(cell);
-            }
-        }
-
-        function actualizarMiniDiagramaPatron(patron) {
-            let cells = document.querySelectorAll('#mini-diagram-grid .mini-cell');
-            if (cells.length === 0) return;
-            cells.forEach(c => c.classList.remove('active'));
-            let indicesActivos = [0, 1, 2, 3, 4];
-            indicesActivos.forEach(idx => {
-                if (cells[idx]) cells[idx].classList.add('active');
-            });
         }
 
         function abrirVistaPreviaFullscreen(cardId) {
