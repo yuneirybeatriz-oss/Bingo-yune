@@ -637,7 +637,8 @@
 
                     let card = document.createElement('div');
                     card.className = `objeto-card ${esMio ? 'selected-by-user border-cyan-400' : 'bg-slate-900 border-slate-800'}`;
-                    card.id = `obj-card-el-${obj.id}`;
+                    // ID corregido para que coincida perfectamente con la animación de ruleta
+                    card.id = `card-objeto-el-${obj.id}`;
                     card.onclick = () => seleccionarObjetoYune(obj.id);
                     card.innerHTML = `
                         <span class="text-3xl block mb-1">${obj.emoji}</span>
@@ -731,64 +732,63 @@
             });
         }
 
-        // SORTEO DE OBJETOS CON LUZ Y VOZ DIRECTA
-function sortearObjetoCasino() {
-    let total = listaObjetosYune.length;
-    let pasadas = 0;
-    let maxPasadas = 25; // Cantidad de saltos de luz antes de frenar
-    let indiceActual = 0;
+        // SORTEO DE OBJETOS CON EFECTO RULETA Y LUCES TITILANDO
+        function sortearObjetoCasino() {
+            let total = listaObjetosYune.length;
+            let pasadas = 0;
+            let maxPasadas = 25; // Cantidad de saltos de luz antes de frenar
+            let indiceActual = 0;
 
-    let interval = setInterval(() => {
-        // Apagar la luz de todas las tarjetas
-        for (let i = 1; i <= total; i++) {
-            let el = document.getElementById(`card-objeto-el-${i}`);
-            if (el) el.classList.remove('titling');
+            let interval = setInterval(() => {
+                // Apagar la luz de todas las tarjetas
+                for (let i = 1; i <= total; i++) {
+                    let el = document.getElementById(`card-objeto-el-${i}`);
+                    if (el) el.classList.remove('titling');
+                }
+
+                // Encender la luz en la casilla actual de la secuencia
+                let elActual = document.getElementById(`card-objeto-el-${listaObjetosYune[indiceActual].id}`);
+                if (elActual) elActual.classList.add('titling');
+
+                indiceActual = (indiceActual + 1) % total;
+                pasadas++;
+
+                // Cuando termina el recorrido, se detiene en el ganador
+                if (pasadas >= maxPasadas) {
+                    clearInterval(interval);
+
+                    // Apagar todas por seguridad
+                    for (let i = 1; i <= total; i++) {
+                        let el = document.getElementById(`card-objeto-el-${i}`);
+                        if (el) el.classList.remove('titling');
+                    }
+
+                    // Elegir el ganador al azar
+                    let ganadorIdx = Math.floor(Math.random() * total);
+                    let objGanador = listaObjetosYune[ganadorIdx];
+
+                    // Dejar la luz fija únicamente en la tarjeta ganadora
+                    let elGanadorFinal = document.getElementById(`card-objeto-el-${objGanador.id}`);
+                    if (elGanadorFinal) elGanadorFinal.classList.add('titling');
+
+                    // Cantar directamente el nombre del objeto
+                    cantarTextoVoz(objGanador.nombre);
+
+                    // Guardar la estrella en Firebase
+                    db.ref(`room/objetosData/${objGanador.id}`).once('value').then((snap) => {
+                        let d = snap.val() || { hits: 0 };
+                        let hits = (d.hits || 0) + 1;
+                        if (hits > 5) hits = 5;
+                        
+                        db.ref(`room/objetosData/${objGanador.id}/hits`).set(hits).then(() => {
+                            setTimeout(() => {
+                                renderizarObjetosYune();
+                            }, 1500);
+                        });
+                    });
+                }
+            }, 100);
         }
-
-        // Encender la luz en la casilla actual de la secuencia
-        let elActual = document.getElementById(`card-objeto-el-${listaObjetosYune[indiceActual].id}`);
-        if (elActual) elActual.classList.add('titling');
-
-        indiceActual = (indiceActual + 1) % total;
-        pasadas++;
-
-        // Cuando termina el recorrido, se detiene en el ganador
-        if (pasadas >= maxPasadas) {
-            clearInterval(interval);
-
-            // Apagar todas por seguridad
-            for (let i = 1; i <= total; i++) {
-                let el = document.getElementById(`card-objeto-el-${i}`);
-                if (el) el.classList.remove('titling');
-            }
-
-            // Elegir el ganador al azar
-            let ganadorIdx = Math.floor(Math.random() * total);
-            let objGanador = listaObjetosYune[ganadorIdx];
-
-            // Dejar la luz fija únicamente en la tarjeta ganadora
-            let elGanadorFinal = document.getElementById(`card-objeto-el-${objGanador.id}`);
-            if (elGanadorFinal) elGanadorFinal.classList.add('titling');
-
-            // Cantar directamente el nombre del objeto sin rodeos
-            cantarTextoVoz(objGanador.nombre);
-
-            // Guardar la estrella en Firebase
-            db.ref(`room/objetosData/${objGanador.id}`).once('value').then((snap) => {
-                let d = snap.val() || { hits: 0 };
-                let hits = (d.hits || 0) + 1;
-                if (hits > 5) hits = 5;
-                
-                db.ref(`room/objetosData/${objGanador.id}/hits`).set(hits).then(() => {
-                    setTimeout(() => {
-                        renderizarObjetosYune();
-                    }, 1500);
-                });
-            });
-        }
-    }, 100);
-}
-
 
         function reiniciarObjetosRonda() {
             if (confirm("¿Estás segura de reiniciar los objetos y las estrellas de esta ronda?")) {
@@ -934,22 +934,9 @@ function sortearObjetoCasino() {
             renderizarObjetosYune();
         }
 
-        function esCeldaDelPatron(r, c, patron) {
-            if (patron === 'full_card') return true;
-            if (patron === 'line') return r === 0 || c === 0;
-            if (patron === 'four_corners') return (r === 0 || r === 4) && (c === 0 || c === 4);
-            if (patron === 'diagonal') return r === c || r === 4 - c;
-            if (patron === 'letter_l') return c === 0 || r === 4;
-            if (patron === 'cross_x') return r === c || r === 4 - c;
-            if (patron === 'small_cross') return (r === 2 || c === 2);
-            if (patron === 'letter_o') return r === 0 || r === 4 || c === 0 || c === 4;
-            if (patron === 'church') return c === 2 || (r === 0 && (c === 1 || c === 3)) || (r === 1 && c === 2);
-            if (patron === 'letter_t') return r === 0 || c === 2;
-            if (patron === 'letter_h') return c === 0 || c === 4 || r === 2;
-            if (patron === 'anchor') return c === 2 || r === 4 || (r === 3 && (c === 0 || c === 4));
-            if (patron === 'plane') return r === 2 || c === 2 || (r === 1 && (c === 1 || c === 3)) || (r === 0 && c === 2);
-            if (patron === 'rombo') return (r === 1 && (c === 1 || c === 3)) || (r === 2 && (c === 0 || c === 4)) || (r === 3 && (c === 1 || c === 3));
-            return r === 0;
+        function verificarFiguraGanadora(grid, drawnArray, patron) {
+            let resultado = obtenerNumerosFaltantesGanar(grid, drawnArray, patron);
+            return resultado.count === 0;
         }
 
         function obtenerNumerosFaltantesGanar(grid, drawnArray, patron) {
@@ -973,84 +960,6 @@ function sortearObjetoCasino() {
                     for (let c = 0; c < 5; c++) linea.push({r, c, num: grid[r][c]});
                 }
                 lineasPosibles.push(linea);
-            } else if (patron === 'four_corners') {
-                lineasPosibles.push([
-                    {r:0, c:0, num: grid[0][0]}, {r:0, c:4, num: grid[0][4]},
-                    {r:4, c:0, num: grid[4][0]}, {r:4, c:4, num: grid[4][4]}
-                ]);
-            } else if (patron === 'diagonal') {
-                let diag1 = [], diag2 = [];
-                for (let i = 0; i < 5; i++) {
-                    diag1.push({r: i, c: i, num: grid[i][i]});
-                    diag2.push({r: i, c: 4 - i, num: grid[i][4 - i]});
-                }
-                lineasPosibles.push(diag1);
-                lineasPosibles.push(diag2);
-            } else if (patron === 'letter_l') {
-                let l = [];
-                for (let r = 0; r < 5; r++) l.push({r, c: 0, num: grid[r][0]});
-                for (let c = 1; c < 5; c++) l.push({r: 4, c, num: grid[4][c]});
-                lineasPosibles.push(l);
-            } else if (patron === 'cross_x') {
-                let cross = [];
-                for (let i = 0; i < 5; i++) {
-                    cross.push({r: i, c: i, num: grid[i][i]});
-                    cross.push({r: i, c: 4 - i, num: grid[i][4 - i]});
-                }
-                lineasPosibles.push(cross);
-            } else if (patron === 'small_cross') {
-                lineasPosibles.push([
-                    {r: 2, c: 2, num: grid[2][2]}, {r: 1, c: 2, num: grid[1][2]},
-                    {r: 3, c: 2, num: grid[3][2]}, {r: 2, c: 1, num: grid[2][1]},
-                    {r: 2, c: 3, num: grid[2][3]}
-                ]);
-            } else if (patron === 'letter_o') {
-                let marco = [];
-                for (let c = 0; c < 5; c++) {
-                    marco.push({r: 0, c, num: grid[0][c]});
-                    marco.push({r: 4, c, num: grid[4][c]});
-                }
-                for (let r = 1; r < 4; r++) {
-                    marco.push({r, c: 0, num: grid[r][0]});
-                    marco.push({r, c: 4, num: grid[r][4]});
-                }
-                lineasPosibles.push(marco);
-            } else if (patron === 'church') {
-                let iglesia = [];
-                for (let r = 0; r < 5; r++) iglesia.push({r, c: 2, num: grid[r][2]});
-                iglesia.push({r: 0, c: 1, num: grid[0][1]}, {r: 0, c: 3, num: grid[0][3]});
-                lineasPosibles.push(iglesia);
-            } else if (patron === 'letter_t') {
-                let t = [];
-                for (let c = 0; c < 5; c++) t.push({r: 0, c, num: grid[0][c]});
-                for (let r = 1; r < 5; r++) t.push({r, c: 2, num: grid[r][2]});
-                lineasPosibles.push(t);
-            } else if (patron === 'letter_h') {
-                let h = [];
-                for (let r = 0; r < 5; r++) {
-                    h.push({r, c: 0, num: grid[r][0]});
-                    h.push({r, c: 4, num: grid[r][4]});
-                }
-                for (let c = 1; c < 4; c++) h.push({r: 2, c, num: grid[2][c]});
-                lineasPosibles.push(h);
-            } else if (patron === 'anchor') {
-                let ancla = [];
-                for (let r = 0; r < 5; r++) ancla.push({r, c: 2, num: grid[r][2]});
-                for (let c = 0; c < 5; c++) ancla.push({r: 4, c, num: grid[4][c]});
-                ancla.push({r: 3, c: 0, num: grid[3][0]}, {r: 3, c: 4, num: grid[3][4]});
-                lineasPosibles.push(ancla);
-            } else if (patron === 'plane') {
-                let avion = [];
-                for (let c = 0; c < 5; c++) avion.push({r: 2, c, num: grid[2][c]});
-                for (let r = 0; r < 5; r++) avion.push({r, c: 2, num: grid[r][2]});
-                avion.push({r: 1, c: 1, num: grid[1][1]}, {r: 1, c: 3, num: grid[1][3]});
-                lineasPosibles.push(avion);
-            } else if (patron === 'rombo') {
-                let rombo = [];
-                rombo.push({r: 1, c: 1, num: grid[1][1]}, {r: 1, c: 3, num: grid[1][3]});
-                rombo.push({r: 2, c: 0, num: grid[2][0]}, {r: 2, c: 4, num: grid[2][4]});
-                rombo.push({r: 3, c: 1, num: grid[3][1]}, {r: 3, c: 3, num: grid[3][3]});
-                lineasPosibles.push(rombo);
             } else {
                 for (let r = 0; r < 5; r++) {
                     let linea = [];
@@ -1071,11 +980,6 @@ function sortearObjetoCasino() {
             });
 
             return { faltantes: mejorFaltantes, count: menorFaltasCount };
-        }
-
-        function verificarFiguraGanadora(grid, drawnArray, patron) {
-            let resultado = obtenerNumerosFaltantesGanar(grid, drawnArray, patron);
-            return resultado.count === 0;
         }
 
         window.onload = function() {
@@ -1255,17 +1159,12 @@ function sortearObjetoCasino() {
             let code = document.getElementById('player-access-code-input').value.trim();
 
             if (!name || !control || !code) {
-                alert("Por favor completa todos los campos (Nombre, Control y Código).");
-                return;
-            }
-
-            if (control.length < 6) {
-                alert("Por favor ingresa un número de control válido (mínimo 6 dígitos).");
+                alert("Por favor completa todos los campos.");
                 return;
             }
 
             if (code.toUpperCase() !== 'BINGO2026') {
-                alert("El código de sala es incorrecto. Verifica e intenta de nuevo.");
+                alert("El código de sala es incorrecto.");
                 return;
             }
 
@@ -1362,7 +1261,7 @@ function sortearObjetoCasino() {
                 cardPrice = data.cardPrice || 300;
 
                 if (data.isRoomLocked) {
-                    alert("🔒 La administradora ha cerrado la sala. Cerrando sesión por seguridad.");
+                    alert("🔒 La administradora ha cerrado la sala. Cerrando sesión.");
                     backToHome();
                     return;
                 }
@@ -1402,7 +1301,7 @@ function sortearObjetoCasino() {
             db.ref(`users/${currentUser.control}`).on('value', (snap) => {
                 let userData = snap.val();
                 if (!userData) {
-                    alert("⚠️ Has sido eliminada del sistema por la Administradora.");
+                    alert("⚠️ Has sido eliminada del sistema.");
                     backToHome();
                     return;
                 }
@@ -1461,12 +1360,7 @@ function sortearObjetoCasino() {
         function copiarResumenWhatsApp() {
             let textoFinal = generarTextoResumenWhatsApp();
             navigator.clipboard.writeText(textoFinal).then(() => {
-                alert("📋 ¡Lista copiada con éxito! Ya puedes ir al grupo de WhatsApp y pegarla.");
-            }).catch(err => {
-                let textarea = document.getElementById('texto-whatsapp-preview');
-                textarea.select();
-                document.execCommand('copy');
-                alert("📋 ¡Lista copiada al portapapeles!");
+                alert("📋 ¡Lista copiada con éxito!");
             });
         }
 
@@ -1578,7 +1472,7 @@ function sortearObjetoCasino() {
             db.ref('users').once('value', (snapshot) => {
                 let users = snapshot.val();
                 if (!users) {
-                    container.innerHTML = '<span class="text-slate-500 text-xs col-span-2 text-center py-4">No hay jugadoras registradas aún.</span>';
+                    container.innerHTML = '<span class="text-slate-500 text-xs col-span-2 text-center py-4">No hay jugadoras.</span>';
                     return;
                 }
                 container.innerHTML = '';
@@ -1616,46 +1510,42 @@ function sortearObjetoCasino() {
         }
 
         function setPositiveBalanceAdmin(code, name) {
-            let monto = prompt(`Ingresa el saldo a sumar para ${name} (Control: ${code}):`);
+            let monto = prompt(`Ingresa el saldo a sumar para ${name}:`);
             if (monto !== null && !isNaN(monto)) {
                 db.ref(`users/${code}`).once('value', (snap) => {
                     let actual = snap.val() && snap.val().balance ? snap.val().balance : 0;
                     let nuevo = actual + parseFloat(monto);
                     db.ref(`users/${code}`).update({ balance: nuevo });
-                    alert(`¡Saldo de ${name} actualizado a ${nuevo.toLocaleString()}!`);
                     renderizarAdminWallets();
                 });
             }
         }
 
         function restarSaldoAdmin(code, name, saldoActual) {
-            let montoRetiro = prompt(`¿Cuánto deseas restarle o retirarle a ${name}? (Saldo actual: ${saldoActual.toLocaleString()}):`);
+            let montoRetiro = prompt(`¿Cuánto deseas restarle a ${name}? (Saldo actual: ${saldoActual}):`);
             if (montoRetiro !== null && !isNaN(montoRetiro)) {
                 let valorRestar = parseFloat(montoRetiro);
                 let nuevoSaldo = saldoActual - valorRestar;
                 if (nuevoSaldo < 0) nuevoSaldo = 0;
                 db.ref(`users/${code}`).update({ balance: nuevoSaldo });
-                alert(`¡Se le han descontado ${valorRestar.toLocaleString()} a ${name}. Su nuevo saldo es ${nuevoSaldo.toLocaleString()}!`);
                 renderizarAdminWallets();
             }
         }
 
         function ponerCeroAdmin(code, name) {
-            if (confirm(`¿Estás segura de colocar el saldo de ${name} en 0.00?`)) {
+            if (confirm(`¿Colocar el saldo de ${name} en 0.00?`)) {
                 db.ref(`users/${code}`).update({ balance: 0.00 });
-                alert(`¡La billetera de ${name} ha quedado en cero con éxito!`);
                 renderizarAdminWallets();
             }
         }
 
         function toggleCreditAdmin(code, name, activarCredito) {
             db.ref(`users/${code}`).update({ isCredit: activarCredito });
-            alert(activarCredito ? `¡Crédito exclusivo activado para ${name}!` : `¡Crédito desactivado para ${name}!`);
             renderizarAdminWallets();
         }
 
         function eliminarJugadorSistema(controlJugadora, nombreJugadora) {
-            if (confirm(`¿Estás segura de eliminar por completo a ${nombreJugadora} (Control: ${controlJugadora}) del sistema?`)) {
+            if (confirm(`¿Eliminar a ${nombreJugadora} del sistema?`)) {
                 for (let id in marketCards) {
                     if (marketCards[id].ownerControl === controlJugadora) {
                         db.ref(`room/marketCards/${id}`).update({ owner: null, ownerControl: null, loaded: false, paid: false });
@@ -1664,7 +1554,6 @@ function sortearObjetoCasino() {
                 let safeCtrl = controlJugadora.replace(/[.#$\/\[\]]/g, "_");
                 db.ref(`room/connectedPlayers/${safeCtrl}`).remove();
                 db.ref(`users/${controlJugadora}`).remove();
-                alert(`¡${nombreJugadora} ha sido eliminada del sistema!`);
                 renderizarAdminWallets();
             }
         }
@@ -1673,35 +1562,6 @@ function sortearObjetoCasino() {
             let container = document.getElementById('admin-cards-summary');
             if (!container) return;
             container.innerHTML = '';
-            let jugadorasMap = {};
-            for (let id in marketCards) {
-                let card = marketCards[id];
-                if (card.owner && card.ownerControl) {
-                    if (!jugadorasMap[card.ownerControl]) {
-                        jugadorasMap[card.ownerControl] = { name: card.owner, control: card.ownerControl, cards: [] };
-                    }
-                    jugadorasMap[card.ownerControl].cards.push(card);
-                }
-            }
-            let controls = Object.keys(jugadorasMap);
-            if (controls.length === 0) return;
-            controls.forEach(ctrl => {
-                let j = jugadorasMap[ctrl];
-                j.cards.sort((a, b) => a.id - b.id);
-                let numerosCartonesStr = j.cards.map(c => c.id).join(', ');
-                let todosPagados = true;
-                j.cards.forEach(c => { if (!c.paid) todosPagados = false; });
-
-                let div = document.createElement('div');
-                div.className = "bg-slate-950 p-2.5 rounded-xl flex justify-between items-center gap-2 border border-slate-800 text-xs";
-                div.innerHTML = `
-                    <div class="flex items-center gap-2 overflow-x-auto">
-                        <strong class="text-pink-400 min-w-[70px]">${j.name}</strong>
-                        <span class="text-yellow-300 tracking-wide">Cartones: [${numerosCartonesStr}]</span>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
         }
 
         function renderizarSelectLiberarAdmin() {
@@ -1720,7 +1580,7 @@ function sortearObjetoCasino() {
             ocupados.forEach(card => {
                 let opt = document.createElement('option');
                 opt.value = card.id;
-                opt.innerText = `Cartón #${card.id} (Dueña: ${card.owner} - Ctrl: ${card.ownerControl})`;
+                opt.innerText = `Cartón #${card.id} (Dueña: ${card.owner})`;
                 selectEl.appendChild(opt);
             });
         }
@@ -1728,12 +1588,9 @@ function sortearObjetoCasino() {
         function liberarCartonSeleccionadoAdmin() {
             let selectEl = document.getElementById('admin-liberar-select');
             let id = selectEl.value;
-            if (!id) {
-                alert("Por favor selecciona un cartón de la lista para liberar.");
-                return;
-            }
+            if (!id) return;
             db.ref(`room/marketCards/${id}`).update({ owner: null, ownerControl: null, loaded: false, paid: false });
-            alert(`¡Cartón #${id} liberado con éxito!`);
+            alert(`¡Cartón #${id} liberado!`);
         }
 
         function renderizarJugadorasConectadasAdmin(connectedPlayers) {
@@ -1744,7 +1601,7 @@ function sortearObjetoCasino() {
             let listaConectadas = Object.values(connectedPlayers || {});
             if (counterBadge) counterBadge.innerText = `${listaConectadas.length} activa(s)`;
             if (listaConectadas.length === 0) {
-                container.innerHTML = '<span class="text-slate-500 text-center py-4">No hay jugadoras conectadas en este momento.</span>';
+                container.innerHTML = '<span class="text-slate-500 text-center py-4">No hay jugadoras conectadas.</span>';
                 return;
             }
             listaConectadas.forEach(jugadora => {
@@ -1769,7 +1626,7 @@ function sortearObjetoCasino() {
             let listaConectadas = Object.values(connectedPlayers || {});
             if (counterBadge) counterBadge.innerText = `${listaConectadas.length} activa(s)`;
             if (listaConectadas.length === 0) {
-                container.innerHTML = '<span class="text-slate-500 italic">No hay jugadoras conectadas todavía.</span>';
+                container.innerHTML = '<span class="text-slate-500 italic">Buscando compañeras...</span>';
                 return;
             }
             listaConectadas.forEach(jugadora => {
@@ -1797,7 +1654,7 @@ function sortearObjetoCasino() {
             }
             listaRadar.sort((a, b) => a.analisis.count - b.analisis.count);
             if (listaRadar.length === 0) {
-                radarContainer.innerHTML = '<span class="text-slate-500 text-xs col-span-2 text-center py-4">Ningún jugador ha cargado cartones todavía.</span>';
+                radarContainer.innerHTML = '<span class="text-slate-500 text-xs col-span-2 text-center py-4">Ningún jugador ha cargado cartones.</span>';
                 return;
             }
             listaRadar.forEach(item => {
@@ -1838,10 +1695,7 @@ function sortearObjetoCasino() {
         }
 
         function drawBallManually() {
-            if (drawnBalls.length >= 75) {
-                alert("¡Ya salieron todas las balotas!");
-                return;
-            }
+            if (drawnBalls.length >= 75) return;
             let disponibles = [];
             for (let i = 1; i <= 75; i++) {
                 if (!drawnBalls.includes(i)) disponibles.push(i);
@@ -1880,7 +1734,7 @@ function sortearObjetoCasino() {
         }
 
         function resetGame() {
-            if (confirm("¿Estás segura de reiniciar TODO el juego completo?")) {
+            if (confirm("¿Reiniciar TODO el juego?")) {
                 db.ref('room/drawnBalls').set([]);
                 db.ref('chatSala').remove();
                 let initialMarket = generarMercadoLocalInicial();
@@ -1888,7 +1742,6 @@ function sortearObjetoCasino() {
                 db.ref('room/connectedPlayers').remove();
                 marketCards = initialMarket;
                 renderizarTablerosGarantizados();
-                alert("¡Juego reiniciado desde cero!");
             }
         }
 
@@ -1931,8 +1784,6 @@ function sortearObjetoCasino() {
             if (cells.length === 0) return;
             cells.forEach(c => c.classList.remove('active'));
             let indicesActivos = [0, 1, 2, 3, 4];
-            if (patron === 'line') indicesActivos = [0, 1, 2, 3, 4];
-            else if (patron === 'four_corners') indicesActivos = [0, 4, 20, 24];
             indicesActivos.forEach(idx => {
                 if (cells[idx]) cells[idx].classList.add('active');
             });
@@ -1995,7 +1846,7 @@ function sortearObjetoCasino() {
                 let balance = userData.balance || 0;
                 let isCredit = userData.isCredit || false;
                 if (!isCredit && balance <= 0) {
-                    alert("❌ No tienes saldo positivo.");
+                    alert("❌ No tienes saldo.");
                     return;
                 }
                 let cartonesNuevos = 0;
