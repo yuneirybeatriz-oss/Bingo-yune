@@ -168,10 +168,10 @@
                 </div>
 
                 <div>
-                    <label class="text-xs text-yellow-300 font-bold block mb-1">💰 Premio de la Figura Actual:</label>
+                    <label class="text-xs text-yellow-300 font-bold block mb-1">💰 Premio de la Figura Actual (Deja en 0 si pagas manual):</label>
                     <div class="flex gap-2">
-                        <input type="number" id="admin-premio-input" placeholder="Ej: 2000" class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-center text-pink-400">
-                        <button onclick="(function(){ const val = document.getElementById('admin-premio-input').value; if(!val) { alert('Escribe un monto'); return; } db.ref('room/premioActual').set(Number(val)).then(() => alert('¡Premio actualizado con éxito!')); })()" class="px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white font-extrabold text-xs rounded-xl shadow">Guardar</button>
+                        <input type="number" id="admin-premio-input" placeholder="Ej: 0" class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-center text-pink-400">
+                        <button onclick="(function(){ const val = document.getElementById('admin-premio-input').value; db.ref('room/premioActual').set(Number(val) || 0).then(() => alert('¡Premio actualizado con éxito!')); })()" class="px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white font-extrabold text-xs rounded-xl shadow">Guardar</button>
                     </div>
                 </div>
             </div>
@@ -821,6 +821,7 @@
                 if (adminMsg) adminMsg.innerText = "🔑 Clave recordada automáticamente. ¡Solo presiona Ingresar!";
             }
 
+            // MOTOR UNIVERSAL DE SINCRONIZACIÓN DE SALA (Administradora y Jugadoras)
             db.ref('room').on('value', (snapshot) => {
                 let data = snapshot.val();
                 if (!data) return;
@@ -828,17 +829,19 @@
                 isRoomLocked = data.isRoomLocked || false;
                 actualizarEstadoBloqueoUI(isRoomLocked);
 
-                // Sincronización en vivo y directa de la figura para todos
+                // SINCRONIZACIÓN DIRECTA DE LA FIGURA EN TIEMPO REAL
                 if (data.gamePattern) {
                     gamePattern = data.gamePattern;
                     
                     let selectPattern = document.getElementById('game-pattern-select');
-                    if (selectPattern && document.activeElement !== selectPattern) {
+                    if (selectPattern) {
                         selectPattern.value = gamePattern;
                     }
 
                     let labelPatternEl = document.getElementById('player-pattern-label');
-                    if (labelPatternEl) labelPatternEl.innerText = nombresPatrones[gamePattern] || 'Línea';
+                    if (labelPatternEl) {
+                        labelPatternEl.innerText = nombresPatrones[gamePattern] || 'Línea';
+                    }
                     
                     actualizarMiniDiagramaPatron(gamePattern);
                 }
@@ -1024,11 +1027,6 @@
                 cardPrice = data.cardPrice || 300;
                 isRoomLocked = data.isRoomLocked || false;
 
-                let selectPattern = document.getElementById('game-pattern-select');
-                if (selectPattern && document.activeElement !== selectPattern) {
-                    selectPattern.value = gamePattern;
-                }
-
                 let roomCodeInput = document.getElementById('admin-room-code');
                 if (roomCodeInput && data.roomCode && !roomCodeInput.value) {
                     roomCodeInput.value = data.roomCode;
@@ -1102,10 +1100,6 @@
                         lastSpokenBallCount = drawnBalls.length;
                     }
                 }
-
-                let labelPatternEl = document.getElementById('player-pattern-label');
-                if (labelPatternEl) labelPatternEl.innerText = nombresPatrones[gamePattern] || 'Línea';
-                actualizarMiniDiagramaPatron(gamePattern);
 
                 let currentBallEl = document.getElementById('player-current-ball');
                 if (drawnBalls.length > 0) {
