@@ -731,60 +731,64 @@
             });
         }
 
-        // SORTEO CON RULETA Y EFECTO DE LUZ VISIBLE
-        function sortearObjetoCasino() {
-            let totalObjetos = listaObjetosYune.length;
-            let pasadas = 0;
-            let limitePasadas = 25; // Número de saltos de luz
-            let indiceActual = 0;
+        // SORTEO DE OBJETOS CON LUZ Y VOZ DIRECTA
+function sortearObjetoCasino() {
+    let total = listaObjetosYune.length;
+    let pasadas = 0;
+    let maxPasadas = 25; // Cantidad de saltos de luz antes de frenar
+    let indiceActual = 0;
 
-            let interval = setInterval(() => {
-                // Limpiar la luz de todos los elementos
-                for (let i = 1; i <= totalObjetos; i++) {
-                    let el = document.getElementById(`obj-card-el-${i}`);
-                    if (el) el.classList.remove('titling');
-                }
-
-                // Encender la luz en la casilla actual
-                let elGanadorTemporal = document.getElementById(`obj-card-el-${listaObjetosYune[indiceActual].id}`);
-                if (elGanadorTemporal) elGanadorTemporal.classList.add('titling');
-
-                indiceActual = (indiceActual + 1) % totalObjetos;
-                pasadas++;
-
-                // Cuando frena la ruleta
-                if (pasadas > limitePasadas) {
-                    clearInterval(interval);
-
-                    let ganadorIdx = Math.floor(Math.random() * totalObjetos);
-                    let objGanador = listaObjetosYune[ganadorIdx];
-
-                    // Apagar todos y dejar solo el ganador encendido con la luz brillante
-                    for (let i = 1; i <= totalObjetos; i++) {
-                        let el = document.getElementById(`obj-card-el-${i}`);
-                        if (el) el.classList.remove('titling');
-                    }
-                    let elFinal = document.getElementById(`obj-card-el-${objGanador.id}`);
-                    if (elFinal) elFinal.classList.add('titling');
-
-                    // Cantar por voz
-                    cantarTextoVoz("Salió el objeto: " + objGanador.nombre);
-
-                    // Guardar punto/estrella en Firebase
-                    db.ref(`room/objetosData/${objGanador.id}`).once('value').then((snap) => {
-                        let d = snap.val() || { hits: 0 };
-                        let hits = (d.hits || 0) + 1;
-                        if (hits > 5) hits = 5;
-                        
-                        db.ref(`room/objetosData/${objGanador.id}/hits`).set(hits).then(() => {
-                            setTimeout(() => {
-                                renderizarObjetosYune();
-                            }, 1500);
-                        });
-                    });
-                }
-            }, 120);
+    let interval = setInterval(() => {
+        // Apagar la luz de todas las tarjetas
+        for (let i = 1; i <= total; i++) {
+            let el = document.getElementById(`card-objeto-el-${i}`);
+            if (el) el.classList.remove('titling');
         }
+
+        // Encender la luz en la casilla actual de la secuencia
+        let elActual = document.getElementById(`card-objeto-el-${listaObjetosYune[indiceActual].id}`);
+        if (elActual) elActual.classList.add('titling');
+
+        indiceActual = (indiceActual + 1) % total;
+        pasadas++;
+
+        // Cuando termina el recorrido, se detiene en el ganador
+        if (pasadas >= maxPasadas) {
+            clearInterval(interval);
+
+            // Apagar todas por seguridad
+            for (let i = 1; i <= total; i++) {
+                let el = document.getElementById(`card-objeto-el-${i}`);
+                if (el) el.classList.remove('titling');
+            }
+
+            // Elegir el ganador al azar
+            let ganadorIdx = Math.floor(Math.random() * total);
+            let objGanador = listaObjetosYune[ganadorIdx];
+
+            // Dejar la luz fija únicamente en la tarjeta ganadora
+            let elGanadorFinal = document.getElementById(`card-objeto-el-${objGanador.id}`);
+            if (elGanadorFinal) elGanadorFinal.classList.add('titling');
+
+            // Cantar directamente el nombre del objeto sin rodeos
+            cantarTextoVoz(objGanador.nombre);
+
+            // Guardar la estrella en Firebase
+            db.ref(`room/objetosData/${objGanador.id}`).once('value').then((snap) => {
+                let d = snap.val() || { hits: 0 };
+                let hits = (d.hits || 0) + 1;
+                if (hits > 5) hits = 5;
+                
+                db.ref(`room/objetosData/${objGanador.id}/hits`).set(hits).then(() => {
+                    setTimeout(() => {
+                        renderizarObjetosYune();
+                    }, 1500);
+                });
+            });
+        }
+    }, 100);
+}
+
 
         function reiniciarObjetosRonda() {
             if (confirm("¿Estás segura de reiniciar los objetos y las estrellas de esta ronda?")) {
