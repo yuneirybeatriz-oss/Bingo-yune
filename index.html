@@ -581,7 +581,7 @@
                 osc.frequency.linearRampToValueWithTimeout ? osc.frequency.linearRampToValueAtTime(500, audioCtx.currentTime + 0.08) : osc.frequency.setValueAtTime(500, audioCtx.currentTime + 0.08);
                 
                 gain.gain.setValueAtTime(0.8, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                gain.gain.exponentialRampToValueWithTimeout ? gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1) : gain.gain.setValueAtTime(0.001, audioCtx.currentTime + 0.1);
 
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
@@ -606,10 +606,10 @@
                 
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.4);
+                osc.frequency.exponentialRampToValueWithTimeout ? osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.4) : osc.frequency.setValueAtTime(300, audioCtx.currentTime + 0.4);
                 
                 gain.gain.setValueAtTime(0.9, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.45);
+                gain.gain.exponentialRampToValueWithTimeout ? gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.45) : gain.gain.setValueAtTime(0.001, audioCtx.currentTime + 0.45);
 
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
@@ -730,7 +730,6 @@
                     hitsActuales = parseInt(cardEl.innerText);
                 }
 
-                // Solo entran al sorteo los que tienen menos de 5 hits/estrellas
                 if (hitsActuales < 5) {
                     objetosDisponibles.push(obj);
                 }
@@ -764,7 +763,6 @@
             if (centroDiv) centroDiv.classList.add('activo');
             if (visorEstado) visorEstado.innerText = "Trrr... Sorteando en Vivo";
 
-            // Usamos la selección equitativa para no repetir ganadores
             let objGanador = seleccionarObjetoEquitativo();
             let targetId = objGanador.id;
             let targetPerimetroIndex = ordenPerimetroRuleta.indexOf(targetId);
@@ -781,7 +779,6 @@
 
                 reproducirSonidoTrrr();
 
-                // Apagar todos los bordes activos
                 for (let i = 1; i <= 10; i++) {
                     let c = document.getElementById(`card-objeto-el-${i}`);
                     if (c) c.classList.remove('active-step', 'titling');
@@ -791,7 +788,6 @@
                 let cardActual = document.getElementById(`card-objeto-el-${idActual}`);
                 if (cardActual) cardActual.classList.add('active-step');
 
-                // Mostrar nombre y emoji provisional en el centro
                 let objTemp = listaObjetosYune.find(o => o.id === idActual);
                 let visorEmoji = document.getElementById('visor-emoji');
                 let visorNombre = document.getElementById('visor-nombre');
@@ -801,7 +797,6 @@
                 currentIndex = (currentIndex + 1) % ordenPerimetroRuleta.length;
                 pasoActual++;
 
-                // Cuando llega al final del recorrido programado, frena en el ganador
                 if (pasoActual >= totalPasosVueltas) {
                     clearInterval(intervaloGiroContinuo);
                     estaGirandoSolo = false;
