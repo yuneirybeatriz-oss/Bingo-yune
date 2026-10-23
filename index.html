@@ -62,7 +62,7 @@
             border: 2px solid #ffffff;
         }
 
-        /* Estilos específicos para Game Objetos Yune */
+        /* Estilos para Game Objetos Yune */
         .objeto-card {
             background: #1a1a40;
             border: 2px solid #2a2a60;
@@ -591,7 +591,7 @@
             'rombo': 'Rombo Pequeño 💎'
         };
 
-        // FUNCIÓN PARA CAMBIAR ENTRE MODO BINGO Y MODO OBJETOS
+        // CAMBIAR ENTRE MODO BINGO Y MODO OBJETOS
         function switchGameMode(modo) {
             let sectionBingo = document.getElementById('section-bingo-main');
             let sectionObjetos = document.getElementById('section-objetos-main');
@@ -653,7 +653,7 @@
                         </div>
                     `;
 
-                    // Renderizar Tarjeta de Objeto
+                    // Renderizar Tarjeta con atributo data-id
                     let card = document.createElement('div');
                     card.className = `objeto-card ${esMio ? 'selected-by-user border-cyan-400' : 'bg-slate-900 border-slate-800'}`;
                     card.dataset.id = obj.id;
@@ -754,7 +754,10 @@
 
         function sortearObjetoCasino() {
             let cards = document.querySelectorAll('.objeto-card');
-            if (cards.length === 0) return alert("Cargando objetos, intenta en un segundo...");
+            if (cards.length === 0) {
+                alert("Cargando objetos, intenta en un segundo...");
+                return;
+            }
 
             let count = 0;
             let interval = setInterval(() => {
@@ -770,7 +773,11 @@
                     let ganadorIdx = Math.floor(Math.random() * listaObjetosYune.length);
                     let objGanador = listaObjetosYune[ganadorIdx];
                     
-                    if (cards[ganadorIdx]) cards[ganadorIdx].classList.add('titling');
+                    cards.forEach(c => {
+                        if (parseInt(c.dataset.id) === objGanador.id) {
+                            c.classList.add('titling');
+                        }
+                    });
 
                     cantarTextoVoz("Salió el objeto: " + objGanador.nombre);
 
@@ -796,9 +803,7 @@
             }
         }
 
-        // ----------------------------------------------------
-        // MANTENIMIENTO DE LAS FUNCIONES ORIGINALES DE BINGO
-        // ----------------------------------------------------
+        // FUNCIONES DE BINGO
         function iniciarRelojEnVivo() {
             function actualizarReloj() {
                 let ahora = new Date();
