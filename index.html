@@ -41,20 +41,25 @@
             background: #1e1e3f; border: 2px solid #333366; border-radius: 10px;
             padding: 6px; text-align: center; cursor: pointer;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            min-height: 70px; position: relative; transition: all 0.2s ease;
+            min-height: 70px; position: relative; transition: all 0.15s ease;
         }
         .objeto-card.active-step {
             border: 3px solid #38bdf8 !important;
             background: #0c4a6e !important; z-index: 10;
         }
+        /* TITILEO CLARO Y SUAVE DE LA LUZ BLANCA/AMARILLA */
+        @keyframes titileoElegante {
+            0% { border-color: #ffffff; box-shadow: 0 0 15px #ffffff, inset 0 0 10px #38bdf8; background: #0369a1; }
+            50% { border-color: #facc15; box-shadow: 0 0 30px #facc15, inset 0 0 20px #facc15; background: #312e81; }
+            100% { border-color: #ffffff; box-shadow: 0 0 15px #ffffff, inset 0 0 10px #38bdf8; background: #0369a1; }
+        }
         .objeto-card.titling {
-            border: 3px solid #facc15 !important;
-            background: #3730a3 !important; z-index: 20; transform: scale(1.05);
+            animation: titileoElegante 0.6s infinite alternate;
+            z-index: 20; transform: scale(1.06);
         }
         .objeto-card.selected-by-user {
             border-color: #38bdf8; background: #0d3b66;
         }
-        /* OBJETO GANADOR COMPLETAMENTE SOMBREADO Y BLOQUEADO */
         .objeto-card.objeto-ganador-ronda {
             background: #020617 !important; border-color: #dc2626 !important;
             opacity: 0.35; filter: grayscale(100%); cursor: not-allowed; pointer-events: none;
@@ -833,6 +838,7 @@
             return objetosDisponibles[Math.floor(Math.random() * objetosDisponibles.length)];
         }
 
+        /* RULETA DINÁMICA CON VUELTAS VARIABLES AL AZAR Y PAUSA TITILANTE */
         function iniciarGiroAutomaticoContinuo() {
             if (!currentUser.isAdmin) return;
             if (juegoPausadoPorGanador) {
@@ -859,13 +865,15 @@
                 let targetId = objGanador.id;
                 let targetPerimetroIndex = ordenPerimetroRuleta.indexOf(targetId);
 
-                let currentIndex = 0;
-                let totalPasosVueltas = 12 + targetPerimetroIndex;
+                // CANTIDAD DE VUELTAS COMPLETAS AL AZAR (Entre 1 y 3 vueltas extras aleatorias)
+                let vueltasAzar = Math.floor(Math.random() * 3) + 1; 
+                let totalPasosVueltas = (vueltasAzar * ordenPerimetroRuleta.length) + targetPerimetroIndex;
                 let pasoActual = 0;
 
                 let visorCentro = document.getElementById('centro-visor');
                 if (visorCentro) visorCentro.classList.remove('visor-ganador-alerta');
 
+                // VELOCIDAD LIGERAMENTE MÁS RÁPIDA (130ms en lugar de 220ms) pero dando más vueltas al azar
                 intervaloGiroContinuo = setInterval(() => {
                     if (juegoPausadoPorGanador) {
                         clearInterval(intervaloGiroContinuo);
@@ -878,7 +886,7 @@
                         if (c && !c.classList.contains('objeto-ganador-ronda')) c.classList.remove('active-step', 'titling');
                     }
 
-                    let idActual = ordenPerimetroRuleta[currentIndex];
+                    let idActual = ordenPerimetroRuleta[pasoActual % ordenPerimetroRuleta.length];
                     let cardActual = document.getElementById(`card-objeto-el-${idActual}`);
                     if (cardActual && !cardActual.classList.contains('objeto-ganador-ronda')) {
                         cardActual.classList.add('active-step');
@@ -888,13 +896,12 @@
                     if (objTemp && document.getElementById('visor-emoji')) {
                         document.getElementById('visor-emoji').innerText = objTemp.emoji;
                         document.getElementById('visor-nombre').innerText = objTemp.nombre;
-                        document.getElementById('visor-estado-txt').innerText = "Girando ruleta...";
+                        document.getElementById('visor-estado-txt').innerText = "Girando ruleta al azar...";
                     }
 
-                    currentIndex = (currentIndex + 1) % ordenPerimetroRuleta.length;
                     pasoActual++;
 
-                    if (pasoActual >= totalPasosVueltas) {
+                    if (pasoActual > totalPasosVueltas) {
                         clearInterval(intervaloGiroContinuo);
                         estaGirandoSolo = false;
 
@@ -903,8 +910,12 @@
                             if (c) c.classList.remove('active-step');
                         }
 
+                        // 🔥 SE QUEDA TITILANDO EN EL OBJETO GANADOR DURANTE 2.5 SEGUNDOS
                         let cardGanadora = document.getElementById(`card-objeto-el-${targetId}`);
                         if (cardGanadora) cardGanadora.classList.add('titling');
+
+                        if (document.getElementById('visor-emoji')) document.getElementById('visor-emoji').innerText = objGanador.emoji;
+                        if (document.getElementById('visor-nombre')) document.getElementById('visor-nombre').innerText = objGanador.nombre;
 
                         reproducirSonidoCampanaFinal();
 
@@ -915,12 +926,7 @@
                             let duenoActual = d.owner || "Sin Dueño";
 
                             db.ref(`room/objetosData/${targetId}/hits`).set(hits).then(() => {
-                                // MOSTRAR VISIBLEMENTE EN EL CENTRO
-                                if (document.getElementById('visor-emoji')) document.getElementById('visor-emoji').innerText = objGanador.emoji;
-                                if (document.getElementById('visor-nombre')) document.getElementById('visor-nombre').innerText = objGanador.nombre;
-
                                 if (hits >= 5) {
-                                    // 🌟 ¡OBJETO LLEGÓ A 5 ESTRELLAS Y GANÓ!
                                     if (visorCentro) visorCentro.classList.add('visor-ganador-alerta');
                                     if (document.getElementById('visor-estado-txt')) document.getElementById('visor-estado-txt').innerText = "🎉 ¡OBJETO GANADOR DE PREMIO! 🎉";
                                 } else {
@@ -936,7 +942,7 @@
                                     document.getElementById('visor-dueno-centro').classList.remove('hidden');
                                 }
 
-                                cantarTextoVoz(`¡${objGanador.nombre}! Suma una estrella.`);
+                                cantarTextoVoz(`¡${objGanador.nombre}!`);
 
                                 if (hits >= 5) {
                                     juegoPausadoPorGanador = true;
@@ -957,14 +963,16 @@
                                     }, 1000);
 
                                 } else {
+                                    // ⏱️ ESPERA 2.5 SEGUNDOS TITILANDO Y VUELVE A ARRANCAR AUTOMÁTICAMENTE
                                     setTimeout(() => {
+                                        if (cardGanadora) cardGanadora.classList.remove('titling');
                                         if (!juegoPausadoPorGanador) iniciarGiroAutomaticoContinuo();
                                     }, 2500);
                                 }
                             });
                         });
                     }
-                }, 220);
+                }, 130); // ⚡ GIRO UN POCO MÁS RÁPIDO PERO CON MÁS VUELTAS
             });
         }
 
@@ -982,6 +990,12 @@
             let visorCentro = document.getElementById('centro-visor');
             if (visorCentro) visorCentro.classList.remove('visor-ganador-alerta');
             if (document.getElementById('visor-estado-txt')) document.getElementById('visor-estado-txt').innerText = "Sorteo en Vivo";
+
+            // Quitar titileo de cualquier cuadro
+            for (let i = 1; i <= 10; i++) {
+                let c = document.getElementById(`card-objeto-el-${i}`);
+                if (c) c.classList.remove('titling');
+            }
 
             if (!currentUser.isAdmin) return;
             if (etapaPremioActual < 4) {
@@ -1013,6 +1027,11 @@
             let visorCentro = document.getElementById('centro-visor');
             if (visorCentro) visorCentro.classList.remove('visor-ganador-alerta');
             if (document.getElementById('visor-estado-txt')) document.getElementById('visor-estado-txt').innerText = "Sorteo en Vivo";
+
+            for (let i = 1; i <= 10; i++) {
+                let c = document.getElementById(`card-objeto-el-${i}`);
+                if (c) c.classList.remove('titling');
+            }
 
             if (!currentUser.isAdmin) return;
             if (confirm("¿Reiniciar ronda de objetos por completo y liberar todas las figuras?")) {
@@ -1658,7 +1677,7 @@
                     }
                 });
                 if (caja1) { caja1.innerHTML = html; caja1.scrollTop = caja1.scrollHeight; }
-                if (caja2) { caja2.innerHTML = html; caja2.scrollTop = caja2.scrollHeight; }
+                if (caja2) { caja2.innerHTML = html; caja2.scrollHeight; }
             });
         }
 
