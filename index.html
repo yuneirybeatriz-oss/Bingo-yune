@@ -15,9 +15,6 @@
         @keyframes flash-bg { 0%, 100% { background-color: rgba(234, 179, 8, 0.9); } 50% { background-color: rgba(219, 39, 119, 0.9); } }
         .flash-winner { animation: flash-bg 1s infinite; }
 
-        @keyframes border-flash { 0%, 100% { border-color: rgba(234, 179, 8, 1); box-shadow: 0 0 15px rgba(234, 179, 8, 0.8); } 50% { border-color: rgba(219, 39, 119, 1); box-shadow: 0 0 25px rgba(219, 39, 119, 0.9); } }
-        .card-one-away { animation: border-flash 0.8s infinite; border-width: 3px; }
-        
         .bola-b { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; border: 2px solid #60a5fa; }
         .bola-i { background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; border: 2px solid #f87171; }
         .bola-n { background: linear-gradient(135deg, #f8fafc, #cbd5e1); color: #0f172a; border: 2px solid #ffffff; }
@@ -46,38 +43,26 @@
             padding: 2px;
             border-radius: 4px;
         }
-        .mini-cell {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 1px;
-        }
-        .mini-cell.active {
-            background: #22c55e;
-            box-shadow: 0 0 4px #22c55e;
-        }
+        .mini-cell { background: rgba(255, 255, 255, 0.1); border-radius: 1px; }
+        .mini-cell.active { background: #22c55e; box-shadow: 0 0 4px #22c55e; }
 
-        .winning-pattern-cell {
-            background: #22c55e !important;
-            color: #0f172a !important;
-            box-shadow: 0 0 10px #22c55e;
-            border: 2px solid #ffffff;
-        }
-
-        /* Estilos para Game Objetos Yune */
+        /* EFECTO DE LUZ DE CASINO EN OBJETOS */
         .objeto-card {
             background: #1a1a40;
             border: 2px solid #2a2a60;
             border-radius: 15px;
             padding: 12px;
             text-align: center;
-            transition: 0.2s;
+            transition: all 0.1s ease-in-out;
             position: relative;
             cursor: pointer;
         }
         .objeto-card.titling {
-            border-color: #ffd700 !important;
-            box-shadow: 0 0 25px #ffd700 !important;
-            transform: scale(1.08);
-            background: #2b2b60 !important;
+            border: 4px solid #facc15 !important;
+            box-shadow: 0 0 30px #facc15, inset 0 0 15px #facc15 !important;
+            transform: scale(1.1);
+            background: #3730a3 !important;
+            z-index: 10;
         }
         .objeto-card.selected-by-user {
             border-color: #05d9e8;
@@ -498,7 +483,7 @@
                 <div id="admin-objetos-panel" class="bg-slate-900 p-4 rounded-2xl border border-pink-500/40 hidden">
                     <h3 class="text-sm font-bold text-pink-400 mb-2">👑 Panel de Control de Administradora (Objetos)</h3>
                     <div class="flex gap-2 flex-wrap mb-4">
-                        <button onclick="sortearObjetoCasino()" class="px-5 py-2.5 bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-950 font-extrabold text-xs rounded-xl shadow cursor-pointer">🎲 Sortear Siguiente Objeto (Efecto Casino)</button>
+                        <button onclick="sortearObjetoCasino()" class="px-5 py-2.5 bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-950 font-extrabold text-xs rounded-xl shadow cursor-pointer hover:scale-105 transition">🎲 Sortear Siguiente Objeto (Efecto Casino)</button>
                         <button onclick="reiniciarObjetosRonda()" class="px-4 py-2.5 bg-red-600 text-white font-bold text-xs rounded-xl shadow cursor-pointer">🔄 Reiniciar Objetos</button>
                     </div>
                     <div class="text-xs font-bold text-yellow-300 mb-1">Control y Liberación Rápida:</div>
@@ -510,9 +495,9 @@
                 <!-- RESUMEN VERTICAL ESTILO WHATSAPP -->
                 <div id="resumen-vertical-objetos"></div>
 
-                <!-- GRILLA DE LOS 10 OBJETOS -->
+                <!-- GRILLA DE LOS 10 OBJETOS (DONDE CORREN LAS LUCES) -->
                 <div>
-                    <h3 class="text-sm font-bold text-pink-400 mb-2">🎁 Selecciona tu Objeto:</h3>
+                    <h3 class="text-sm font-bold text-pink-400 mb-2">🎁 Lista de Objetos en Ruleta:</h3>
                     <div id="grid-objetos-yune" class="grid grid-cols-2 md:grid-cols-5 gap-3">
                         <!-- Se llena con JS -->
                     </div>
@@ -560,7 +545,6 @@
         let presenceRef = null;
         let audioHabilitado = true;
 
-        // DATOS DE LOS 10 OBJETOS
         const listaObjetosYune = [
             { id: 1, emoji: "🪜", nombre: "La Escalera" },
             { id: 2, emoji: "💍", nombre: "El Anillo" },
@@ -591,7 +575,6 @@
             'rombo': 'Rombo Pequeño 💎'
         };
 
-        // CAMBIAR ENTRE MODO BINGO Y MODO OBJETOS
         function switchGameMode(modo) {
             let sectionBingo = document.getElementById('section-bingo-main');
             let sectionObjetos = document.getElementById('section-objetos-main');
@@ -612,7 +595,6 @@
             }
         }
 
-        // FUNCIONES DE OBJETOS YUNE
         function renderizarObjetosYune() {
             db.ref('room/objetosData').once('value').then((snap) => {
                 let objetosState = snap.val() || {};
@@ -653,10 +635,9 @@
                         </div>
                     `;
 
-                    // Renderizar Tarjeta con atributo data-id
                     let card = document.createElement('div');
                     card.className = `objeto-card ${esMio ? 'selected-by-user border-cyan-400' : 'bg-slate-900 border-slate-800'}`;
-                    card.dataset.id = obj.id;
+                    card.id = `obj-card-el-${obj.id}`;
                     card.onclick = () => seleccionarObjetoYune(obj.id);
                     card.innerHTML = `
                         <span class="text-3xl block mb-1">${obj.emoji}</span>
@@ -665,7 +646,6 @@
                     `;
                     gridContainer.appendChild(card);
 
-                    // Renderizar Admin Control
                     if (adminControlList) {
                         let row = document.createElement('div');
                         row.className = "flex justify-between items-center bg-slate-900 p-2 rounded-lg text-xs";
@@ -688,7 +668,6 @@
                 let resContainer = document.getElementById('resumen-vertical-objetos');
                 if (resContainer) resContainer.innerHTML = listaVerticalHTML;
 
-                // Renderizar Mis Objetos
                 let misObjGrid = document.getElementById('mis-objetos-juego-grid');
                 if (misObjGrid) {
                     if (misObjetosEnJuego.length === 0) {
@@ -752,46 +731,59 @@
             });
         }
 
+        // SORTEO CON RULETA Y EFECTO DE LUZ VISIBLE
         function sortearObjetoCasino() {
-            let cards = document.querySelectorAll('.objeto-card');
-            if (cards.length === 0) {
-                alert("Cargando objetos, intenta en un segundo...");
-                return;
-            }
+            let totalObjetos = listaObjetosYune.length;
+            let pasadas = 0;
+            let limitePasadas = 25; // Número de saltos de luz
+            let indiceActual = 0;
 
-            let count = 0;
             let interval = setInterval(() => {
-                cards.forEach(c => c.classList.remove('titling'));
-                let randomIndex = Math.floor(Math.random() * cards.length);
-                cards[randomIndex].classList.add('titling');
-                count++;
+                // Limpiar la luz de todos los elementos
+                for (let i = 1; i <= totalObjetos; i++) {
+                    let el = document.getElementById(`obj-card-el-${i}`);
+                    if (el) el.classList.remove('titling');
+                }
 
-                if (count > 15) {
+                // Encender la luz en la casilla actual
+                let elGanadorTemporal = document.getElementById(`obj-card-el-${listaObjetosYune[indiceActual].id}`);
+                if (elGanadorTemporal) elGanadorTemporal.classList.add('titling');
+
+                indiceActual = (indiceActual + 1) % totalObjetos;
+                pasadas++;
+
+                // Cuando frena la ruleta
+                if (pasadas > limitePasadas) {
                     clearInterval(interval);
-                    cards.forEach(c => c.classList.remove('titling'));
-                    
-                    let ganadorIdx = Math.floor(Math.random() * listaObjetosYune.length);
-                    let objGanador = listaObjetosYune[ganadorIdx];
-                    
-                    cards.forEach(c => {
-                        if (parseInt(c.dataset.id) === objGanador.id) {
-                            c.classList.add('titling');
-                        }
-                    });
 
+                    let ganadorIdx = Math.floor(Math.random() * totalObjetos);
+                    let objGanador = listaObjetosYune[ganadorIdx];
+
+                    // Apagar todos y dejar solo el ganador encendido con la luz brillante
+                    for (let i = 1; i <= totalObjetos; i++) {
+                        let el = document.getElementById(`obj-card-el-${i}`);
+                        if (el) el.classList.remove('titling');
+                    }
+                    let elFinal = document.getElementById(`obj-card-el-${objGanador.id}`);
+                    if (elFinal) elFinal.classList.add('titling');
+
+                    // Cantar por voz
                     cantarTextoVoz("Salió el objeto: " + objGanador.nombre);
 
+                    // Guardar punto/estrella en Firebase
                     db.ref(`room/objetosData/${objGanador.id}`).once('value').then((snap) => {
                         let d = snap.val() || { hits: 0 };
                         let hits = (d.hits || 0) + 1;
                         if (hits > 5) hits = 5;
                         
                         db.ref(`room/objetosData/${objGanador.id}/hits`).set(hits).then(() => {
-                            renderizarObjetosYune();
+                            setTimeout(() => {
+                                renderizarObjetosYune();
+                            }, 1500);
                         });
                     });
                 }
-            }, 100);
+            }, 120);
         }
 
         function reiniciarObjetosRonda() {
@@ -803,7 +795,7 @@
             }
         }
 
-        // FUNCIONES DE BINGO
+        // FUNCIONES GENERALES Y BINGO
         function iniciarRelojEnVivo() {
             function actualizarReloj() {
                 let ahora = new Date();
