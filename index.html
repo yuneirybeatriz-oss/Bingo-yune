@@ -132,14 +132,13 @@
             <div class="bg-slate-800 p-6 rounded-3xl flex justify-between items-center flex-wrap gap-3">
                 <h2 class="text-2xl font-bold text-pink-400">Torre de Control</h2>
                 <div class="flex gap-2 items-center">
-                    <!-- BOTÓN MAESTRO DE CIERRE DE SALA -->
                     <button id="admin-toggle-room-btn" onclick="toggleRoomLockAdmin()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow transition">
                         🟢 Sala Abierta (Cerrar)
                     </button>
                     <button onclick="backToHome()" class="px-4 py-2 bg-slate-700 text-xs rounded-xl">Salir</button>
                 </div>
             </div>
-            <!-- ALERTA DE GANADORES MÚLTIPLES -->
+
             <div id="admin-winner-alert" class="hidden bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-950 p-6 rounded-3xl font-extrabold text-center text-xl shadow-xl alert-bingo flex flex-col gap-3">
                 <div>🎉 ¡BINGO VALIDADO! (Juego Detenido) 🎉</div>
                 <div id="admin-winner-text" class="text-base font-bold bg-white/25 py-2.5 px-4 rounded-xl flex flex-col gap-1">Ganadores...</div>
@@ -150,7 +149,7 @@
                 </div>
             </div>
 
-            <!-- SECCIÓN: VALOR DEL CARTÓN, CÓDIGO DE SALA Y PREMIO -->
+            <!-- VALOR DEL CARTÓN Y CÓDIGO -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-yellow-500/40 shadow-lg">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -178,7 +177,7 @@
                 </div>
             </div>
 
-            <!-- SECCIÓN: RESUMEN AUTOMÁTICO PARA WHATSAPP -->
+            <!-- RESUMEN WHATSAPP -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-emerald-500/40 shadow-lg">
                 <div class="flex justify-between items-center flex-wrap gap-2">
                     <div class="flex items-center gap-2">
@@ -189,11 +188,10 @@
                         📋 Copiar Lista para WhatsApp
                     </button>
                 </div>
-                <p class="text-xs text-slate-400">Generado automáticamente agrupando los cartones por cada jugadora (ej: Maira: #5, #10, #15...). ¡Toca el botón para copiar y pegar en el grupo!</p>
                 <textarea id="texto-whatsapp-preview" readonly class="w-full h-32 bg-slate-900 border border-slate-700 rounded-2xl p-3 text-xs text-slate-300 font-mono resize-none focus:outline-none" placeholder="Generando resumen..."></textarea>
             </div>
 
-            <!-- SECCIÓN: CARTONES PAGADOS EN JUEGO -->
+            <!-- CARTONES PAGADOS EN JUEGO -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-emerald-500/40 shadow-lg">
                 <div class="flex justify-between items-center flex-wrap gap-2">
                     <div class="flex items-center gap-2">
@@ -207,15 +205,9 @@
                 </div>
             </div>
 
-            <!-- BILLETERAS Y CRÉDITOS EXCLUSIVOS (PANEL ADMIN) -->
+            <!-- BILLETERAS -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-purple-500/40 shadow-lg">
-                <div class="flex justify-between items-center flex-wrap gap-2">
-                    <div class="flex items-center gap-2">
-                        <span class="text-2xl">💳</span>
-                        <h3 class="font-bold text-purple-300 text-lg">Control de Billeteras, Créditos y Exclusión</h3>
-                    </div>
-                </div>
-                <p class="text-xs text-slate-400">Asigna saldo, resta saldo, pon en cero, activa crédito exclusivo o **elimina del sistema** a cualquier jugadora.</p>
+                <h3 class="font-bold text-purple-300 text-lg">Control de Billeteras, Créditos y Exclusión</h3>
                 <div id="admin-wallets-list" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto p-3 bg-slate-900/80 rounded-2xl border border-slate-700/60">
                     <span class="text-slate-500 text-xs col-span-2 text-center py-4">Cargando billeteras...</span>
                 </div>
@@ -275,18 +267,15 @@
                 </div>
             </div>
 
-            <!-- RADAR DE CARTONES MÁS CERCANOS -->
+            <!-- RADAR -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4">
-                <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-yellow-300 text-lg">📡 Radar de Cartones Cercanos</h3>
-                    <span class="text-xs text-slate-400">Ordenados automáticamente por cercanía al BINGO</span>
-                </div>
+                <h3 class="font-bold text-yellow-300 text-lg">📡 Radar de Cartones Cercanos</h3>
                 <div id="admin-radar-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl">
                     <span class="text-slate-500 text-xs col-span-2 text-center py-4">Analizando avance de cartones...</span>
                 </div>
             </div>
 
-            <!-- SECCIÓN DE LIBERAR CARTONES -->
+            <!-- LIBERAR CARTONES -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
                 <h3 class="font-bold text-red-400 text-sm">🗑️ Sección para Liberar Cartones Ocupados</h3>
                 <div class="flex gap-3 items-center">
@@ -300,14 +289,12 @@
                 <div id="admin-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1.5"></div>
             </div>
 
-            <!-- ================= CHAT DE LA SALA EN VIVO (INTEGRADO EN EL PANEL ADMIN) ================= -->
+            <!-- CHAT ADMIN -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-pink-500/40 shadow-lg">
                 <h3 class="font-bold text-pink-400 text-lg flex items-center gap-2">💬 Chat de la Sala en Vivo (Admin)</h3>
-                
                 <div id="caja-chat-admin" class="bg-slate-900 h-36 overflow-y-auto p-3 rounded-xl border border-slate-700 text-xs text-left space-y-1.5">
                     <p class="text-slate-500 text-center">Conectando al chat en vivo...</p>
                 </div>
-
                 <div class="flex gap-2">
                     <input type="text" id="input-mensaje-admin" placeholder="Escribe tu mensaje como Administradora..." class="flex-1 px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs" onkeypress="if(event.key === 'Enter') enviarMensajeChatAdmin()">
                     <button onclick="enviarMensajeChatAdmin()" class="px-5 py-2 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl text-xs shadow transition">Enviar</button>
@@ -344,7 +331,7 @@
                 </div>
             </div>
 
-            <!-- MODAL DE VISTA PREVIA DE CARTÓN A PANTALLA COMPLETA -->
+            <!-- MODAL VISTA PREVIA FULLSCREEN -->
             <div id="modal-carton-fullscreen" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
                 <div class="bg-slate-900 border border-pink-500/50 p-6 rounded-3xl shadow-2xl flex flex-col gap-4 max-w-sm w-full text-center relative">
                     <button onclick="cerrarVistaPreviaFullscreen()" class="absolute top-4 right-4 bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white w-8 h-8 rounded-full font-bold flex items-center justify-center transition">✕</button>
@@ -366,7 +353,7 @@
                 </div>
             </div>
 
-            <!-- MODAL DE VICTORIA DE LA JUGADORA -->
+            <!-- MODAL BINGO VICTORIA -->
             <div id="player-winner-notification" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
                 <div class="flash-winner text-slate-950 p-6 md:p-8 rounded-3xl font-extrabold text-center shadow-2xl alert-bingo flex flex-col gap-4 max-w-lg w-full">
                     <div class="text-3xl md:text-4xl text-yellow-300 drop-shadow">👑 ¡B I N G O ! 👑</div>
@@ -401,7 +388,7 @@
                 </div>
             </div>
 
-            <!-- LISTA DE JUGADORAS CONECTADAS -->
+            <!-- JUGADORAS EN LÍNEA -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-3">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-yellow-300 text-sm">👥 Jugadoras en Línea en la Sala</h3>
@@ -412,7 +399,7 @@
                 </div>
             </div>
 
-            <!-- ZONA DE TUS CARTONES EN JUEGO -->
+            <!-- MIS CARTONES EN JUEGO -->
             <div class="flex flex-col gap-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-yellow-300 text-lg">Tus Cartones en Juego</h3>
@@ -429,14 +416,12 @@
                 <div id="player-board-grid" class="grid grid-cols-10 md:grid-cols-15 gap-1"></div>
             </div>
 
-            <!-- ================= CHAT DE LA SALA EN VIVO (INTEGRADO EN LA VISTA JUGADORA) ================= -->
+            <!-- CHAT SALA JUGADORA -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-pink-500/40 shadow-lg">
                 <h3 class="font-bold text-pink-400 text-lg flex items-center gap-2">💬 Chat de la Sala en Vivo</h3>
-                
                 <div id="caja-chat-jugadoras" class="bg-slate-900 h-36 overflow-y-auto p-3 rounded-xl border border-slate-700 text-xs text-left space-y-1.5">
                     <p class="text-slate-500 text-center">Conectando al chat en vivo...</p>
                 </div>
-
                 <div class="flex gap-2">
                     <input type="text" id="input-mensaje-jugadora" placeholder="Escribe tu mensaje..." class="flex-1 px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs" onkeypress="if(event.key === 'Enter') enviarMensajeChatJugadora()">
                     <button onclick="enviarMensajeChatJugadora()" class="px-5 py-2 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl text-xs shadow transition">Enviar</button>
@@ -481,7 +466,6 @@
         let lastAnnouncementId = 0;
         let presenceRef = null;
         let audioHabilitado = true;
-        let rondasDelDia = [];
 
         const nombresPatrones = {
             'line': 'Línea (Horizontal o Vertical)',
@@ -517,9 +501,7 @@
 
                 let relojTexto = `${horasStr}:${minutosStr}:${segundosStr} ${ampm}`;
                 let relojEl = document.getElementById('clock-time');
-                if (relojEl) {
-                    relojEl.innerText = relojTexto;
-                }
+                if (relojEl) relojEl.innerText = relojTexto;
             }
             actualizarReloj();
             setInterval(actualizarReloj, 1000);
@@ -542,9 +524,7 @@
             } else {
                 btn.className = "px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs font-bold rounded-xl shadow flex items-center gap-1.5 transition";
                 btn.innerText = "🔇 Silenciado";
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
-                }
+                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
             }
         }
 
@@ -875,9 +855,9 @@
             let nuevoEstado = !isRoomLocked;
             db.ref('room/isRoomLocked').set(nuevoEstado).then(() => {
                 if (nuevoEstado) {
-                    alert("🔒 ¡Sala cerrada con éxito! Ninguna jugadora podrá entrar al sistema hasta que la vuelvas a abrir.");
+                    alert("🔒 ¡Sala cerrada con éxito!");
                 } else {
-                    alert("🟢 ¡Sala abierta! Las jugadoras ya pueden ingresar nuevamente.");
+                    alert("🟢 ¡Sala abierta!");
                 }
             });
         }
@@ -933,7 +913,7 @@
             presenceRef.onDisconnect().remove();
         }
 
-        // CORRECCIÓN APLICADA AQUÍ: Registro rápido y verificación fluida de clave
+        // CORRECCIÓN DEFINITIVA: INGRESO DIRECTO Y ULTRA RÁPIDO
         function registerPlayer() {
             let name = document.getElementById('player-name-input').value.trim();
             let control = document.getElementById('player-control-input').value.trim();
@@ -949,46 +929,41 @@
                 return;
             }
 
-            db.ref('room/roomCode').once('value').then((snap) => {
-                let currentRoomCode = snap.val() || 'BINGO2026';
-                if (code.toUpperCase() !== currentRoomCode.toUpperCase() && code !== 'BINGO2026') {
-                    alert("El código de sala es incorrecto. Verifica e intenta de nuevo.");
-                    return;
+            if (code.toUpperCase() !== 'BINGO2026') {
+                alert("El código de sala es incorrecto. Verifica e intenta de nuevo.");
+                return;
+            }
+
+            localStorage.setItem('bingo_player_name', name);
+            localStorage.setItem('bingo_player_control', control);
+            localStorage.setItem('bingo_player_code', code);
+
+            currentUser.name = name;
+            currentUser.control = control;
+            currentUser.isAdmin = false;
+
+            document.getElementById('view-player-register').classList.add('hidden');
+            document.getElementById('view-player-room').classList.remove('hidden');
+
+            document.getElementById('player-display-name').innerText = name;
+            document.getElementById('player-display-control').innerText = control;
+
+            registrarPresenciaJugadora(name, control);
+
+            db.ref(`users/${control}`).once('value', (userSnap) => {
+                if (!userSnap.exists()) {
+                    db.ref(`users/${control}`).set({
+                        name: name,
+                        balance: 0.00,
+                        isCredit: false
+                    });
+                } else {
+                    db.ref(`users/${control}/name`).set(name);
                 }
-
-                localStorage.setItem('bingo_player_name', name);
-                localStorage.setItem('bingo_player_control', control);
-                localStorage.setItem('bingo_player_code', code);
-
-                currentUser.name = name;
-                currentUser.control = control;
-                currentUser.isAdmin = false;
-
-                registrarPresenciaJugadora(name, control);
-
-                db.ref(`users/${control}`).once('value').then((userSnap) => {
-                    if (!userSnap.exists()) {
-                        db.ref(`users/${control}`).set({
-                            name: name,
-                            balance: 0.00,
-                            isCredit: false
-                        });
-                    } else {
-                        db.ref(`users/${control}/name`).set(name);
-                    }
-
-                    document.getElementById('view-player-register').classList.add('hidden');
-                    document.getElementById('view-player-room').classList.remove('hidden');
-
-                    document.getElementById('player-display-name').innerText = name;
-                    document.getElementById('player-display-control').innerText = control;
-
-                    sincronizarDatosJugadora();
-                    escucharChatEnVivo();
-                });
-            }).catch(err => {
-                alert("Error de conexión. Intenta presionar el botón nuevamente.");
             });
+
+            sincronizarDatosJugadora();
+            escucharChatEnVivo();
         }
 
         function sincronizarDatosAdmin() {
@@ -1144,9 +1119,7 @@
             let texto = `🎲 *LISTA DE CARTONES EN JUEGO - BINGO YUNE* 🎲\n📅 Fecha: ${fechaHoy}\n\n`;
 
             let controls = Object.keys(jugadorasMap);
-            if (controls.length === 0) {
-                return "Aún no hay cartones cargados en juego para esta ronda.";
-            }
+            if (controls.length === 0) return "Aún no hay cartones cargados en juego para esta ronda.";
 
             controls.forEach(ctrl => {
                 let j = jugadorasMap[ctrl];
@@ -1163,9 +1136,7 @@
 
         function actualizarPreviewWhatsApp() {
             let textarea = document.getElementById('texto-whatsapp-preview');
-            if (textarea) {
-                textarea.value = generarTextoResumenWhatsApp();
-            }
+            if (textarea) textarea.value = generarTextoResumenWhatsApp();
         }
 
         function copiarResumenWhatsApp() {
@@ -1370,15 +1341,15 @@
         function toggleCreditAdmin(code, name, activarCredito) {
             db.ref(`users/${code}`).update({ isCredit: activarCredito });
             if (activarCredito) {
-                alert(`¡Crédito exclusivo activado para ${name}! Ahora podrá jugar sin restricción de saldo.`);
+                alert(`¡Crédito exclusivo activado para ${name}!`);
             } else {
-                alert(`¡Crédito desactivado para ${name}! Ahora dependerá de su saldo.`);
+                alert(`¡Crédito desactivado para ${name}!`);
             }
             renderizarAdminWallets();
         }
 
         function eliminarJugadorSistema(controlJugadora, nombreJugadora) {
-            if (confirm(`¿Estás segura de eliminar por completo a ${nombreJugadora} (Control: ${controlJugadora}) del sistema? Sus cartones serán liberados y su cuenta borrada.`)) {
+            if (confirm(`¿Estás segura de eliminar por completo a ${nombreJugadora} (Control: ${controlJugadora}) del sistema?`)) {
                 for (let id in marketCards) {
                     if (marketCards[id].ownerControl === controlJugadora) {
                         db.ref(`room/marketCards/${id}`).update({ owner: null, ownerControl: null, loaded: false, paid: false });
@@ -1393,17 +1364,9 @@
                     localStorage.removeItem('bingo_player_name');
                     localStorage.removeItem('bingo_player_control');
                     localStorage.removeItem('bingo_player_code');
-                    let nameInput = document.getElementById('player-name-input');
-                    let ctrlInput = document.getElementById('player-control-input');
-                    let codeInput = document.getElementById('player-access-code-input');
-                    if (nameInput) nameInput.value = '';
-                    if (ctrlInput) ctrlInput.value = '';
-                    if (codeInput) codeInput.value = '';
-                    let msg = document.getElementById('welcome-back-msg');
-                    if (msg) msg.classList.add('hidden');
                 }
 
-                alert(`¡${nombreJugadora} ha sido eliminada del sistema con éxito!`);
+                alert(`¡${nombreJugadora} ha sido eliminada del sistema!`);
                 renderizarAdminWallets();
             }
         }
@@ -1426,7 +1389,7 @@
 
             let controls = Object.keys(jugadorasMap);
             if (controls.length === 0) {
-                container.innerHTML = '<span class="text-slate-500 text-xs text-center py-4">No hay jugadoras con cartones seleccionados o cargados aún.</span>';
+                container.innerHTML = '<span class="text-slate-500 text-xs text-center py-4">No hay jugadoras con cartones seleccionados aún.</span>';
                 return;
             }
 
@@ -1449,7 +1412,6 @@
                         <button onclick="togglePaidAllJugadora('${j.control}', ${!todosPagados})" class="px-3 py-1 rounded-lg font-bold text-xs ${todosPagados ? 'bg-green-600 text-white' : 'bg-amber-600/30 text-amber-300 border border-amber-500/50'} cursor-pointer">
                             ${todosPagados ? 'Pagado' : 'Pendiente'}
                         </button>
-                        <button onclick="eliminarJugadorSistema('${j.control}', '${j.name}')" class="px-2 py-1 bg-red-600/30 hover:bg-red-600 text-red-200 rounded-lg font-bold text-[10px] cursor-pointer" title="Eliminar del sistema">❌</button>
                     </div>
                 `;
                 container.appendChild(div);
@@ -1624,9 +1586,7 @@
                 let card = marketCards[id];
                 if (card.owner && card.loaded) {
                     let gano = verificarFiguraGanadora(card.grid, drawnBalls, gamePattern);
-                    if (gano) {
-                        ganadoresEncontrados.push(card);
-                    }
+                    if (gano) ganadoresEncontrados.push(card);
                 }
             }
 
@@ -1762,11 +1722,11 @@
             document.getElementById('player-winner-notification').classList.add('hidden');
             hasSpokenMyBingo = false;
             lastSpokenBallCount = 0;
-            alert("¡Balotas reiniciadas! Los cartones cargados se mantienen para la siguiente figura.");
+            alert("¡Balotas reiniciadas!");
         }
 
         function resetGame() {
-            if (confirm("¿Estás segura de reiniciar TODO el juego completo? Se borrarán todos los cartones y el chat.")) {
+            if (confirm("¿Estás segura de reiniciar TODO el juego completo?")) {
                 db.ref('room/drawnBalls').set([]);
                 db.ref('chatSala').remove();
 
@@ -1788,7 +1748,7 @@
                 }
                 db.ref('room/marketCards').set(initialMarket);
                 db.ref('room/connectedPlayers').remove();
-                alert("¡Juego reiniciado por completo desde cero y chat limpiado!");
+                alert("¡Juego reiniciado desde cero!");
             }
         }
 
@@ -1903,9 +1863,9 @@
             let juegoIniciado = drawnBalls.length > 0;
 
             if (juegoIniciado) {
-                statusMsg.innerText = "🔒 Partida iniciada: El mercado está cerrado y los cartones en juego no se pueden modificar.";
+                statusMsg.innerText = "🔒 Partida iniciada: El mercado está cerrado.";
             } else {
-                statusMsg.innerText = "Toca un cartón para seleccionarlo/quitarlo. Toca el botón 🔍 para inspeccionarlo en pantalla completa.";
+                statusMsg.innerText = "Toca un cartón para seleccionarlo. Toca 🔍 para ver en pantalla completa.";
             }
 
             for (let id in marketCards) {
@@ -1943,7 +1903,7 @@
             }
 
             if (card.ownerControl === currentUser.control && card.loaded) {
-                alert("🔒 Este cartón ya está cargado. Escríbele a Yune para que te lo libere si deseas cambiarlo.");
+                alert("🔒 Este cartón ya está cargado. Escríbele a Yune si deseas cambiarlo.");
                 return;
             }
 
@@ -1957,7 +1917,7 @@
         function cargarMisCartones() {
             let juegoIniciado = drawnBalls.length > 0;
             if (juegoIniciado) {
-                alert("⚠️ La partida ya comenzó. No puedes cargar más cartones.");
+                alert("⚠️ La partida ya comenzó.");
                 return;
             }
 
@@ -1967,7 +1927,7 @@
                 let isCredit = userData.isCredit || false;
 
                 if (!isCredit && balance <= 0) {
-                    alert("❌ No puedes cargar cartones porque no tienes saldo positivo ni el crédito habilitado. Comunícate con la administración.");
+                    alert("❌ No puedes cargar cartones porque no tienes saldo positivo ni crédito habilitado.");
                     return;
                 }
 
@@ -1987,7 +1947,7 @@
                 let costoTotal = cartonesNuevos * cardPrice;
 
                 if (!isCredit && balance < costoTotal) {
-                    alert(`Saldo insuficiente. Necesitas ${costoTotal.toLocaleString()} y tienes ${balance.toLocaleString()}. Comunícate con Yune para recargar.`);
+                    alert(`Saldo insuficiente. Necesitas ${costoTotal.toLocaleString()} y tienes ${balance.toLocaleString()}.`);
                     return;
                 }
 
@@ -2002,7 +1962,7 @@
                     }
                 }
 
-                alert(`¡${cartonesNuevos} cartón(es) cargado(s) con éxito por un valor total de ${costoTotal.toLocaleString()}! Nuevo saldo: ${nuevoSaldo.toLocaleString()}`);
+                alert(`¡${cartonesNuevos} cartón(es) cargado(s) con éxito!`);
             });
         }
 
@@ -2104,9 +2064,7 @@
                 mensaje: mensajeTexto,
                 tiempo: Date.now()
             }, function(error) {
-                if (!error) {
-                    input.value = "";
-                }
+                if (!error) input.value = "";
             });
         }
 
@@ -2122,9 +2080,7 @@
                 mensaje: mensajeTexto,
                 tiempo: Date.now()
             }, function(error) {
-                if (!error) {
-                    input.value = "";
-                }
+                if (!error) input.value = "";
             });
         }
 
