@@ -468,10 +468,31 @@
             <div class="bg-slate-800 p-6 rounded-3xl card-shadow flex flex-col gap-6">
                 <div class="text-center">
                     <h2 class="text-2xl font-bold text-yellow-300">🎰 Game Objetos Yune 🎰</h2>
-                    <p class="text-xs text-slate-400">Pide tu objeto en WhatsApp, selecciónalo aquí y llena tus 5 estrellas</p>
+                    <p class="text-xs text-slate-400">Ruleta automática con 4 premios por ronda</p>
                 </div>
 
-                <!-- PANTALLA GIGANTE CON LAS 5 ESTRELLAS -->
+                <!-- VISOR CENTRAL DE LA RULETA EN GRANDE -->
+                <div class="bg-slate-950 border-4 border-yellow-400 p-6 rounded-3xl text-center shadow-2xl my-2 relative overflow-hidden">
+                    <span class="text-xs text-yellow-400 uppercase tracking-widest font-bold block mb-1">🎰 Sorteo en Vivo 🎰</span>
+                    <div id="visor-objeto-central" class="flex flex-col items-center justify-center py-4">
+                        <span class="text-6xl md:text-7xl block mb-2" id="visor-emoji">⭐</span>
+                        <span class="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-pink-400" id="visor-nombre">¡Listo para Girar!</span>
+                    </div>
+                </div>
+
+                <!-- PANEL DE CONTROL DE PREMIOS (PAUSA Y CONTINUAR) -->
+                <div id="panel-control-premios" class="bg-slate-950 p-4 rounded-2xl border-2 border-yellow-400 text-center">
+                    <span class="text-xs text-yellow-300 font-bold uppercase tracking-wider block mb-1">🏆 Premio Actual en Juego</span>
+                    <div id="premio-actual-titulo" class="text-lg font-extrabold text-pink-400 mb-3">1er Premio (Ronda en Curso)</div>
+                    
+                    <div class="flex gap-2 justify-center flex-wrap">
+                        <button onclick="sortearObjetoCasino()" id="btn-girar-ruleta" class="px-5 py-3 bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-950 font-extrabold text-xs rounded-xl shadow cursor-pointer hover:scale-105 transition">🎲 Girar Ruleta de Objeto</button>
+                        <button onclick="avanzarSiguientePremio()" id="btn-siguiente-premio" class="px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow cursor-pointer hidden">▶ Continuar al Siguiente Premio</button>
+                        <button onclick="reiniciarObjetosRonda()" class="px-4 py-3 bg-red-600 text-white font-bold text-xs rounded-xl shadow cursor-pointer">🔄 Reiniciar Objetos</button>
+                    </div>
+                </div>
+
+                <!-- PANTALLA DE TUS ESTRELLAS -->
                 <div class="bg-gradient-to-r from-indigo-950 to-slate-900 border-2 border-cyan-400 p-6 rounded-2xl text-center shadow-lg">
                     <span class="text-xs text-slate-400 uppercase tracking-widest font-bold">Tus Objetos en Juego</span>
                     <div id="mis-objetos-juego-grid" class="mt-2">
@@ -479,33 +500,27 @@
                     </div>
                 </div>
 
-                <!-- PANEL DE ADMIN PARA SORTEAR Y LIBERAR -->
+                <!-- PANEL DE ADMIN PARA LIBERAR -->
                 <div id="admin-objetos-panel" class="bg-slate-900 p-4 rounded-2xl border border-pink-500/40 hidden">
                     <h3 class="text-sm font-bold text-pink-400 mb-2">👑 Panel de Control de Administradora (Objetos)</h3>
-                    <div class="flex gap-2 flex-wrap mb-4">
-                        <button onclick="sortearObjetoCasino()" class="px-5 py-2.5 bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-950 font-extrabold text-xs rounded-xl shadow cursor-pointer hover:scale-105 transition">🎲 Sortear Siguiente Objeto (Efecto Casino)</button>
-                        <button onclick="reiniciarObjetosRonda()" class="px-4 py-2.5 bg-red-600 text-white font-bold text-xs rounded-xl shadow cursor-pointer">🔄 Reiniciar Objetos</button>
-                    </div>
                     <div class="text-xs font-bold text-yellow-300 mb-1">Control y Liberación Rápida:</div>
                     <div id="admin-objetos-list-control" class="flex flex-col gap-1.5 max-h-40 overflow-y-auto bg-slate-950 p-2 rounded-xl text-xs">
                         <!-- Se llena con JS -->
                     </div>
                 </div>
 
-                <!-- RESUMEN VERTICAL ESTILO WHATSAPP -->
+                <!-- RESUMEN VERTICAL -->
                 <div id="resumen-vertical-objetos"></div>
 
-                <!-- GRILLA DE LOS 10 OBJETOS (DONDE CORREN LAS LUCES) -->
+                <!-- GRILLA DE LOS 10 OBJETOS -->
                 <div>
                     <h3 class="text-sm font-bold text-pink-400 mb-2">🎁 Lista de Objetos en Ruleta:</h3>
-                    <div id="grid-objetos-yune" class="grid grid-cols-2 md:grid-cols-5 gap-3">
-                        <!-- Se llena con JS -->
-                    </div>
+                    <div id="grid-objetos-yune" class="grid grid-cols-2 md:grid-cols-5 gap-3"></div>
                 </div>
 
                 <!-- PANEL DE PREMIOS Y GANADORES -->
                 <div class="bg-slate-900 p-4 rounded-2xl border border-yellow-500/30">
-                    <h3 class="text-sm font-bold text-yellow-300 mb-2">🏆 Premios y Ganadores en Vivo:</h3>
+                    <h3 class="text-sm font-bold text-yellow-300 mb-2">🏆 Ganadores de los 4 Premios en Vivo:</h3>
                     <div class="flex flex-col gap-2 text-xs" id="panel-ganadores-objetos">
                         <div class="flex justify-between bg-slate-950 p-2 rounded-lg"><span>1er Premio:</span> <span id="ganador-premio-1" class="text-slate-400">Por sortear</span></div>
                         <div class="flex justify-between bg-slate-950 p-2 rounded-lg"><span>2do Premio:</span> <span id="ganador-premio-2" class="text-slate-400">Por sortear</span></div>
@@ -544,6 +559,9 @@
         let lastAnnouncementId = 0;
         let presenceRef = null;
         let audioHabilitado = true;
+
+        let etapaPremioActual = 1;
+        let juegoPausadoPorGanador = false;
 
         const listaObjetosYune = [
             { id: 1, emoji: "🪜", nombre: "La Escalera" },
@@ -617,11 +635,12 @@
                 listaObjetosYune.forEach((obj, index) => {
                     let estadoObj = objetosState[obj.id] || { owner: null, ownerControl: null, hits: 0 };
                     let esMio = currentUser.control && estadoObj.ownerControl === currentUser.control;
+                    let hitsActuales = estadoObj.hits || 0;
 
                     if (estadoObj.owner) asignadosCount++;
 
                     if (esMio) {
-                        misObjetosEnJuego.push({ ...obj, hits: estadoObj.hits || 0 });
+                        misObjetosEnJuego.push({ ...obj, hits: hitsActuales });
                     }
 
                     let estadoTexto = estadoObj.owner 
@@ -631,19 +650,19 @@
                     listaVerticalHTML += `
                         <div class="flex justify-between items-center py-1 border-b border-slate-800/80">
                             <span class="text-slate-200"><strong>${index + 1}</strong> ${obj.emoji} ${obj.nombre}</span>
-                            <span>${estadoTexto}</span>
+                            <span>${estadoTexto} (${hitsActuales}⭐)</span>
                         </div>
                     `;
 
                     let card = document.createElement('div');
                     card.className = `objeto-card ${esMio ? 'selected-by-user border-cyan-400' : 'bg-slate-900 border-slate-800'}`;
-                    // ID corregido para que coincida perfectamente con la animación de ruleta
                     card.id = `card-objeto-el-${obj.id}`;
                     card.onclick = () => seleccionarObjetoYune(obj.id);
                     card.innerHTML = `
                         <span class="text-3xl block mb-1">${obj.emoji}</span>
                         <span class="text-xs font-bold text-slate-200 block">${obj.nombre}</span>
-                        <span class="text-[10px] ${estadoObj.owner ? 'text-yellow-300' : 'text-emerald-400'} mt-1 block">${estadoObj.owner ? '👤 ' + estadoObj.owner : 'Disponible'}</span>
+                        <span class="text-[10px] text-yellow-400 font-bold block mt-1">⭐ ${hitsActuales} / 5</span>
+                        <span class="text-[10px] ${estadoObj.owner ? 'text-yellow-300' : 'text-emerald-400'} mt-0.5 block">${estadoObj.owner ? '👤 ' + estadoObj.owner : 'Disponible'}</span>
                     `;
                     gridContainer.appendChild(card);
 
@@ -651,7 +670,7 @@
                         let row = document.createElement('div');
                         row.className = "flex justify-between items-center bg-slate-900 p-2 rounded-lg text-xs";
                         row.innerHTML = `
-                            <span>${obj.emoji} ${obj.nombre} &bull; <strong class="text-yellow-300">${estadoObj.owner || 'Libre'}</strong></span>
+                            <span>${obj.emoji} ${obj.nombre} &bull; <strong class="text-yellow-300">${estadoObj.owner || 'Libre'}</strong> (${hitsActuales}⭐)</span>
                             <button onclick="liberarObjetoYuneAdmin(${obj.id})" class="px-2 py-1 bg-red-600 hover:bg-red-500 text-white rounded font-bold text-[10px] cursor-pointer">Liberar</button>
                         `;
                         adminControlList.appendChild(row);
@@ -726,75 +745,150 @@
         }
 
         function liberarObjetoYuneAdmin(idObj) {
-            db.ref(`room/objetosData/${idObj}`).update({ owner: null, ownerControl: null }).then(() => {
+            db.ref(`room/objetosData/${idObj}`).update({ owner: null, ownerControl: null, hits: 0 }).then(() => {
                 alert(`¡Objeto #${idObj} liberado con éxito!`);
                 renderizarObjetosYune();
             });
         }
 
-        // SORTEO DE OBJETOS CON EFECTO RULETA Y LUCES TITILANDO
+        // SORTEO DE OBJETOS CON EFECTO RULETA Y PARADA AUTOMÁTICA A 5 ESTRELLAS
         function sortearObjetoCasino() {
+            if (juegoPausadoPorGanador) {
+                alert("⚠️ El juego está pausado porque un objeto ya ganó este premio. Presiona 'Continuar al Siguiente Premio'.");
+                return;
+            }
+
             let total = listaObjetosYune.length;
             let pasadas = 0;
-            let maxPasadas = 25; // Cantidad de saltos de luz antes de frenar
+            let maxPasadas = 35;
             let indiceActual = 0;
 
+            let visorEmoji = document.getElementById('visor-emoji');
+            let visorNombre = document.getElementById('visor-nombre');
+            let btnGirar = document.getElementById('btn-girar-ruleta');
+            if (btnGirar) btnGirar.disabled = true;
+
             let interval = setInterval(() => {
-                // Apagar la luz de todas las tarjetas
                 for (let i = 1; i <= total; i++) {
                     let el = document.getElementById(`card-objeto-el-${i}`);
                     if (el) el.classList.remove('titling');
                 }
 
-                // Encender la luz en la casilla actual de la secuencia
-                let elActual = document.getElementById(`card-objeto-el-${listaObjetosYune[indiceActual].id}`);
+                let objActual = listaObjetosYune[indiceActual];
+                let elActual = document.getElementById(`card-objeto-el-${objActual.id}`);
                 if (elActual) elActual.classList.add('titling');
+
+                if (visorEmoji) visorEmoji.innerText = objActual.emoji;
+                if (visorNombre) visorNombre.innerText = objActual.nombre;
 
                 indiceActual = (indiceActual + 1) % total;
                 pasadas++;
 
-                // Cuando termina el recorrido, se detiene en el ganador
                 if (pasadas >= maxPasadas) {
                     clearInterval(interval);
 
-                    // Apagar todas por seguridad
                     for (let i = 1; i <= total; i++) {
                         let el = document.getElementById(`card-objeto-el-${i}`);
                         if (el) el.classList.remove('titling');
                     }
 
-                    // Elegir el ganador al azar
                     let ganadorIdx = Math.floor(Math.random() * total);
                     let objGanador = listaObjetosYune[ganadorIdx];
 
-                    // Dejar la luz fija únicamente en la tarjeta ganadora
                     let elGanadorFinal = document.getElementById(`card-objeto-el-${objGanador.id}`);
                     if (elGanadorFinal) elGanadorFinal.classList.add('titling');
 
-                    // Cantar directamente el nombre del objeto
+                    if (visorEmoji) visorEmoji.innerText = objGanador.emoji;
+                    if (visorNombre) visorNombre.innerText = objGanador.nombre;
+
                     cantarTextoVoz(objGanador.nombre);
 
-                    // Guardar la estrella en Firebase
                     db.ref(`room/objetosData/${objGanador.id}`).once('value').then((snap) => {
-                        let d = snap.val() || { hits: 0 };
+                        let d = snap.val() || { hits: 0, owner: 'Libre' };
                         let hits = (d.hits || 0) + 1;
                         if (hits > 5) hits = 5;
                         
                         db.ref(`room/objetosData/${objGanador.id}/hits`).set(hits).then(() => {
-                            setTimeout(() => {
-                                renderizarObjetosYune();
-                            }, 1500);
+                            renderizarObjetosYune();
+
+                            if (hits >= 5) {
+                                juegoPausadoPorGanador = true;
+                                cantarTextoVoz(`¡Tenemos ganador para el premio número ${etapaPremioActual}! El objeto ${objGanador.nombre} completó sus cinco estrellas.`);
+                                
+                                let tituloPremio = document.getElementById('premio-actual-titulo');
+                                if (tituloPremio) tituloPremio.innerHTML = `🎉 ¡GANADOR DEL PREMIO ${etapaPremioActual}! (${objGanador.emoji} ${objGanador.nombre})`;
+                                
+                                if (btnGirar) btnGirar.classList.add('hidden');
+                                let btnSiguiente = document.getElementById('btn-siguiente-premio');
+                                if (btnSiguiente) btnSiguiente.classList.remove('hidden');
+
+                                let spanPremio = document.getElementById(`ganador-premio-${etapaPremioActual}`);
+                                if (spanPremio) {
+                                    spanPremio.innerText = `${objGanador.emoji} ${objGanador.nombre} (Dueño: ${d.owner || 'Libre'})`;
+                                    spanPremio.className = "text-yellow-300 font-bold";
+                                }
+                            } else {
+                                if (btnGirar) btnGirar.disabled = false;
+                            }
                         });
                     });
                 }
-            }, 100);
+            }, 80);
+        }
+
+        function avanzarSiguientePremio() {
+            if (etapaPremioActual < 4) {
+                etapaPremioActual++;
+                juegoPausadoPorGanador = false;
+
+                db.ref('room/objetosData').once('value').then((snap) => {
+                    let objetos = snap.val() || {};
+                    let updates = {};
+                    for (let id in objetos) {
+                        updates[`${id}/hits`] = 0;
+                    }
+                    db.ref('room/objetosData').update(updates).then(() => {
+                        renderizarObjetosYune();
+                    });
+                });
+
+                let tituloPremio = document.getElementById('premio-actual-titulo');
+                if (tituloPremio) {
+                    let nombresFases = ["1er Premio", "2do Premio", "3er Premio", "4to Premio (Mayor)"];
+                    tituloPremio.innerText = nombresFases[etapaPremioActual - 1] + " (Ronda en Curso)";
+                }
+
+                let btnGirar = document.getElementById('btn-girar-ruleta');
+                let btnSiguiente = document.getElementById('btn-siguiente-premio');
+                if (btnGirar) {
+                    btnGirar.classList.remove('hidden');
+                    btnGirar.disabled = false;
+                }
+                if (btnSiguiente) btnSiguiente.classList.add('hidden');
+
+                cantarTextoVoz(`Iniciamos la búsqueda del premio número ${etapaPremioActual}. ¡A girar la ruleta!`);
+            } else {
+                alert("🏆 ¡Se han completado los 4 premios de esta ronda con éxito!");
+            }
         }
 
         function reiniciarObjetosRonda() {
             if (confirm("¿Estás segura de reiniciar los objetos y las estrellas de esta ronda?")) {
                 db.ref('room/objetosData').remove().then(() => {
+                    etapaPremioActual = 1;
+                    juegoPausadoPorGanador = false;
+                    let tituloPremio = document.getElementById('premio-actual-titulo');
+                    if (tituloPremio) tituloPremio.innerText = "1er Premio (Ronda en Curso)";
+                    let btnGirar = document.getElementById('btn-girar-ruleta');
+                    if (btnGirar) {
+                        btnGirar.classList.remove('hidden');
+                        btnGirar.disabled = false;
+                    }
+                    let btnSiguiente = document.getElementById('btn-siguiente-premio');
+                    if (btnSiguiente) btnSiguiente.classList.add('hidden');
+
                     renderizarObjetosYune();
-                    alert("¡Objetos reiniciados!");
+                    alert("¡Objetos y premios reiniciados!");
                 });
             }
         }
