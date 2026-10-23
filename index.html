@@ -46,21 +46,21 @@
         .mini-cell { background: rgba(255, 255, 255, 0.1); border-radius: 1px; }
         .mini-cell.active { background: #22c55e; box-shadow: 0 0 4px #22c55e; }
 
-        /* EFECTO DE LUZ DE CASINO EN OBJETOS */
+        /* ESTILO TABLERO / CIRCUITO DE OBJETOS */
         .objeto-card {
-            background: #1a1a40;
-            border: 2px solid #2a2a60;
-            border-radius: 15px;
-            padding: 12px;
+            background: #1e1e3f;
+            border: 2px solid #333366;
+            border-radius: 12px;
+            padding: 8px;
             text-align: center;
-            transition: all 0.1s ease-in-out;
+            transition: all 0.08s ease-in-out;
             position: relative;
             cursor: pointer;
         }
         .objeto-card.titling {
             border: 4px solid #facc15 !important;
-            box-shadow: 0 0 30px #facc15, inset 0 0 15px #facc15 !important;
-            transform: scale(1.1);
+            box-shadow: 0 0 25px #facc15, inset 0 0 12px #facc15 !important;
+            transform: scale(1.08);
             background: #3730a3 !important;
             z-index: 10;
         }
@@ -462,70 +462,121 @@
         </div>
 
         <!-- ========================================== -->
-        <!-- SECCIÓN 2: GAME OBJETOS YUNE               -->
+        <!-- SECCIÓN 2: GAME OBJETOS YUNE (CIRCUITO)     -->
         <!-- ========================================== -->
         <div id="section-objetos-main" class="w-full flex-col gap-6 hidden">
-            <div class="bg-slate-800 p-6 rounded-3xl card-shadow flex flex-col gap-6">
+            <div class="bg-slate-800 p-6 rounded-3xl card-shadow flex flex-col gap-6 max-w-3xl mx-auto w-full">
                 <div class="text-center">
                     <h2 class="text-2xl font-bold text-yellow-300">🎰 Game Objetos Yune 🎰</h2>
-                    <p class="text-xs text-slate-400">Ruleta automática con 4 premios por ronda</p>
+                    <p class="text-xs text-slate-400">Tablero interactivo de circuito con 4 premios por ronda</p>
                 </div>
 
-                <!-- VISOR CENTRAL DE LA RULETA EN GRANDE -->
-                <div class="bg-slate-950 border-4 border-yellow-400 p-6 rounded-3xl text-center shadow-2xl my-2 relative overflow-hidden">
-                    <span class="text-xs text-yellow-400 uppercase tracking-widest font-bold block mb-1">🎰 Sorteo en Vivo 🎰</span>
-                    <div id="visor-objeto-central" class="flex flex-col items-center justify-center py-4">
-                        <span class="text-6xl md:text-7xl block mb-2" id="visor-emoji">⭐</span>
-                        <span class="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-pink-400" id="visor-nombre">¡Listo para Girar!</span>
+                <!-- TABLERO CENTRAL / CIRCUITO COMPACTO TIPO CASINO -->
+                <div class="bg-slate-950 p-4 md:p-6 rounded-3xl border-4 border-yellow-400 shadow-2xl relative">
+                    <div class="text-center mb-3">
+                        <span class="text-xs text-yellow-300 font-bold uppercase tracking-widest bg-slate-900 px-3 py-1 rounded-full border border-yellow-500/40">
+                            🏆 Premio Actual: <span id="premio-actual-titulo" class="text-pink-400 font-extrabold">1er Premio (Ronda en Curso)</span>
+                        </span>
+                    </div>
+
+                    <!-- GRILLA EN CUADRO / MARCO PERIMETRAL CON EL VISOR EN EL MEDIO -->
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-2.5 items-center">
+                        <!-- Casilla 1 -->
+                        <div id="card-objeto-el-1" onclick="seleccionarObjetoYune(1)" class="objeto-card">
+                            <span class="text-2xl block">🪜</span>
+                            <span class="text-[10px] font-bold text-slate-200 block truncate">La Escalera</span>
+                            <span class="text-[9px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-1">0</span>/5</span>
+                        </div>
+                        <!-- Casilla 2 -->
+                        <div id="card-objeto-el-2" onclick="seleccionarObjetoYune(2)" class="objeto-card">
+                            <span class="text-2xl block">💍</span>
+                            <span class="text-[10px] font-bold text-slate-200 block truncate">El Anillo</span>
+                            <span class="text-[9px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-2">0</span>/5</span>
+                        </div>
+                        <!-- Casilla 3 -->
+                        <div id="card-objeto-el-3" onclick="seleccionarObjetoYune(3)" class="objeto-card">
+                            <span class="text-2xl block">🔑</span>
+                            <span class="text-[10px] font-bold text-slate-200 block truncate">La Llave</span>
+                            <span class="text-[9px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-3">0</span>/5</span>
+                        </div>
+                        <!-- Casilla 4 -->
+                        <div id="card-objeto-el-4" onclick="seleccionarObjetoYune(4)" class="objeto-card">
+                            <span class="text-2xl block">⭐</span>
+                            <span class="text-[10px] font-bold text-slate-200 block truncate">La Estrella</span>
+                            <span class="text-[9px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-4">0</span>/5</span>
+                        </div>
+                        <!-- Casilla 5 -->
+                        <div id="card-objeto-el-5" onclick="seleccionarObjetoYune(5)" class="objeto-card">
+                            <span class="text-2xl block">👑</span>
+                            <span class="text-[10px] font-bold text-slate-200 block truncate">La Corona</span>
+                            <span class="text-[9px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-5">0</span>/5</span>
+                        </div>
+
+                        <!-- CENTRO DEL TABLERO: VISOR GIGANTE -->
+                        <div class="col-span-2 md:col-span-3 bg-slate-900 border-2 border-pink-500/60 p-4 rounded-2xl text-center shadow-inner flex flex-col items-center justify-center min-h-[130px]">
+                            <span class="text-[10px] text-pink-400 uppercase tracking-widest font-bold block mb-1">🎯 Sorteo en Vivo</span>
+                            <div id="visor-objeto-central" class="flex flex-col items-center justify-center">
+                                <span class="text-5xl block mb-1" id="visor-emoji">⭐</span>
+                                <span class="text-xl md:text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-pink-400" id="visor-nombre">¡Listo para Girar!</span>
+                            </div>
+                        </div>
+
+                        <!-- Casilla 6 -->
+                        <div id="card-objeto-el-6" onclick="seleccionarObjetoYune(6)" class="objeto-card">
+                            <span class="text-2xl block">🚗</span>
+                            <span class="text-[10px] font-bold text-slate-200 block truncate">El Carro</span>
+                            <span class="text-[9px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-6">0</span>/5</span>
+                        </div>
+                        <!-- Casilla 7 -->
+                        <div id="card-objeto-el-7" onclick="seleccionarObjetoYune(7)" class="objeto-card">
+                            <span class="text-2xl block">🎩</span>
+                            <span class="text-[10px] font-bold text-slate-200 block truncate">El Sombrero</span>
+                            <span class="text-[9px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-7">0</span>/5</span>
+                        </div>
+                        <!-- Casilla 8 -->
+                        <div id="card-objeto-el-8" onclick="seleccionarObjetoYune(8)" class="objeto-card">
+                            <span class="text-2xl block">🍼</span>
+                            <span class="text-[10px] font-bold text-slate-200 block truncate">La Botella</span>
+                            <span class="text-[9px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-8">0</span>/5</span>
+                        </div>
+                        <!-- Casilla 9 -->
+                        <div id="card-objeto-el-9" onclick="seleccionarObjetoYune(9)" class="objeto-card">
+                            <span class="text-2xl block">🏠</span>
+                            <span class="text-[10px] font-bold text-slate-200 block truncate">La Casa</span>
+                            <span class="text-[9px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-9">0</span>/5</span>
+                        </div>
+                        <!-- Casilla 10 -->
+                        <div id="card-objeto-el-10" onclick="seleccionarObjetoYune(10)" class="objeto-card">
+                            <span class="text-2xl block">☀️</span>
+                            <span class="text-[10px] font-bold text-slate-200 block truncate">El Sol</span>
+                            <span class="text-[9px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-10">0</span>/5</span>
+                        </div>
+                    </div>
+
+                    <!-- BOTONES DE CONTROL DE PREMIOS -->
+                    <div class="mt-4 flex gap-2 justify-center flex-wrap">
+                        <button onclick="sortearObjetoCasino()" id="btn-girar-ruleta" class="px-6 py-3 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-slate-950 font-extrabold text-xs rounded-xl shadow cursor-pointer transition transform active:scale-95">🎲 Girar Ruleta de Objeto</button>
+                        <button onclick="avanzarSiguientePremio()" id="btn-siguiente-premio" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow cursor-pointer hidden transition">▶ Continuar al Siguiente Premio</button>
+                        <button onclick="reiniciarObjetosRonda()" class="px-4 py-3 bg-red-600/80 hover:bg-red-600 text-white font-bold text-xs rounded-xl shadow cursor-pointer">🔄 Reiniciar Objetos</button>
                     </div>
                 </div>
 
-                <!-- PANEL DE CONTROL DE PREMIOS (PAUSA Y CONTINUAR) -->
-                <div id="panel-control-premios" class="bg-slate-950 p-4 rounded-2xl border-2 border-yellow-400 text-center">
-                    <span class="text-xs text-yellow-300 font-bold uppercase tracking-wider block mb-1">🏆 Premio Actual en Juego</span>
-                    <div id="premio-actual-titulo" class="text-lg font-extrabold text-pink-400 mb-3">1er Premio (Ronda en Curso)</div>
-                    
-                    <div class="flex gap-2 justify-center flex-wrap">
-                        <button onclick="sortearObjetoCasino()" id="btn-girar-ruleta" class="px-5 py-3 bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-950 font-extrabold text-xs rounded-xl shadow cursor-pointer hover:scale-105 transition">🎲 Girar Ruleta de Objeto</button>
-                        <button onclick="avanzarSiguientePremio()" id="btn-siguiente-premio" class="px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow cursor-pointer hidden">▶ Continuar al Siguiente Premio</button>
-                        <button onclick="reiniciarObjetosRonda()" class="px-4 py-3 bg-red-600 text-white font-bold text-xs rounded-xl shadow cursor-pointer">🔄 Reiniciar Objetos</button>
-                    </div>
-                </div>
-
-                <!-- PANTALLA DE TUS ESTRELLAS -->
-                <div class="bg-gradient-to-r from-indigo-950 to-slate-900 border-2 border-cyan-400 p-6 rounded-2xl text-center shadow-lg">
-                    <span class="text-xs text-slate-400 uppercase tracking-widest font-bold">Tus Objetos en Juego</span>
+                <!-- PANTALLA DE TUS OBJETOS Y ESTRELLAS -->
+                <div class="bg-gradient-to-r from-indigo-950 to-slate-900 border-2 border-cyan-400 p-4 rounded-2xl text-center shadow-lg">
+                    <span class="text-xs text-slate-400 uppercase tracking-widest font-bold">Tus Objetos en Juego y Estrellas</span>
                     <div id="mis-objetos-juego-grid" class="mt-2">
-                        <div class="text-slate-400 text-sm py-2">No has seleccionado ningún objeto. Toca un objeto abajo para apartarlo.</div>
+                        <div class="text-slate-400 text-sm py-2">No has seleccionado ningún objeto. Toca un cuadro arriba para apartarlo.</div>
                     </div>
                 </div>
 
-                <!-- PANEL DE ADMIN PARA LIBERAR -->
-                <div id="admin-objetos-panel" class="bg-slate-900 p-4 rounded-2xl border border-pink-500/40 hidden">
-                    <h3 class="text-sm font-bold text-pink-400 mb-2">👑 Panel de Control de Administradora (Objetos)</h3>
-                    <div class="text-xs font-bold text-yellow-300 mb-1">Control y Liberación Rápida:</div>
-                    <div id="admin-objetos-list-control" class="flex flex-col gap-1.5 max-h-40 overflow-y-auto bg-slate-950 p-2 rounded-xl text-xs">
-                        <!-- Se llena con JS -->
-                    </div>
-                </div>
-
-                <!-- RESUMEN VERTICAL -->
-                <div id="resumen-vertical-objetos"></div>
-
-                <!-- GRILLA DE LOS 10 OBJETOS -->
-                <div>
-                    <h3 class="text-sm font-bold text-pink-400 mb-2">🎁 Lista de Objetos en Ruleta:</h3>
-                    <div id="grid-objetos-yune" class="grid grid-cols-2 md:grid-cols-5 gap-3"></div>
-                </div>
-
-                <!-- PANEL DE PREMIOS Y GANADORES -->
+                <!-- PANEL DE GANADORES DE LOS 4 PREMIOS -->
                 <div class="bg-slate-900 p-4 rounded-2xl border border-yellow-500/30">
                     <h3 class="text-sm font-bold text-yellow-300 mb-2">🏆 Ganadores de los 4 Premios en Vivo:</h3>
                     <div class="flex flex-col gap-2 text-xs" id="panel-ganadores-objetos">
-                        <div class="flex justify-between bg-slate-950 p-2 rounded-lg"><span>1er Premio:</span> <span id="ganador-premio-1" class="text-slate-400">Por sortear</span></div>
-                        <div class="flex justify-between bg-slate-950 p-2 rounded-lg"><span>2do Premio:</span> <span id="ganador-premio-2" class="text-slate-400">Por sortear</span></div>
-                        <div class="flex justify-between bg-slate-950 p-2 rounded-lg"><span>3er Premio:</span> <span id="ganador-premio-3" class="text-slate-400">Por sortear</span></div>
-                        <div class="flex justify-between bg-slate-950 p-2 rounded-lg"><span>4to Premio (Mayor):</span> <span id="ganador-premio-4" class="text-slate-400">Por sortear</span></div>
+                        <div class="flex justify-between bg-slate-950 p-2.5 rounded-lg items-center"><span>1er Premio:</span> <span id="ganador-premio-1" class="text-slate-400 font-semibold">Por sortear</span></div>
+                        <div class="flex justify-between bg-slate-950 p-2.5 rounded-lg items-center"><span>2do Premio:</span> <span id="ganador-premio-2" class="text-slate-400 font-semibold">Por sortear</span></div>
+                        <div class="flex justify-between bg-slate-950 p-2.5 rounded-lg items-center"><span>3er Premio:</span> <span id="ganador-premio-3" class="text-slate-400 font-semibold">Por sortear</span></div>
+                        <div class="flex justify-between bg-slate-950 p-2.5 rounded-lg items-center"><span>4to Premio (Mayor):</span> <span id="ganador-premio-4" class="text-slate-400 font-semibold">Por sortear</span></div>
                     </div>
                 </div>
             </div>
@@ -616,82 +667,37 @@
         function renderizarObjetosYune() {
             db.ref('room/objetosData').once('value').then((snap) => {
                 let objetosState = snap.val() || {};
-                let gridContainer = document.getElementById('grid-objetos-yune');
-                let adminControlList = document.getElementById('admin-objetos-list-control');
-                if (!gridContainer) return;
-
-                gridContainer.innerHTML = '';
-                if (adminControlList) adminControlList.innerHTML = '';
-
                 let misObjetosEnJuego = [];
-                let asignadosCount = 0;
 
-                let listaVerticalHTML = `
-                    <div class="bg-slate-950 p-4 rounded-2xl border border-pink-500/40 mb-2 text-left font-mono text-xs shadow-lg">
-                        <div class="text-center font-bold text-yellow-300 text-sm mb-3">🎁 LISTA DE OBJETOS EN JUEGO 🎁</div>
-                        <div class="flex flex-col gap-1.5">
-                `;
-
-                listaObjetosYune.forEach((obj, index) => {
+                listaObjetosYune.forEach((obj) => {
                     let estadoObj = objetosState[obj.id] || { owner: null, ownerControl: null, hits: 0 };
                     let esMio = currentUser.control && estadoObj.ownerControl === currentUser.control;
                     let hitsActuales = estadoObj.hits || 0;
-
-                    if (estadoObj.owner) asignadosCount++;
 
                     if (esMio) {
                         misObjetosEnJuego.push({ ...obj, hits: hitsActuales });
                     }
 
-                    let estadoTexto = estadoObj.owner 
-                        ? `<span class="text-yellow-300 font-bold">${estadoObj.owner}</span>` 
-                        : `<span class="text-emerald-400 italic">Disponible</span>`;
+                    // Actualizar indicadores visuales de estrellas en cada cajita del circuito
+                    let hitsSpan = document.getElementById(`hits-obj-${obj.id}`);
+                    if (hitsSpan) hitsSpan.innerText = hitsActuales;
 
-                    listaVerticalHTML += `
-                        <div class="flex justify-between items-center py-1 border-b border-slate-800/80">
-                            <span class="text-slate-200"><strong>${index + 1}</strong> ${obj.emoji} ${obj.nombre}</span>
-                            <span>${estadoTexto} (${hitsActuales}⭐)</span>
-                        </div>
-                    `;
-
-                    let card = document.createElement('div');
-                    card.className = `objeto-card ${esMio ? 'selected-by-user border-cyan-400' : 'bg-slate-900 border-slate-800'}`;
-                    card.id = `card-objeto-el-${obj.id}`;
-                    card.onclick = () => seleccionarObjetoYune(obj.id);
-                    card.innerHTML = `
-                        <span class="text-3xl block mb-1">${obj.emoji}</span>
-                        <span class="text-xs font-bold text-slate-200 block">${obj.nombre}</span>
-                        <span class="text-[10px] text-yellow-400 font-bold block mt-1">⭐ ${hitsActuales} / 5</span>
-                        <span class="text-[10px] ${estadoObj.owner ? 'text-yellow-300' : 'text-emerald-400'} mt-0.5 block">${estadoObj.owner ? '👤 ' + estadoObj.owner : 'Disponible'}</span>
-                    `;
-                    gridContainer.appendChild(card);
-
-                    if (adminControlList) {
-                        let row = document.createElement('div');
-                        row.className = "flex justify-between items-center bg-slate-900 p-2 rounded-lg text-xs";
-                        row.innerHTML = `
-                            <span>${obj.emoji} ${obj.nombre} &bull; <strong class="text-yellow-300">${estadoObj.owner || 'Libre'}</strong> (${hitsActuales}⭐)</span>
-                            <button onclick="liberarObjetoYuneAdmin(${obj.id})" class="px-2 py-1 bg-red-600 hover:bg-red-500 text-white rounded font-bold text-[10px] cursor-pointer">Liberar</button>
-                        `;
-                        adminControlList.appendChild(row);
+                    let cardEl = document.getElementById(`card-objeto-el-${obj.id}`);
+                    if (cardEl) {
+                        if (esMio) {
+                            cardEl.className = "objeto-card selected-by-user border-cyan-400";
+                        } else if (estadoObj.owner) {
+                            cardEl.className = "objeto-card bg-slate-900 border-slate-700 opacity-75";
+                        } else {
+                            cardEl.className = "objeto-card bg-slate-900 border-slate-800";
+                        }
                     }
                 });
-
-                listaVerticalHTML += `
-                        </div>
-                        <div class="mt-3 pt-2 border-t border-slate-700 text-center text-slate-400 font-bold">
-                            Total asignados: ${asignadosCount}/10
-                        </div>
-                    </div>
-                `;
-
-                let resContainer = document.getElementById('resumen-vertical-objetos');
-                if (resContainer) resContainer.innerHTML = listaVerticalHTML;
 
                 let misObjGrid = document.getElementById('mis-objetos-juego-grid');
                 if (misObjGrid) {
                     if (misObjetosEnJuego.length === 0) {
-                        misObjGrid.innerHTML = '<div class="text-slate-400 text-sm py-2">No has seleccionado ningún objeto. Toca un objeto abajo para apartarlo.</div>';
+                        misObjGrid.innerHTML = '<div class="text-slate-400 text-sm py-2">No has seleccionado ningún objeto. Toca un cuadro arriba para apartarlo.</div>';
                     } else {
                         let htmlMis = '<div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">';
                         misObjetosEnJuego.forEach(mObj => {
@@ -708,11 +714,6 @@
                         htmlMis += '</div>';
                         misObjGrid.innerHTML = htmlMis;
                     }
-                }
-
-                if (currentUser.isAdmin || (currentUser.name && currentUser.name.toLowerCase() === 'yune')) {
-                    let adminPanelObj = document.getElementById('admin-objetos-panel');
-                    if (adminPanelObj) adminPanelObj.classList.remove('hidden');
                 }
             });
         }
@@ -744,24 +745,19 @@
             });
         }
 
-        function liberarObjetoYuneAdmin(idObj) {
-            db.ref(`room/objetosData/${idObj}`).update({ owner: null, ownerControl: null, hits: 0 }).then(() => {
-                alert(`¡Objeto #${idObj} liberado con éxito!`);
-                renderizarObjetosYune();
-            });
-        }
+        // ORDEN DEL CIRCUITO EN LA GRILLA DE 10 CUADROS (Matriz perimetral para que la luz gire)
+        const ordenCircuitoLuces = [1, 2, 3, 4, 5, 10, 9, 8, 7, 6];
 
-        // SORTEO DE OBJETOS CON EFECTO RULETA Y PARADA AUTOMÁTICA A 5 ESTRELLAS
         function sortearObjetoCasino() {
             if (juegoPausadoPorGanador) {
                 alert("⚠️ El juego está pausado porque un objeto ya ganó este premio. Presiona 'Continuar al Siguiente Premio'.");
                 return;
             }
 
-            let total = listaObjetosYune.length;
+            let totalPasos = ordenCircuitoLuces.length;
             let pasadas = 0;
-            let maxPasadas = 35;
-            let indiceActual = 0;
+            let maxPasadas = 35; // Vueltas completas de luces antes de frenar
+            let indiceSecuencia = 0;
 
             let visorEmoji = document.getElementById('visor-emoji');
             let visorNombre = document.getElementById('visor-nombre');
@@ -769,30 +765,33 @@
             if (btnGirar) btnGirar.disabled = true;
 
             let interval = setInterval(() => {
-                for (let i = 1; i <= total; i++) {
-                    let el = document.getElementById(`card-objeto-el-${i}`);
+                // Apagar todas las luces del circuito
+                for (let id = 1; id <= 10; id++) {
+                    let el = document.getElementById(`card-objeto-el-${id}`);
                     if (el) el.classList.remove('titling');
                 }
 
-                let objActual = listaObjetosYune[indiceActual];
-                let elActual = document.getElementById(`card-objeto-el-${objActual.id}`);
+                let idActual = ordenCircuitoLuces[indiceSecuencia];
+                let objActual = listaObjetosYune.find(o => o.id === idActual);
+                let elActual = document.getElementById(`card-objeto-el-${idActual}`);
+                
                 if (elActual) elActual.classList.add('titling');
-
                 if (visorEmoji) visorEmoji.innerText = objActual.emoji;
                 if (visorNombre) visorNombre.innerText = objActual.nombre;
 
-                indiceActual = (indiceActual + 1) % total;
+                indiceSecuencia = (indiceSecuencia + 1) % totalPasos;
                 pasadas++;
 
                 if (pasadas >= maxPasadas) {
                     clearInterval(interval);
 
-                    for (let i = 1; i <= total; i++) {
-                        let el = document.getElementById(`card-objeto-el-${i}`);
+                    for (let id = 1; id <= 10; id++) {
+                        let el = document.getElementById(`card-objeto-el-${id}`);
                         if (el) el.classList.remove('titling');
                     }
 
-                    let ganadorIdx = Math.floor(Math.random() * total);
+                    // Ganador al azar entre los 10 objetos
+                    let ganadorIdx = Math.floor(Math.random() * listaObjetosYune.length);
                     let objGanador = listaObjetosYune[ganadorIdx];
 
                     let elGanadorFinal = document.getElementById(`card-objeto-el-${objGanador.id}`);
@@ -811,6 +810,7 @@
                         db.ref(`room/objetosData/${objGanador.id}/hits`).set(hits).then(() => {
                             renderizarObjetosYune();
 
+                            // PAUSA AUTOMÁTICA SI LLEGA A 5 ESTRELLAS
                             if (hits >= 5) {
                                 juegoPausadoPorGanador = true;
                                 cantarTextoVoz(`¡Tenemos ganador para el premio número ${etapaPremioActual}! El objeto ${objGanador.nombre} completó sus cinco estrellas.`);
@@ -2013,7 +2013,7 @@
                     }
                 });
                 if (cajaChatJugadoras) { cajaChatJugadoras.innerHTML = htmlMensajes; cajaChatJugadoras.scrollTop = cajaChatJugadoras.scrollHeight; }
-                if (cajaChatAdmin) { cajaChatAdmin.innerHTML = htmlMensajes; cajaChatAdmin.scrollTop = cajaChatAdmin.scrollHeight; }
+                if (cajaChatAdmin) { cajaChatAdmin.innerHTML = htmlNamesajes; cajaChatAdmin.scrollTop = cajaChatAdmin.scrollHeight; }
             });
         }
     </script>
