@@ -71,6 +71,7 @@
             min-height: 70px;
             transition: all 0.15s ease;
         }
+        /* ESTILO CUANDO LA LUZ PASA SALTANDO POR EL CUADRO */
         .objeto-card.active-step {
             border: 4px solid #05d9e8 !important;
             box-shadow: 0 0 25px #05d9e8 !important;
@@ -78,6 +79,7 @@
             transform: scale(1.05);
             z-index: 10;
         }
+        /* ESTILO CUANDO CAE Y SE QUEDA QUIETO EN EL GANADOR */
         .objeto-card.titling {
             border: 4px solid #facc15 !important;
             box-shadow: 0 0 40px #facc15, inset 0 0 20px #facc15 !important;
@@ -371,13 +373,13 @@
         </div>
 
         <!-- ================================================================= -->
-        <!-- SECCIÓN 2: GAME OBJETOS YUNE (GIRO PERIMETRAL EQUITATIVO + TRRR) -->
-        <!-- ================================================================= -->
+        // SECCIÓN 2: GAME OBJETOS YUNE (GIRO AUTOMÁTICO EN EL PERÍMETRO + TRRR)
+        // ================================================================= -->
         <div id="section-objetos-main" class="w-full flex-col gap-6 hidden">
             <div class="bg-slate-800 p-6 rounded-3xl card-shadow flex flex-col gap-6 max-w-lg mx-auto w-full">
                 <div class="text-center">
                     <h2 class="text-2xl font-bold text-yellow-300">🎰 Game Objetos Yune 🎰</h2>
-                    <p class="text-xs text-slate-400">Ruleta automática con recorrido equitativo por los cuadros</p>
+                    <p class="text-xs text-slate-400">Ruleta con recorrido automático por los cuadros y frenado en solitario</p>
                 </div>
 
                 <!-- TABLERO CUADRADO PERIMETRAL 4x4 -->
@@ -390,6 +392,7 @@
 
                     <!-- GRILLA 4x4 EXACTA -->
                     <div class="ruleta-cuadrada-4x4">
+                        <!-- FILA SUPERIOR (4 objetos: ordenados en el perímetro: 1, 2, 3, 4) -->
                         <div id="card-objeto-el-1" onclick="seleccionarObjetoYune(1)" class="objeto-card">
                             <span class="text-lg block">🪜</span>
                             <span class="text-[8px] font-bold text-slate-200 block truncate">La Escalera</span>
@@ -411,14 +414,16 @@
                             <span class="text-[7px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-4">0</span>/5</span>
                         </div>
 
+                        <!-- LADO IZQUIERDO (Objeto 10) -->
                         <div id="card-objeto-el-10" onclick="seleccionarObjetoYune(10)" class="objeto-card">
                             <span class="text-lg block">☀️</span>
                             <span class="text-[8px] font-bold text-slate-200 block truncate">El Sol</span>
                             <span class="text-[7px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-10">0</span>/5</span>
                         </div>
 
+                        <!-- CENTRO DEL CUADRO: OCUPA LAS 4 CELDAS DEL MEDIO (2x2) -->
                         <div id="centro-visor" class="centro-visor-cuadrado">
-                            <span class="text-[9px] text-slate-500 uppercase tracking-wider font-bold block mb-0.5" id="visor-estado-txt">Sorteo Equitativo</span>
+                            <span class="text-[9px] text-slate-500 uppercase tracking-wider font-bold block mb-0.5" id="visor-estado-txt">Sorteo Continuo</span>
                             <div id="visor-objeto-central" class="flex flex-col items-center justify-center">
                                 <span class="text-3xl block mb-0.5" id="visor-emoji">🎰</span>
                                 <span class="text-xs font-bold text-slate-400" id="visor-nombre">Listo para girar</span>
@@ -427,21 +432,28 @@
                             </div>
                         </div>
 
+                        <!-- LADO DERECHO (Objeto 5) -->
                         <div id="card-objeto-el-5" onclick="seleccionarObjetoYune(5)" class="objeto-card">
                             <span class="text-lg block">👑</span>
                             <span class="text-[8px] font-bold text-slate-200 block truncate">La Corona</span>
                             <span class="text-[7px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-5">0</span>/5</span>
                         </div>
+
+                        <!-- LADO IZQUIERDO (Objeto 9) -->
                         <div id="card-objeto-el-9" onclick="seleccionarObjetoYune(9)" class="objeto-card">
                             <span class="text-lg block">🏠</span>
                             <span class="text-[8px] font-bold text-slate-200 block truncate">La Casa</span>
                             <span class="text-[7px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-9">0</span>/5</span>
                         </div>
+
+                        <!-- LADO DERECHO (Objeto 6) -->
                         <div id="card-objeto-el-6" onclick="seleccionarObjetoYune(6)" class="objeto-card">
                             <span class="text-lg block">🚗</span>
                             <span class="text-[8px] font-bold text-slate-200 block truncate">El Carro</span>
                             <span class="text-[7px] text-yellow-400 font-bold block">⭐ <span id="hits-obj-6">0</span>/5</span>
                         </div>
+
+                        <!-- FILA INFERIOR (4 objetos: ordenados en el perímetro: 8, 7 / o 7, 8 según el orden de las manecillas del reloj) -->
                         <div id="card-objeto-el-8" onclick="seleccionarObjetoYune(8)" class="objeto-card">
                             <span class="text-lg block">🍼</span>
                             <span class="text-[8px] font-bold text-slate-200 block truncate">La Botella</span>
@@ -519,7 +531,7 @@
         let intervaloGiroContinuo = null;
         let estaGirandoSolo = false;
 
-        // ORDEN EXACTO EN EL PERÍMETRO DE LA RULETA
+        // ORDEN EXACTO EN EL PERÍMETRO DE LA RULETA (SIGUIENDO LAS MANECILLAS DEL RELOJ)
         const ordenPerimetroRuleta = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
         // LAS 10 FIGURAS OFICIALES DE TUS OBJETOS YUNE
@@ -535,30 +547,6 @@
             { id: 9, emoji: "🏠", nombre: "La Casa" },
             { id: 10, emoji: "☀️", nombre: "El Sol" }
         ];
-
-        // HISTORIAL PARA GARANTIZAR SORTEO 100% EQUITATIVO
-        let historialSorteosObjetos = [];
-
-        function seleccionarObjetoEquitativo() {
-            let conteos = {};
-            listaObjetosYune.forEach(o => conteos[o.id] = 0);
-            historialSorteosObjetos.forEach(id => {
-                if (conteos[id] !== undefined) conteos[id]++;
-            });
-
-            let minSalidas = 999;
-            for (let id in conteos) {
-                if (conteos[id] < minSalidas) minSalidas = conteos[id];
-            }
-
-            let candidatosJustos = listaObjetosYune.filter(o => conteos[o.id] === minSalidas);
-            let elegido = candidatosJustos[Math.floor(Math.random() * candidatosJustos.length)];
-
-            historialSorteosObjetos.push(elegido.id);
-            if (historialSorteosObjetos.length > 20) historialSorteosObjetos.shift();
-
-            return elegido;
-        }
 
         const nombresPatrones = {
             'line': 'Línea (Horizontal o Vertical)',
@@ -577,39 +565,57 @@
             'rombo': 'Rombo Pequeño 💎'
         };
 
+        // EFECTO DE SONIDO TIPO TRRR (CARRACA DE CASINO A TODO VOLUMEN)
         function reproducirSonidoTrrr() {
             if (!audioHabilitado) return;
             try {
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                if (audioCtx.state === 'suspended') audioCtx.resume();
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
                 let osc = audioCtx.createOscillator();
                 let gain = audioCtx.createGain();
+                
                 osc.type = 'sawtooth';
                 osc.frequency.setValueAtTime(200, audioCtx.currentTime);
-                osc.frequency.setValueAtTime(500, audioCtx.currentTime + 0.08);
+                osc.frequency.linearRampToValueWithTimeout ? osc.frequency.linearRampToValueAtTime(500, audioCtx.currentTime + 0.08) : osc.frequency.setValueAtTime(500, audioCtx.currentTime + 0.08);
+                
                 gain.gain.setValueAtTime(0.8, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
+                
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.1);
             } catch(e) {}
         }
 
+        // EFECTO DE GOLPE SECO Y VICTORIOSO AL FRENAR EN EL GANADOR
         function reproducirSonidoCampanaFinal() {
             if (!audioHabilitado) return;
             try {
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                if (audioCtx.state === 'suspended') audioCtx.resume();
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
                 let osc = audioCtx.createOscillator();
                 let gain = audioCtx.createGain();
+                
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(880, audioCtx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.4);
+                
                 gain.gain.setValueAtTime(0.9, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.45);
+
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
+                
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.45);
             } catch(e) {}
@@ -645,16 +651,22 @@
                     let esMio = currentUser.control && estadoObj.ownerControl === currentUser.control;
                     let hitsActuales = estadoObj.hits || 0;
 
-                    if (esMio) misObjetosEnJuego.push({ ...obj, hits: hitsActuales });
+                    if (esMio) {
+                        misObjetosEnJuego.push({ ...obj, hits: hitsActuales });
+                    }
 
                     let hitsSpan = document.getElementById(`hits-obj-${obj.id}`);
                     if (hitsSpan) hitsSpan.innerText = hitsActuales;
 
                     let cardEl = document.getElementById(`card-objeto-el-${obj.id}`);
                     if (cardEl) {
-                        if (esMio) cardEl.className = "objeto-card selected-by-user border-cyan-400";
-                        else if (estadoObj.owner) cardEl.className = "objeto-card bg-slate-900 border-slate-700 opacity-75";
-                        else cardEl.className = "objeto-card bg-slate-900 border-slate-800";
+                        if (esMio) {
+                            cardEl.className = "objeto-card selected-by-user border-cyan-400";
+                        } else if (estadoObj.owner) {
+                            cardEl.className = "objeto-card bg-slate-900 border-slate-700 opacity-75";
+                        } else {
+                            cardEl.className = "objeto-card bg-slate-900 border-slate-800";
+                        }
                     }
                 });
 
@@ -687,12 +699,15 @@
                 alert("Por favor ingresa primero con tu nombre para seleccionar un objeto.");
                 return;
             }
+
             db.ref(`room/objetosData/${idObj}`).once('value').then((snap) => {
                 let data = snap.val() || { owner: null, ownerControl: null, hits: 0 };
+                
                 if (data.owner && data.ownerControl !== currentUser.control) {
                     alert("⚠️ Este objeto ya ha sido seleccionado por otra jugadora.");
                     return;
                 }
+
                 if (data.ownerControl === currentUser.control) {
                     db.ref(`room/objetosData/${idObj}`).update({ owner: null, ownerControl: null });
                 } else {
@@ -706,6 +721,7 @@
             });
         }
 
+        // GIRO AUTOMÁTICO CONTINUO CON SALTO DE LUZ EN EL PERÍMETRO HASTA CAER EN EL GANADOR
         function iniciarGiroAutomaticoContinuo() {
             if (juegoPausadoPorGanador) {
                 alert("⚠️ El juego está pausado porque un objeto ya ganó este premio. Presiona 'Siguiente Premio'.");
@@ -723,14 +739,16 @@
             let centroDiv = document.getElementById('centro-visor');
             let visorEstado = document.getElementById('visor-estado-txt');
             if (centroDiv) centroDiv.classList.add('activo');
-            if (visorEstado) visorEstado.innerText = "Trrr... Sorteo Equitativo";
+            if (visorEstado) visorEstado.innerText = "Trrr... Sorteando en Vivo";
 
-            let objGanador = seleccionarObjetoEquitativo();
+            // Sorteamos de una vez el ganador secreto hacia donde irá frenando
+            let ganadorIndex = Math.floor(Math.random() * listaObjetosYune.length);
+            let objGanador = listaObjetosYune[ganadorIndex];
             let targetId = objGanador.id;
             let targetPerimetroIndex = ordenPerimetroRuleta.indexOf(targetId);
 
             let currentIndex = 0;
-            let totalPasosVueltas = 20 + targetPerimetroIndex;
+            let totalPasosVueltas = 20 + targetPerimetroIndex; // Da varias vueltas de emoción antes de llegar al ganador
             let pasoActual = 0;
 
             intervaloGiroContinuo = setInterval(() => {
@@ -741,6 +759,7 @@
 
                 reproducirSonidoTrrr();
 
+                // Apagar todos los bordes activos
                 for (let i = 1; i <= 10; i++) {
                     let c = document.getElementById(`card-objeto-el-${i}`);
                     if (c) c.classList.remove('active-step', 'titling');
@@ -750,6 +769,7 @@
                 let cardActual = document.getElementById(`card-objeto-el-${idActual}`);
                 if (cardActual) cardActual.classList.add('active-step');
 
+                // Mostrar nombre y emoji provisional en el centro mientras corre
                 let objTemp = listaObjetosYune.find(o => o.id === idActual);
                 let visorEmoji = document.getElementById('visor-emoji');
                 let visorNombre = document.getElementById('visor-nombre');
@@ -759,6 +779,7 @@
                 currentIndex = (currentIndex + 1) % ordenPerimetroRuleta.length;
                 pasoActual++;
 
+                // Cuando llega al final del recorrido programado, frena de golpe en el ganador
                 if (pasoActual >= totalPasosVueltas) {
                     clearInterval(intervaloGiroContinuo);
                     estaGirandoSolo = false;
@@ -810,6 +831,7 @@
                                     spanPremio.className = "text-yellow-300 font-bold";
                                 }
                             } else {
+                                // Si no ha completado las 5 estrellas, vuelve a girar solito en 2 segundos
                                 setTimeout(() => {
                                     if (!juegoPausadoPorGanador) {
                                         iniciarGiroAutomaticoContinuo();
@@ -820,7 +842,7 @@
                     });
                 }
 
-            }, 90);
+            }, 90); // Velocidad rápida del salto entre casillas
         }
 
         function detenerGiroAutomaticoContinuo() {
@@ -842,8 +864,12 @@
                 db.ref('room/objetosData').once('value').then((snap) => {
                     let objetos = snap.val() || {};
                     let updates = {};
-                    for (let id in objetos) updates[`${id}/hits`] = 0;
-                    db.ref('room/objetosData').update(updates).then(() => renderizarObjetosYune());
+                    for (let id in objetos) {
+                        updates[`${id}/hits`] = 0;
+                    }
+                    db.ref('room/objetosData').update(updates).then(() => {
+                        renderizarObjetosYune();
+                    });
                 });
 
                 for (let i = 1; i <= 10; i++) {
@@ -885,7 +911,6 @@
                     etapaPremioActual = 1;
                     juegoPausadoPorGanador = false;
                     estaGirandoSolo = false;
-                    historialSorteosObjetos = [];
                     clearInterval(intervaloGiroContinuo);
 
                     let tituloPremio = document.getElementById('premio-actual-titulo');
@@ -934,19 +959,23 @@
                 let utterance = new SpeechSynthesisUtterance("");
                 window.speechSynthesis.speak(utterance);
             }
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
         }
 
         function toggleAudioJugadora() {
             audioHabilitado = !audioHabilitado;
             let btn = document.getElementById('btn-toggle-audio');
             if (audioHabilitado) {
-                btn.className = "px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl shadow flex items-center gap-1.5";
+                btn.className = "px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow flex items-center gap-1.5 transition";
                 btn.innerText = "🔊 Sonido Activado";
-                cantarTextoVoz("¡Sonido activado!");
+                cantarTextoVoz("¡Sonido activado con éxito!");
             } else {
-                btn.className = "px-4 py-2 bg-slate-700 text-slate-300 text-xs font-bold rounded-xl shadow flex items-center gap-1.5";
+                btn.className = "px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs font-bold rounded-xl shadow flex items-center gap-1.5 transition";
                 btn.innerText = "🔇 Silenciado";
                 if ('speechSynthesis' in window) window.speechSynthesis.cancel();
             }
@@ -962,6 +991,11 @@
                 utterance.pitch = 1.1;
                 window.speechSynthesis.speak(utterance);
             }
+        }
+
+        function probarVoz() {
+            let mensajeAnuncio = "¡Bienvenidos al Bingo Lineal Yune! Damos inicio a la ronda. ¡Comenzamos, mucha suerte para todas!";
+            db.ref('room/announcement').set({ text: mensajeAnuncio, timestamp: Date.now() });
         }
 
         function obtenerLetraYNumeroVoz(num) {
@@ -1003,7 +1037,9 @@
             let matrizFilas = [];
             for (let f = 0; f < 5; f++) {
                 let fila = [];
-                for (let c = 0; c < 5; c++) fila.push(carton[c][f]);
+                for (let c = 0; c < 5; c++) {
+                    fila.push(carton[c][f]);
+                }
                 matrizFilas.push(fila);
             }
             matrizFilas[2][2] = 0; 
@@ -1032,11 +1068,61 @@
         }
 
         function renderizarTablerosGarantizados() {
-            if (!marketCards || Object.keys(marketCards).length === 0) marketCards = generarMercadoLocalInicial();
+            if (!marketCards || Object.keys(marketCards).length === 0) {
+                marketCards = generarMercadoLocalInicial();
+            }
             renderizarTableroAdmin();
             renderizarTableroJugadora();
             renderizarMercadoJugadora();
             renderizarObjetosYune();
+        }
+
+        function verificarFiguraGanadora(grid, drawnArray, patron) {
+            let resultado = obtenerNumerosFaltantesGanar(grid, drawnArray, patron);
+            return resultado.count === 0;
+        }
+
+        function obtenerNumerosFaltantesGanar(grid, drawnArray, patron) {
+            let isChecked = (num) => num === 0 || drawnArray.includes(num);
+            let lineasPosibles = [];
+
+            if (patron === 'line') {
+                for (let r = 0; r < 5; r++) {
+                    let linea = [];
+                    for (let c = 0; c < 5; c++) linea.push({r, c, num: grid[r][c]});
+                    lineasPosibles.push(linea);
+                }
+                for (let c = 0; c < 5; c++) {
+                    let linea = [];
+                    for (let r = 0; r < 5; r++) linea.push({r, c, num: grid[r][c]});
+                    lineasPosibles.push(linea);
+                }
+            } else if (patron === 'full_card') {
+                let linea = [];
+                for (let r = 0; r < 5; r++) {
+                    for (let c = 0; c < 5; c++) linea.push({r, c, num: grid[r][c]});
+                }
+                lineasPosibles.push(linea);
+            } else {
+                for (let r = 0; r < 5; r++) {
+                    let linea = [];
+                    for (let c = 0; c < 5; c++) linea.push({r, c, num: grid[r][c]});
+                    lineasPosibles.push(linea);
+                }
+            }
+
+            let mejorFaltantes = [];
+            let menorFaltasCount = 99;
+
+            lineasPosibles.forEach(linea => {
+                let faltanEnLinea = linea.filter(item => !isChecked(item.num));
+                if (faltanEnLinea.length < menorFaltasCount) {
+                    menorFaltasCount = faltanEnLinea.length;
+                    mejorFaltantes = faltanEnLinea.map(item => item.num);
+                }
+            });
+
+            return { faltantes: mejorFaltantes, count: menorFaltasCount };
         }
 
         window.onload = function() {
@@ -1044,7 +1130,786 @@
             inicializarMiniDiagrama();
             marketCards = generarMercadoLocalInicial();
             renderizarTablerosGarantizados();
+
+            let savedName = localStorage.getItem('bingo_player_name');
+            let savedControl = localStorage.getItem('bingo_player_control');
+            let savedCode = localStorage.getItem('bingo_player_code');
+            
+            if (savedControl) {
+                db.ref(`users/${savedControl}`).once('value').then((snap) => {
+                    if (!snap.exists()) {
+                        localStorage.removeItem('bingo_player_name');
+                        localStorage.removeItem('bingo_player_control');
+                        localStorage.removeItem('bingo_player_code');
+                    } else {
+                        if (savedName) document.getElementById('player-name-input').value = savedName;
+                        document.getElementById('player-control-input').value = savedControl;
+                        if (savedCode) document.getElementById('player-access-code-input').value = savedCode;
+                        let msg = document.getElementById('welcome-back-msg');
+                        if (msg) {
+                            msg.innerText = `¡Hola de nuevo, ${savedName}! Tus datos ya están listos.`;
+                            msg.classList.remove('hidden');
+                        }
+                    }
+                });
+            }
+
+            let savedAdminPass = localStorage.getItem('bingo_admin_pass');
+            if (savedAdminPass) {
+                let passInput = document.getElementById('admin-password-input');
+                if (passInput) passInput.value = savedAdminPass;
+                let adminMsg = document.getElementById('admin-login-msg');
+                if (adminMsg) adminMsg.innerText = "🔑 Clave recordada automáticamente. ¡Solo presiona Ingresar!";
+            }
+
+            db.ref('room').on('value', (snapshot) => {
+                let data = snapshot.val();
+                if (!data) return;
+
+                isRoomLocked = data.isRoomLocked || false;
+                actualizarEstadoBloqueoUI(isRoomLocked);
+
+                if (data.gamePattern) {
+                    gamePattern = data.gamePattern;
+                    let selectPattern = document.getElementById('game-pattern-select');
+                    if (selectPattern) selectPattern.value = gamePattern;
+                    let labelPatternEl = document.getElementById('player-pattern-label');
+                    if (labelPatternEl) labelPatternEl.innerText = nombresPatrones[gamePattern] || 'Línea';
+                    actualizarMiniDiagramaPatron(gamePattern);
+                }
+            });
+
+            db.ref('room/announcement').on('value', (snap) => {
+                let anuncio = snap.val();
+                if (anuncio && anuncio.timestamp > lastAnnouncementId) {
+                    lastAnnouncementId = anuncio.timestamp;
+                    cantarTextoVoz(anuncio.text);
+                }
+            });
         };
+
+        function registrarYReiniciarSiguienteRonda() {
+            reiniciarBalotasParaSiguienteFigura();
+        }
+
+        function actualizarEstadoBloqueoUI(cerrado) {
+            let badgeHome = document.getElementById('home-room-status-badge');
+            let warningReg = document.getElementById('room-closed-warning');
+            let formFields = document.getElementById('player-register-form-fields');
+            let submitBtn = document.getElementById('btn-submit-player-login');
+            let adminToggleBtn = document.getElementById('admin-toggle-room-btn');
+
+            if (cerrado) {
+                if (badgeHome) {
+                    badgeHome.className = "w-full text-center py-2 px-4 rounded-xl text-xs font-bold bg-red-500/20 text-red-300 border border-red-500/40";
+                    badgeHome.innerText = "🔒 Sala Cerrada por la Administradora";
+                }
+                if (warningReg) warningReg.classList.remove('hidden');
+                if (formFields) formFields.classList.add('opacity-40', 'pointer-events-none');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+                if (adminToggleBtn) {
+                    adminToggleBtn.className = "px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-xl shadow transition";
+                    adminToggleBtn.innerText = "🔒 Sala Cerrada (Abrir)";
+                }
+            } else {
+                if (badgeHome) {
+                    badgeHome.className = "w-full text-center py-2 px-4 rounded-xl text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40";
+                    badgeHome.innerText = "🟢 Sala Abierta a Jugadoras";
+                }
+                if (warningReg) warningReg.classList.add('hidden');
+                if (formFields) formFields.classList.remove('opacity-40', 'pointer-events-none');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+                if (adminToggleBtn) {
+                    adminToggleBtn.className = "px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow transition";
+                    adminToggleBtn.innerText = "🟢 Sala Abierta (Cerrar)";
+                }
+            }
+        }
+
+        function toggleRoomLockAdmin() {
+            let nuevoEstado = !isRoomLocked;
+            db.ref('room/isRoomLocked').set(nuevoEstado).then(() => {
+                if (nuevoEstado) {
+                    alert("🔒 ¡Sala cerrada con éxito!");
+                } else {
+                    alert("🟢 ¡Sala abierta!");
+                }
+            });
+        }
+
+        function showPlayerLogin() {
+            document.getElementById('view-home').classList.add('hidden');
+            document.getElementById('view-player-register').classList.remove('hidden');
+        }
+
+        function showAdminLogin() {
+            document.getElementById('view-home').classList.add('hidden');
+            document.getElementById('view-admin-login').classList.remove('hidden');
+        }
+
+        function backToHome() {
+            if (presenceRef) {
+                presenceRef.remove();
+                presenceRef = null;
+            }
+            document.getElementById('top-bar-nav').classList.add('hidden');
+            document.getElementById('view-home').classList.remove('hidden');
+            document.getElementById('view-admin-login').classList.add('hidden');
+            document.getElementById('view-player-register').classList.add('hidden');
+            document.getElementById('view-admin-panel').classList.add('hidden');
+            document.getElementById('view-player-room').classList.add('hidden');
+            document.getElementById('section-bingo-main').style.display = 'none';
+            document.getElementById('section-objetos-main').style.display = 'none';
+            if (autoDrawInterval) clearInterval(autoDrawInterval);
+            isAutoRunning = false;
+        }
+
+        function verifyAdminPassword() {
+            let pass = document.getElementById('admin-password-input').value;
+            if (pass === adminSecretKey) {
+                localStorage.setItem('bingo_admin_pass', pass);
+                currentUser.isAdmin = true;
+                currentUser.name = "Administradora";
+                document.getElementById('view-admin-login').classList.add('hidden');
+                document.getElementById('top-bar-nav').classList.remove('hidden');
+                document.getElementById('section-bingo-main').style.display = 'flex';
+                document.getElementById('view-admin-panel').classList.remove('hidden');
+                inicializarMercadoCartones();
+                sincronizarDatosAdmin();
+                escucharChatEnVivo();
+                renderizarTablerosGarantizados();
+            } else {
+                alert("Clave incorrecta. Intenta de nuevo.");
+            }
+        }
+
+        function registrarPresenciaJugadora(name, control) {
+            let safeControl = control.replace(/[.#$\/\[\]]/g, "_");
+            presenceRef = db.ref(`room/connectedPlayers/${safeControl}`);
+            presenceRef.set({ name: name, control: control, lastSeen: firebase.database.ServerValue.TIMESTAMP });
+            presenceRef.onDisconnect().remove();
+        }
+
+        function registerPlayer() {
+            let name = document.getElementById('player-name-input').value.trim();
+            let control = document.getElementById('player-control-input').value.trim();
+            let code = document.getElementById('player-access-code-input').value.trim();
+
+            if (!name || !control || !code) {
+                alert("Por favor completa todos los campos.");
+                return;
+            }
+
+            if (code.toUpperCase() !== 'BINGO2026') {
+                alert("El código de sala es incorrecto.");
+                return;
+            }
+
+            localStorage.setItem('bingo_player_name', name);
+            localStorage.setItem('bingo_player_control', control);
+            localStorage.setItem('bingo_player_code', code);
+
+            currentUser.name = name;
+            currentUser.control = control;
+            currentUser.isAdmin = false;
+
+            document.getElementById('view-player-register').classList.add('hidden');
+            document.getElementById('top-bar-nav').classList.remove('hidden');
+            document.getElementById('section-bingo-main').style.display = 'flex';
+            document.getElementById('view-player-room').classList.remove('hidden');
+
+            document.getElementById('player-display-name').innerText = name;
+            document.getElementById('player-display-control').innerText = control;
+
+            registrarPresenciaJugadora(name, control);
+
+            db.ref(`users/${control}`).once('value', (userSnap) => {
+                if (!userSnap.exists()) {
+                    db.ref(`users/${control}`).set({ name: name, balance: 0.00, isCredit: false });
+                } else {
+                    db.ref(`users/${control}/name`).set(name);
+                }
+            });
+
+            sincronizarDatosJugadora();
+            escucharChatEnVivo();
+            renderizarTablerosGarantizados();
+        }
+
+        function sincronizarDatosAdmin() {
+            db.ref('room').on('value', (snapshot) => {
+                let data = snapshot.val();
+                if (!data) return;
+
+                drawnBalls = data.drawnBalls || [];
+                gamePattern = data.gamePattern || 'line';
+                if (data.marketCards) marketCards = data.marketCards;
+                cardPrice = data.cardPrice || 300;
+                isRoomLocked = data.isRoomLocked || false;
+
+                let roomCodeInput = document.getElementById('admin-room-code');
+                if (roomCodeInput && data.roomCode && !roomCodeInput.value) roomCodeInput.value = data.roomCode;
+
+                let priceInput = document.getElementById('admin-card-price-input');
+                if (priceInput && document.activeElement !== priceInput) priceInput.value = cardPrice;
+
+                if (drawnBalls.length === 0) {
+                    document.getElementById('admin-winner-alert').classList.add('hidden');
+                    lastSpokenBallCount = 0;
+                } else {
+                    if (drawnBalls.length > lastSpokenBallCount) {
+                        let ultima = drawnBalls[drawnBalls.length - 1];
+                        cantarTextoVoz(obtenerLetraYNumeroVoz(ultima));
+                        lastSpokenBallCount = drawnBalls.length;
+                    }
+                }
+
+                let currentBallEl = document.getElementById('admin-current-ball');
+                if (drawnBalls.length > 0) {
+                    let ultima = drawnBalls[drawnBalls.length - 1];
+                    currentBallEl.innerText = ultima;
+                    currentBallEl.className = `w-28 h-28 rounded-full font-extrabold text-5xl flex items-center justify-center shadow-lg ${obtenerClaseBolaColor(ultima)}`;
+                } else {
+                    currentBallEl.innerText = "--";
+                    currentBallEl.className = "w-28 h-28 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-5xl flex items-center justify-center shadow-lg";
+                }
+
+                renderizarHistorialAdmin();
+                renderizarTableroAdmin();
+                renderizarResumenCartonesAdmin();
+                renderizarVentanaCartonesPagadosAdmin();
+                renderizarAdminWallets();
+                renderizarSelectLiberarAdmin();
+                renderizarRadarAdmin();
+                renderizarJugadorasConectadasAdmin(data.connectedPlayers || {});
+                actualizarPreviewWhatsApp();
+                verificarGanadoresEnVivoAdmin();
+            });
+        }
+
+        function sincronizarDatosJugadora() {
+            db.ref('room').on('value', (snapshot) => {
+                let data = snapshot.val();
+                if (!data) return;
+
+                drawnBalls = data.drawnBalls || [];
+                gamePattern = data.gamePattern || 'line';
+                if (data.marketCards) marketCards = data.marketCards;
+                cardPrice = data.cardPrice || 300;
+
+                if (data.isRoomLocked) {
+                    alert("🔒 La administradora ha cerrado la sala. Cerrando sesión.");
+                    backToHome();
+                    return;
+                }
+
+                let btnCargar = document.getElementById('btn-cargar-cartones');
+                if (btnCargar) btnCargar.innerText = `📥 Cargar / Confirmar Mis Cartones ($${cardPrice.toLocaleString()} c/u)`;
+
+                if (drawnBalls.length === 0) {
+                    hasSpokenMyBingo = false;
+                    document.getElementById('player-winner-notification').classList.add('hidden');
+                } else {
+                    if (drawnBalls.length > lastSpokenBallCount) {
+                        let ultima = drawnBalls[drawnBalls.length - 1];
+                        cantarTextoVoz(obtenerLetraYNumeroVoz(ultima));
+                        lastSpokenBallCount = drawnBalls.length;
+                    }
+                }
+
+                let currentBallEl = document.getElementById('player-current-ball');
+                if (drawnBalls.length > 0) {
+                    let ultima = drawnBalls[drawnBalls.length - 1];
+                    currentBallEl.innerText = ultima;
+                    currentBallEl.className = `w-24 h-24 rounded-full font-extrabold text-4xl flex items-center justify-center shadow-lg animate-pulse ${obtenerClaseBolaColor(ultima)}`;
+                } else {
+                    currentBallEl.innerText = "--";
+                    currentBallEl.className = "w-24 h-24 rounded-full bg-yellow-400 text-slate-950 font-extrabold text-4xl flex items-center justify-center shadow-lg animate-pulse";
+                }
+
+                renderizarHistorialJugadora();
+                renderizarTableroJugadora();
+                renderizarMercadoJugadora();
+                renderizarMisCartones();
+                renderizarJugadorasConectadasJugadora(data.connectedPlayers || {});
+                renderizarObjetosYune();
+            });
+
+            db.ref(`users/${currentUser.control}`).on('value', (snap) => {
+                let userData = snap.val();
+                if (!userData) {
+                    alert("⚠️ Has sido eliminada del sistema.");
+                    backToHome();
+                    return;
+                }
+
+                let balance = userData.balance || 0;
+                let isCredit = userData.isCredit || false;
+
+                let balanceEl = document.getElementById('wallet-balance-display');
+                let labelEl = document.getElementById('wallet-label');
+                if (balanceEl) balanceEl.innerText = balance.toLocaleString();
+                if (labelEl) {
+                    if (isCredit) {
+                        labelEl.innerText = "Crédito Exclusivo 🌟";
+                        balanceEl.className = "text-lg font-black text-amber-400";
+                    } else {
+                        labelEl.innerText = "Mi Saldo";
+                        balanceEl.className = "text-lg font-black text-emerald-400";
+                    }
+                }
+            });
+        }
+
+        function generarTextoResumenWhatsApp() {
+            let jugadorasMap = {};
+            let totalCartones = 0;
+            for (let id in marketCards) {
+                let card = marketCards[id];
+                if (card.owner && card.ownerControl && card.loaded) {
+                    totalCartones++;
+                    if (!jugadorasMap[card.ownerControl]) {
+                        jugadorasMap[card.ownerControl] = { name: card.owner, cards: [] };
+                    }
+                    jugadorasMap[card.ownerControl].cards.push(card.id);
+                }
+            }
+            let fechaHoy = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            let texto = `🎲 *LISTA DE CARTONES EN JUEGO - BINGO YUNE* 🎲\n📅 Fecha: ${fechaHoy}\n\n`;
+            let controls = Object.keys(jugadorasMap);
+            if (controls.length === 0) return "Aún no hay cartones cargados en juego para esta ronda.";
+            controls.forEach(ctrl => {
+                let j = jugadorasMap[ctrl];
+                j.cards.sort((a, b) => a - b);
+                texto += `👤 *${j.name}*\n   Cartones: #${j.cards.join(', #')}\n\n`;
+            });
+            texto += `🎟️ *Total de cartones:* ${totalCartones}\n`;
+            texto += `💰 *Valor por cartón:* $${cardPrice}\n`;
+            texto += `✨ ¡Mucha suerte a todas en la partida! ✨`;
+            return texto;
+        }
+
+        function actualizarPreviewWhatsApp() {
+            let textarea = document.getElementById('texto-whatsapp-preview');
+            if (textarea) textarea.value = generarTextoResumenWhatsApp();
+        }
+
+        function copiarResumenWhatsApp() {
+            let textoFinal = generarTextoResumenWhatsApp();
+            navigator.clipboard.writeText(textoFinal).then(() => {
+                alert("📋 ¡Lista copiada con éxito!");
+            });
+        }
+
+        function renderizarHistorialAdmin() {
+            let container = document.getElementById('admin-history-balls');
+            if (!container) return;
+            container.innerHTML = '';
+            let ultimas5 = drawnBalls.slice(-5).reverse();
+            if (ultimas5.length === 0) {
+                container.innerHTML = '<span class="text-xs text-slate-500">--</span>';
+                return;
+            }
+            ultimas5.forEach(num => {
+                let div = document.createElement('div');
+                div.className = `bola-historial ${obtenerClaseBolaColor(num)}`;
+                div.innerText = num;
+                container.appendChild(div);
+            });
+        }
+
+        function renderizarHistorialJugadora() {
+            let container = document.getElementById('player-history-balls');
+            if (!container) return;
+            container.innerHTML = '';
+            let ultimas5 = drawnBalls.slice(-5).reverse();
+            if (ultimas5.length === 0) {
+                container.innerHTML = '<span class="text-xs text-slate-500">--</span>';
+                return;
+            }
+            ultimas5.forEach(num => {
+                let div = document.createElement('div');
+                div.className = `bola-historial ${obtenerClaseBolaColor(num)}`;
+                div.innerText = num;
+                container.appendChild(div);
+            });
+        }
+
+        function renderizarTableroAdmin() {
+            let gridEl = document.getElementById('admin-board-grid');
+            if (!gridEl) return;
+            gridEl.innerHTML = '';
+            for (let i = 1; i <= 75; i++) {
+                let div = document.createElement('div');
+                let activo = drawnBalls.includes(i);
+                div.className = `w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${activo ? obtenerClaseBolaColor(i) + ' shadow-md' : 'bg-slate-900 text-slate-500'}`;
+                div.innerText = i;
+                gridEl.appendChild(div);
+            }
+        }
+
+        function renderizarTableroJugadora() {
+            let gridEl = document.getElementById('player-board-grid');
+            if (!gridEl) return;
+            gridEl.innerHTML = '';
+            for (let i = 1; i <= 75; i++) {
+                let div = document.createElement('div');
+                let activo = drawnBalls.includes(i);
+                div.className = `w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[10px] ${activo ? obtenerClaseBolaColor(i) + ' shadow' : 'bg-slate-900 text-slate-600'}`;
+                div.innerText = i;
+                gridEl.appendChild(div);
+            }
+        }
+
+        function renderizarVentanaCartonesPagadosAdmin() {
+            let container = document.getElementById('admin-paid-cards-window');
+            let badgeCount = document.getElementById('admin-paid-count-badge');
+            if (!container) return;
+            container.innerHTML = '';
+            let jugadorasMap = {};
+            let totalCartonesPagados = 0;
+            for (let id in marketCards) {
+                let card = marketCards[id];
+                if (card.owner && card.ownerControl && card.paid) {
+                    totalCartonesPagados++;
+                    if (!jugadorasMap[card.ownerControl]) {
+                        jugadorasMap[card.ownerControl] = { name: card.owner, control: card.ownerControl, cards: [] };
+                    }
+                    jugadorasMap[card.ownerControl].cards.push(card.id);
+                }
+            }
+            if (badgeCount) badgeCount.innerText = `${totalCartonesPagados} cartón(es) pagado(s)`;
+            let controls = Object.keys(jugadorasMap);
+            if (controls.length === 0) {
+                container.innerHTML = '<span class="text-slate-500 text-xs col-span-2 text-center py-4">No hay cartones marcados como "Pagado" todavía.</span>';
+                return;
+            }
+            controls.forEach(ctrl => {
+                let j = jugadorasMap[ctrl];
+                j.cards.sort((a, b) => a - b);
+                let div = document.createElement('div');
+                div.className = "bg-slate-950 p-3 rounded-xl flex flex-col gap-1.5 border border-emerald-500/30 text-xs";
+                div.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <strong class="text-pink-300 text-sm">${j.name}</strong>
+                        <span class="text-[10px] bg-slate-900 px-2 py-0.5 rounded text-slate-400 font-mono">Control: ${j.control}</span>
+                    </div>
+                    <div class="text-emerald-300 font-bold flex items-center gap-1.5">
+                        <span>✅ Cartones en juego:</span> 
+                        <span class="tracking-wide">#${j.cards.join(', #')}</span>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderizarAdminWallets() {
+            let container = document.getElementById('admin-wallets-list');
+            if (!container) return;
+            db.ref('users').once('value', (snapshot) => {
+                let users = snapshot.val();
+                if (!users) {
+                    container.innerHTML = '<span class="text-slate-500 text-xs col-span-2 text-center py-4">No hay jugadoras.</span>';
+                    return;
+                }
+                container.innerHTML = '';
+                Object.keys(users).forEach(code => {
+                    let user = users[code];
+                    let balance = user.balance || 0;
+                    let isCredit = user.isCredit || false;
+                    let balanceColor = isCredit ? 'text-amber-400' : 'text-emerald-400';
+                    let badgeText = isCredit ? '<span class="text-[9px] bg-amber-950 text-amber-300 px-1.5 py-0.5 rounded border border-amber-800">Crédito Activo 🌟</span>' : '<span class="text-[9px] bg-emerald-950 text-emerald-300 px-1.5 py-0.5 rounded border border-emerald-800">Saldo Normal</span>';
+
+                    let div = document.createElement('div');
+                    div.className = "bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center gap-2 text-xs";
+                    div.innerHTML = `
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <strong class="text-slate-200 text-sm">${user.name}</strong>
+                                ${badgeText}
+                            </div>
+                            <span class="text-slate-400 font-mono text-[10px]">Control: ${code}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="${balanceColor} font-bold block text-sm">${balance.toLocaleString()}</span>
+                            <div class="mt-1.5 flex gap-1 justify-end flex-wrap">
+                                <button onclick="setPositiveBalanceAdmin('${code}', '${user.name}')" class="text-[9px] bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-0.5 rounded font-semibold cursor-pointer">＋ Saldo</button>
+                                <button onclick="restarSaldoAdmin('${code}', '${user.name}', ${balance})" class="text-[9px] bg-orange-600 hover:bg-orange-500 text-white px-2 py-0.5 rounded font-semibold cursor-pointer">➖ Restar</button>
+                                <button onclick="ponerCeroAdmin('${code}', '${user.name}')" class="text-[9px] bg-yellow-600 hover:bg-yellow-500 text-slate-950 px-2 py-0.5 rounded font-bold cursor-pointer">0️⃣ En Cero</button>
+                                <button onclick="toggleCreditAdmin('${code}', '${user.name}', ${!isCredit})" class="text-[9px] ${isCredit ? 'bg-amber-700' : 'bg-slate-700 hover:bg-amber-600'} text-white px-2 py-0.5 rounded font-semibold cursor-pointer">${isCredit ? 'Quitar Crédito' : 'Dar Crédito'}</button>
+                                <button onclick="eliminarJugadorSistema('${code}', '${user.name}')" class="text-[9px] bg-red-600 hover:bg-red-500 text-white px-2 py-0.5 rounded font-semibold cursor-pointer">🗑️ Eliminar</button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            });
+        }
+
+        function setPositiveBalanceAdmin(code, name) {
+            let monto = prompt(`Ingresa el saldo a sumar para ${name}:`);
+            if (monto !== null && !isNaN(monto)) {
+                db.ref(`users/${code}`).once('value', (snap) => {
+                    let actual = snap.val() && snap.val().balance ? snap.val().balance : 0;
+                    let nuevo = actual + parseFloat(monto);
+                    db.ref(`users/${code}`).update({ balance: nuevo });
+                    renderizarAdminWallets();
+                });
+            }
+        }
+
+        function restarSaldoAdmin(code, name, saldoActual) {
+            let montoRetiro = prompt(`¿Cuánto deseas restarle a ${name}? (Saldo actual: ${saldoActual}):`);
+            if (montoRetiro !== null && !isNaN(montoRetiro)) {
+                let valorRestar = parseFloat(montoRetiro);
+                let nuevoSaldo = saldoActual - valorRestar;
+                if (nuevoSaldo < 0) nuevoSaldo = 0;
+                db.ref(`users/${code}`).update({ balance: nuevoSaldo });
+                renderizarAdminWallets();
+            }
+        }
+
+        function ponerCeroAdmin(code, name) {
+            if (confirm(`¿Colocar el saldo de ${name} en 0.00?`)) {
+                db.ref(`users/${code}`).update({ balance: 0.00 });
+                renderizarAdminWallets();
+            }
+        }
+
+        function toggleCreditAdmin(code, name, activarCredito) {
+            db.ref(`users/${code}`).update({ isCredit: activarCredito });
+            renderizarAdminWallets();
+        }
+
+        function eliminarJugadorSistema(controlJugadora, nombreJugadora) {
+            if (confirm(`¿Eliminar a ${nombreJugadora} del sistema?`)) {
+                for (let id in marketCards) {
+                    if (marketCards[id].ownerControl === controlJugadora) {
+                        db.ref(`room/marketCards/${id}`).update({ owner: null, ownerControl: null, loaded: false, paid: false });
+                    }
+                }
+                let safeCtrl = controlJugadora.replace(/[.#$\/\[\]]/g, "_");
+                db.ref(`room/connectedPlayers/${safeCtrl}`).remove();
+                db.ref(`users/${controlJugadora}`).remove();
+                renderizarAdminWallets();
+            }
+        }
+
+        function renderizarResumenCartonesAdmin() {
+            let container = document.getElementById('admin-cards-summary');
+            if (!container) return;
+            container.innerHTML = '';
+        }
+
+        function renderizarSelectLiberarAdmin() {
+            let selectEl = document.getElementById('admin-liberar-select');
+            if (!selectEl) return;
+            selectEl.innerHTML = '';
+            let ocupados = [];
+            for (let id in marketCards) {
+                if (marketCards[id].owner) ocupados.push(marketCards[id]);
+            }
+            if (ocupados.length === 0) {
+                selectEl.innerHTML = '<option value="">-- No hay cartones ocupados --</option>';
+                return;
+            }
+            selectEl.innerHTML = '<option value="">-- Selecciona cartón a liberar --</option>';
+            ocupados.forEach(card => {
+                let opt = document.createElement('option');
+                opt.value = card.id;
+                opt.innerText = `Cartón #${card.id} (Dueña: ${card.owner})`;
+                selectEl.appendChild(opt);
+            });
+        }
+
+        function liberarCartonSeleccionadoAdmin() {
+            let selectEl = document.getElementById('admin-liberar-select');
+            let id = selectEl.value;
+            if (!id) return;
+            db.ref(`room/marketCards/${id}`).update({ owner: null, ownerControl: null, loaded: false, paid: false });
+            alert(`¡Cartón #${id} liberado!`);
+        }
+
+        function renderizarJugadorasConectadasAdmin(connectedPlayers) {
+            let container = document.getElementById('admin-players-list');
+            let counterBadge = document.getElementById('admin-active-players-count');
+            if (!container) return;
+            container.innerHTML = '';
+            let listaConectadas = Object.values(connectedPlayers || {});
+            if (counterBadge) counterBadge.innerText = `${listaConectadas.length} activa(s)`;
+            if (listaConectadas.length === 0) {
+                container.innerHTML = '<span class="text-slate-500 text-center py-4">No hay jugadoras conectadas.</span>';
+                return;
+            }
+            listaConectadas.forEach(jugadora => {
+                let div = document.createElement('div');
+                div.className = "bg-slate-800/90 border border-slate-700/80 p-2.5 rounded-xl flex justify-between items-center text-xs";
+                div.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <strong class="text-pink-300">${jugadora.name}</strong>
+                    </div>
+                    <button onclick="eliminarJugadorSistema('${jugadora.control}', '${jugadora.name}')" class="text-[10px] bg-red-600 text-white px-2 py-0.5 rounded font-bold cursor-pointer">🗑️ Expulsar</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderizarJugadorasConectadasJugadora(connectedPlayers) {
+            let container = document.getElementById('player-room-online-list');
+            let counterBadge = document.getElementById('player-active-count-badge');
+            if (!container) return;
+            container.innerHTML = '';
+            let listaConectadas = Object.values(connectedPlayers || {});
+            if (counterBadge) counterBadge.innerText = `${listaConectadas.length} activa(s)`;
+            if (listaConectadas.length === 0) {
+                container.innerHTML = '<span class="text-slate-500 italic">Buscando compañeras...</span>';
+                return;
+            }
+            listaConectadas.forEach(jugadora => {
+                let badge = document.createElement('div');
+                badge.className = "bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs";
+                badge.innerHTML = `
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="font-bold text-pink-300">${jugadora.name}</span>
+                `;
+                container.appendChild(badge);
+            });
+        }
+
+        function renderizarRadarAdmin() {
+            let radarContainer = document.getElementById('admin-radar-container');
+            if (!radarContainer) return;
+            radarContainer.innerHTML = '';
+            let listaRadar = [];
+            for (let id in marketCards) {
+                let card = marketCards[id];
+                if (card.owner && card.loaded) {
+                    let analisis = obtenerNumerosFaltantesGanar(card.grid, drawnBalls, gamePattern);
+                    listaRadar.push({ card: card, analisis: analisis });
+                }
+            }
+            listaRadar.sort((a, b) => a.analisis.count - b.analisis.count);
+            if (listaRadar.length === 0) {
+                radarContainer.innerHTML = '<span class="text-slate-500 text-xs col-span-2 text-center py-4">Ningún jugador ha cargado cartones.</span>';
+                return;
+            }
+            listaRadar.forEach(item => {
+                let card = item.card;
+                let analisis = item.analisis;
+                let div = document.createElement('div');
+                div.className = `bg-slate-900 p-3 rounded-xl flex justify-between items-center border ${analisis.count === 1 ? 'border-yellow-400' : 'border-slate-700'} text-xs`;
+                div.innerHTML = `
+                    <span class="text-yellow-300 font-bold">Cartón #${card.id} (${card.owner})</span>
+                    <span class="${analisis.count === 1 ? 'text-yellow-400 font-extrabold animate-pulse' : 'text-pink-400'}">${analisis.count === 1 ? '🔥 ¡A UNA BOLITA!' : analisis.count + ' faltantes'}</span>
+                `;
+                radarContainer.appendChild(div);
+            });
+        }
+
+        function verificarGanadoresEnVivoAdmin() {
+            let alertBox = document.getElementById('admin-winner-alert');
+            let winnerText = document.getElementById('admin-winner-text');
+            let ganadoresEncontrados = [];
+
+            for (let id in marketCards) {
+                let card = marketCards[id];
+                if (card.owner && card.loaded) {
+                    if (verificarFiguraGanadora(card.grid, drawnBalls, gamePattern)) {
+                        ganadoresEncontrados.push(card);
+                    }
+                }
+            }
+
+            if (ganadoresEncontrados.length > 0) {
+                let htmlGanadores = `<div class="text-base text-yellow-300 font-extrabold mb-1">¡Se detectaron ${ganadoresEncontrados.length} ganador(es)!</div>`;
+                ganadoresEncontrados.forEach(card => {
+                    htmlGanadores += `<div>Cartón #${card.id} &bull; ${card.owner}</div>`;
+                });
+                winnerText.innerHTML = htmlGanadores;
+                alertBox.classList.remove('hidden');
+            }
+        }
+
+        function drawBallManually() {
+            if (drawnBalls.length >= 75) return;
+            let disponibles = [];
+            for (let i = 1; i <= 75; i++) {
+                if (!drawnBalls.includes(i)) disponibles.push(i);
+            }
+            let nuevaBola = disponibles[Math.floor(Math.random() * disponibles.length)];
+            drawnBalls.push(nuevaBola);
+            db.ref('room/drawnBalls').set(drawnBalls);
+        }
+
+        function toggleAutoDraw() {
+            if (isAutoRunning) {
+                clearInterval(autoDrawInterval);
+                isAutoRunning = false;
+                document.getElementById('auto-draw-btn').innerText = "▶ Iniciar Auto (Cada 3s)";
+            } else {
+                isAutoRunning = true;
+                document.getElementById('auto-draw-btn').innerText = "⏸ Pausar Auto";
+                autoDrawInterval = setInterval(() => {
+                    if (drawnBalls.length >= 75) {
+                        clearInterval(autoDrawInterval);
+                        isAutoRunning = false;
+                        return;
+                    }
+                    drawBallManually();
+                }, 3000);
+            }
+        }
+
+        function reiniciarBalotasParaSiguienteFigura() {
+            db.ref('room/drawnBalls').set([]);
+            document.getElementById('admin-winner-alert').classList.add('hidden');
+            document.getElementById('player-winner-notification').classList.add('hidden');
+            hasSpokenMyBingo = false;
+            lastSpokenBallCount = 0;
+            alert("¡Balotas reiniciadas!");
+        }
+
+        function resetGame() {
+            if (confirm("¿Reiniciar TODO el juego?")) {
+                db.ref('room/drawnBalls').set([]);
+                db.ref('chatSala').remove();
+                let initialMarket = generarMercadoLocalInicial();
+                db.ref('room/marketCards').set(initialMarket);
+                db.ref('room/connectedPlayers').remove();
+                marketCards = initialMarket;
+                renderizarTablerosGarantizados();
+            }
+        }
+
+        function clearWinnerAlert() {
+            document.getElementById('admin-winner-alert').classList.add('hidden');
+        }
+
+        function cerrarModalJugadora() {
+            document.getElementById('player-winner-notification').classList.add('hidden');
+        }
+
+        function updateGamePattern() {
+            let sel = document.getElementById('game-pattern-select').value;
+            db.ref('room/gamePattern').set(sel);
+        }
+
+        function updateRoomCode() {
+            let code = document.getElementById('admin-room-code').value.trim();
+            if (code) db.ref('room/roomCode').set(code);
+        }
+
+        function updateCardPrice() {
+            let price = parseFloat(document.getElementById('admin-card-price-input').value);
+            if (!isNaN(price) && price >= 0) db.ref('room/cardPrice').set(price);
+        }
 
         function inicializarMiniDiagrama() {
             let gridContainer = document.getElementById('mini-diagram-grid');
@@ -1055,6 +1920,150 @@
                 cell.className = 'mini-cell';
                 gridContainer.appendChild(cell);
             }
+        }
+
+        function actualizarMiniDiagramaPatron(patron) {
+            let cells = document.querySelectorAll('#mini-diagram-grid .mini-cell');
+            if (cells.length === 0) return;
+            cells.forEach(c => c.classList.remove('active'));
+            let indicesActivos = [0, 1, 2, 3, 4];
+            indicesActivos.forEach(idx => {
+                if (cells[idx]) cells[idx].classList.add('active');
+            });
+        }
+
+        function abrirVistaPreviaFullscreen(cardId) {
+            let card = marketCards[cardId];
+            if (!card) return;
+            document.getElementById('modal-preview-title').innerText = `Cartón #${card.id}`;
+            let gridContainer = document.getElementById('modal-preview-grid');
+            gridContainer.innerHTML = '';
+            for (let r = 0; r < 5; r++) {
+                for (let c = 0; c < 5; c++) {
+                    let num = card.grid[r][c];
+                    let marcado = num === 0 || drawnBalls.includes(num);
+                    gridContainer.innerHTML += `<div class="py-2.5 text-xs font-bold text-center rounded ${marcado ? 'bg-yellow-400 text-slate-950' : 'bg-slate-800 text-slate-200'}">${num === 0 ? '⭐' : num}</div>`;
+                }
+            }
+            document.getElementById('modal-carton-fullscreen').classList.remove('hidden');
+        }
+
+        function cerrarVistaPreviaFullscreen() {
+            document.getElementById('modal-carton-fullscreen').classList.add('hidden');
+        }
+
+        function renderizarMercadoJugadora() {
+            let container = document.getElementById('cards-market-grid');
+            if (!container) return;
+            container.innerHTML = '';
+            for (let id in marketCards) {
+                let card = marketCards[id];
+                let div = document.createElement('div');
+                let esMio = card.ownerControl === currentUser.control;
+                let estaCargadoMio = esMio && card.loaded;
+                div.className = `p-2 rounded-xl text-center font-bold text-xs border flex flex-col items-center justify-between gap-1.5 ${estaCargadoMio ? 'bg-pink-600/40 border-pink-500 text-pink-200' : esMio ? 'bg-green-600/30 border-green-500 text-green-300' : card.owner ? 'bg-slate-900 border-slate-800 text-slate-600 opacity-80' : 'bg-slate-800 border-slate-700 text-yellow-300'}`;
+                div.innerHTML = `
+                    <span class="cursor-pointer w-full py-1" onclick="seleccionarCarton(${id})">#${id}</span>
+                    <button onclick="event.stopPropagation(); abrirVistaPreviaFullscreen(${id})" class="w-full bg-slate-900 text-slate-300 py-1 rounded text-[10px]">🔍 Ver</button>
+                `;
+                container.appendChild(div);
+            }
+        }
+
+        function seleccionarCarton(id) {
+            let card = marketCards[id];
+            if (drawnBalls.length > 0) return;
+            if (card.owner && card.ownerControl !== currentUser.control) return;
+            if (card.ownerControl === currentUser.control && card.loaded) return;
+            if (card.ownerControl === currentUser.control && !card.loaded) {
+                db.ref(`room/marketCards/${id}`).update({ owner: null, ownerControl: null, loaded: false, paid: false });
+            } else {
+                db.ref(`room/marketCards/${id}`).update({ owner: currentUser.name, ownerControl: currentUser.control, loaded: false, paid: false });
+            }
+        }
+
+        function cargarMisCartones() {
+            if (drawnBalls.length > 0) return;
+            db.ref(`users/${currentUser.control}`).once('value').then((snap) => {
+                let userData = snap.val() || { balance: 0, isCredit: false };
+                let balance = userData.balance || 0;
+                let isCredit = userData.isCredit || false;
+                if (!isCredit && balance <= 0) {
+                    alert("❌ No tienes saldo.");
+                    return;
+                }
+                let cartonesNuevos = 0;
+                for (let id in marketCards) {
+                    if (marketCards[id].ownerControl === currentUser.control && !marketCards[id].loaded) cartonesNuevos++;
+                }
+                if (cartonesNuevos === 0) return;
+                let costoTotal = cartonesNuevos * cardPrice;
+                if (!isCredit && balance < costoTotal) {
+                    alert("Saldo insuficiente.");
+                    return;
+                }
+                db.ref(`users/${currentUser.control}/balance`).set(balance - costoTotal);
+                for (let id in marketCards) {
+                    if (marketCards[id].ownerControl === currentUser.control && !marketCards[id].loaded) {
+                        db.ref(`room/marketCards/${id}`).update({ loaded: true, paid: true });
+                    }
+                }
+                alert("¡Cartones cargados con éxito!");
+            });
+        }
+
+        function renderizarMisCartones() {
+            let container = document.getElementById('player-my-cards-container');
+            if (!container) return;
+            container.innerHTML = '';
+            let misCartones = [];
+            for (let id in marketCards) {
+                if (marketCards[id].ownerControl === currentUser.control && marketCards[id].loaded) {
+                    let analisis = obtenerNumerosFaltantesGanar(marketCards[id].grid, drawnBalls, gamePattern);
+                    misCartones.push({ card: marketCards[id], analisis: analisis });
+                }
+            }
+            if (misCartones.length === 0) {
+                container.innerHTML = '<span class="text-slate-500 text-sm col-span-2">Aún no tienes cartones cargados.</span>';
+                return;
+            }
+            misCartones.forEach(item => {
+                let card = item.card;
+                let cardDiv = document.createElement('div');
+                cardDiv.className = "bg-slate-900 border border-slate-700 p-3 rounded-2xl flex flex-col gap-2 cursor-pointer";
+                cardDiv.onclick = () => abrirVistaPreviaFullscreen(card.id);
+                cardDiv.innerHTML = `<span class="font-bold text-yellow-300 text-xs">Cartón #${card.id}</span>`;
+                container.appendChild(cardDiv);
+            });
+        }
+
+        function enviarMensajeChatJugadora() {
+            let input = document.getElementById('input-mensaje-jugadora');
+            if (!input || !input.value.trim()) return;
+            db.ref('chatSala').push({ nombre: currentUser.name || "Jugadora", mensaje: input.value.trim(), tiempo: Date.now() }, () => { input.value = ""; });
+        }
+
+        function enviarMensajeChatAdmin() {
+            let input = document.getElementById('input-mensaje-admin');
+            if (!input || !input.value.trim()) return;
+            db.ref('chatSala').push({ nombre: "Administradora ⭐", mensaje: input.value.trim(), tiempo: Date.now() }, () => { input.value = ""; });
+        }
+
+        function escucharChatEnVivo() {
+            db.ref('chatSala').on('value', function(snapshot) {
+                let cajaChatJugadoras = document.getElementById('caja-chat-jugadoras');
+                let cajaChatAdmin = document.getElementById('caja-chat-admin');
+                if (!snapshot.exists()) return;
+                let htmlMensajes = "";
+                snapshot.forEach(function(childSnapshot) {
+                    let data = childSnapshot.val();
+                    if (data && data.nombre && data.mensaje) {
+                        htmlMensajes += `<div class="bg-slate-950/50 p-2 rounded-lg border border-slate-800"><strong class="text-yellow-400">${data.nombre}:</strong> <span class="text-slate-200">${data.mensaje}</span></div>`;
+                    }
+                });
+                if (cajaChatJugadoras) { cajaChatJugadoras.innerHTML = htmlMensajes; cajaChatJugadoras.scrollTop = cajaChatJugadoras.scrollHeight; }
+                if (cajaChatAdmin) { cajaChatAdmin.innerHTML = htmlMensajes; cajaChatAdmin.scrollTop = cajaChatAdmin.scrollHeight; }
+            });
         }
     </script>
 </body>
