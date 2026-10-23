@@ -765,6 +765,7 @@
         window.onload = function() {
             iniciarRelojEnVivo();
             inicializarMiniDiagrama();
+            inicializarMercadoCartones();
 
             let savedName = localStorage.getItem('bingo_player_name');
             let savedControl = localStorage.getItem('bingo_player_control');
@@ -781,15 +782,18 @@
                         document.getElementById('player-control-input').value = savedControl;
                         if (savedCode) document.getElementById('player-access-code-input').value = savedCode;
                         let msg = document.getElementById('welcome-back-msg');
-                        msg.innerText = `¡Hola de nuevo, ${savedName}! Tus datos ya están listos.`;
-                        msg.classList.remove('hidden');
+                        if (msg) {
+                            msg.innerText = `¡Hola de nuevo, ${savedName}! Tus datos ya están listos.`;
+                            msg.classList.remove('hidden');
+                        }
                     }
                 });
             }
 
             let savedAdminPass = localStorage.getItem('bingo_admin_pass');
             if (savedAdminPass) {
-                document.getElementById('admin-password-input').value = savedAdminPass;
+                let passInput = document.getElementById('admin-password-input');
+                if (passInput) passInput.value = savedAdminPass;
                 let adminMsg = document.getElementById('admin-login-msg');
                 if (adminMsg) adminMsg.innerText = "🔑 Clave recordada automáticamente. ¡Solo presiona Ingresar!";
             }
@@ -810,6 +814,10 @@
                 }
             });
         };
+
+        function registrarYReiniciarSiguienteRonda() {
+            reiniciarBalotasParaSiguienteFigura();
+        }
 
         function actualizarEstadoBloqueoUI(cerrado) {
             let badgeHome = document.getElementById('home-room-status-badge');
@@ -913,7 +921,6 @@
             presenceRef.onDisconnect().remove();
         }
 
-        // CORRECCIÓN DEFINITIVA: INGRESO DIRECTO Y ULTRA RÁPIDO
         function registerPlayer() {
             let name = document.getElementById('player-name-input').value.trim();
             let control = document.getElementById('player-control-input').value.trim();
@@ -1231,7 +1238,7 @@
                 }
             }
 
-            badgeCount.innerText = `${totalCartonesPagados} cartón(es) pagado(s)`;
+            if (badgeCount) badgeCount.innerText = `${totalCartonesPagados} cartón(es) pagado(s)`;
 
             let controls = Object.keys(jugadorasMap);
             if (controls.length === 0) {
@@ -1468,7 +1475,7 @@
             container.innerHTML = '';
             
             let listaConectadas = Object.values(connectedPlayers || {});
-            counterBadge.innerText = `${listaConectadas.length} activa(s)`;
+            if (counterBadge) counterBadge.innerText = `${listaConectadas.length} activa(s)`;
 
             if (listaConectadas.length === 0) {
                 container.innerHTML = '<span class="text-slate-500 text-center py-4">No hay jugadoras conectadas en este momento.</span>';
@@ -1863,9 +1870,9 @@
             let juegoIniciado = drawnBalls.length > 0;
 
             if (juegoIniciado) {
-                statusMsg.innerText = "🔒 Partida iniciada: El mercado está cerrado.";
+                if (statusMsg) statusMsg.innerText = "🔒 Partida iniciada: El mercado está cerrado.";
             } else {
-                statusMsg.innerText = "Toca un cartón para seleccionarlo. Toca 🔍 para ver en pantalla completa.";
+                if (statusMsg) statusMsg.innerText = "Toca el número para seleccionarlo, o toca el botón 🔍 para inspeccionarlo.";
             }
 
             for (let id in marketCards) {
@@ -1885,7 +1892,8 @@
 
                 container.appendChild(div);
             }
-            document.getElementById('available-count').innerText = disponiblesCount;
+            let availCountEl = document.getElementById('available-count');
+            if (availCountEl) availCountEl.innerText = disponiblesCount;
         }
 
         function seleccionarCarton(id) {
