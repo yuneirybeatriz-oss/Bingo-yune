@@ -828,11 +828,18 @@
                 isRoomLocked = data.isRoomLocked || false;
                 actualizarEstadoBloqueoUI(isRoomLocked);
 
-                // ¡Sincronización en vivo de la figura en juego para todos!
+                // Sincronización automática de la figura en juego para todos
                 if (data.gamePattern) {
                     gamePattern = data.gamePattern;
+                    
+                    let selectPattern = document.getElementById('game-pattern-select');
+                    if (selectPattern && document.activeElement !== selectPattern) {
+                        selectPattern.value = gamePattern;
+                    }
+
                     let labelPatternEl = document.getElementById('player-pattern-label');
                     if (labelPatternEl) labelPatternEl.innerText = nombresPatrones[gamePattern] || 'Línea';
+                    
                     actualizarMiniDiagramaPatron(gamePattern);
                 }
             });
@@ -1018,7 +1025,9 @@
                 isRoomLocked = data.isRoomLocked || false;
 
                 let selectPattern = document.getElementById('game-pattern-select');
-                if (selectPattern) selectPattern.value = gamePattern;
+                if (selectPattern && document.activeElement !== selectPattern) {
+                    selectPattern.value = gamePattern;
+                }
 
                 let roomCodeInput = document.getElementById('admin-room-code');
                 if (roomCodeInput && data.roomCode && !roomCodeInput.value) {
