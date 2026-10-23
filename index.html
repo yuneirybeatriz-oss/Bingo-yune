@@ -63,7 +63,6 @@
             border-radius: 10px;
             padding: 6px;
             text-align: center;
-            transition: all 0.08s ease-in-out;
             cursor: pointer;
             display: flex;
             flex-direction: column;
@@ -73,10 +72,10 @@
         }
         .objeto-card.titling {
             border: 4px solid #facc15 !important;
-            box-shadow: 0 0 30px #facc15, inset 0 0 12px #facc15 !important;
-            transform: scale(1.1);
+            box-shadow: 0 0 40px #facc15, inset 0 0 20px #facc15 !important;
             background: #3730a3 !important;
             z-index: 20;
+            transform: scale(1.08);
         }
         .objeto-card.selected-by-user {
             border-color: #05d9e8;
@@ -364,13 +363,13 @@
         </div>
 
         <!-- ================================================================= -->
-        <!-- SECCIÓN 2: GAME OBJETOS YUNE (RULETA 4x4 CON SONIDO Y BOTONES LIBRES) -->
+        <!-- SECCIÓN 2: GAME OBJETOS YUNE (GIRO AUTOMÁTICO HASTA GANADOR + TRRR DURA) -->
         <!-- ================================================================= -->
         <div id="section-objetos-main" class="w-full flex-col gap-6 hidden">
             <div class="bg-slate-800 p-6 rounded-3xl card-shadow flex flex-col gap-6 max-w-lg mx-auto w-full">
                 <div class="text-center">
                     <h2 class="text-2xl font-bold text-yellow-300">🎰 Game Objetos Yune 🎰</h2>
-                    <p class="text-xs text-slate-400">Ruleta con sonido interactivo de giro y frenado</p>
+                    <p class="text-xs text-slate-400">Ruleta automática con sonido trrr potente hasta el ganador</p>
                 </div>
 
                 <!-- TABLERO CUADRADO PERIMETRAL 4x4 -->
@@ -414,10 +413,10 @@
 
                         <!-- CENTRO DEL CUADRO: OCUPA LAS 4 CELDAS DEL MEDIO (2x2) -->
                         <div id="centro-visor" class="centro-visor-cuadrado">
-                            <span class="text-[9px] text-slate-500 uppercase tracking-wider font-bold block mb-0.5" id="visor-estado-txt">Sorteo en Vivo</span>
+                            <span class="text-[9px] text-slate-500 uppercase tracking-wider font-bold block mb-0.5" id="visor-estado-txt">Sorteo Continuo</span>
                             <div id="visor-objeto-central" class="flex flex-col items-center justify-center">
                                 <span class="text-3xl block mb-0.5 opacity-40" id="visor-emoji">🎰</span>
-                                <span class="text-xs font-bold text-slate-400" id="visor-nombre">Girando...</span>
+                                <span class="text-xs font-bold text-slate-400" id="visor-nombre">Listo para girar</span>
                                 <div id="visor-estrellas-centro" class="text-[10px] font-bold text-yellow-400 mt-0.5 hidden">⭐ 0 / 5</div>
                                 <div id="visor-dueno-centro" class="text-[9px] text-pink-300 hidden">Dueño: --</div>
                             </div>
@@ -457,10 +456,11 @@
                         </div>
                     </div>
 
-                    <!-- BOTÓN DE GIRO -->
+                    <!-- BOTONES DE CONTROL DE GIRO -->
                     <div class="mt-4 flex gap-2 justify-center flex-wrap">
-                        <button onclick="sortearObjetoCasinoAutomatico()" id="btn-girar-ruleta" class="px-6 py-3 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-slate-950 font-extrabold text-xs rounded-xl shadow cursor-pointer transition">🎲 Girar Ruleta Automática</button>
-                        <button onclick="avanzarSiguientePremio()" id="btn-siguiente-premio" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow cursor-pointer hidden transition">▶ Continuar al Siguiente Premio</button>
+                        <button onclick="iniciarGiroAutomaticoContinuo()" id="btn-iniciar-auto" class="px-5 py-3 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-slate-950 font-extrabold text-xs rounded-xl shadow cursor-pointer transition">▶ Iniciar Giro Automático</button>
+                        <button onclick="detenerGiroAutomaticoContinuo()" id="btn-pausar-auto" class="px-5 py-3 bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-xs rounded-xl shadow cursor-pointer hidden transition">⏸ Pausar Giro</button>
+                        <button onclick="avanzarSiguientePremio()" id="btn-siguiente-premio" class="px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow cursor-pointer hidden transition">▶ Siguiente Premio</button>
                         <button onclick="reiniciarObjetosRonda()" class="px-4 py-3 bg-red-600/80 hover:bg-red-600 text-white font-bold text-xs rounded-xl shadow cursor-pointer">🔄 Reiniciar</button>
                     </div>
                 </div>
@@ -518,6 +518,8 @@
         let etapaPremioActual = 1;
         let juegoPausadoPorGanador = false;
         let audioCtx = null;
+        let intervaloGiroContinuo = null;
+        let estaGirandoSolo = false;
 
         // LAS 10 FIGURAS OFICIALES DE TUS OBJETOS YUNE
         const listaObjetosYune = [
@@ -550,8 +552,8 @@
             'rombo': 'Rombo Pequeño 💎'
         };
 
-        // GENERADOR DE SONIDO DE CLIC TIPO RULETA / MÁQUINA
-        function reproducirSonidoClic(esFinal = false) {
+        // EFECTO DE SONIDO TIPO TRRR (CARRACA DE CASINO A TODO VOLUMEN)
+        function reproducirSonidoTrrr() {
             if (!audioHabilitado) return;
             try {
                 if (!audioCtx) {
@@ -563,20 +565,47 @@
                 let osc = audioCtx.createOscillator();
                 let gain = audioCtx.createGain();
                 
-                osc.type = esFinal ? 'triangle' : 'sine';
-                osc.frequency.setValueAtTime(esFinal ? 300 : 800, audioCtx.currentTime);
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(450, audioCtx.currentTime + 0.12);
                 
-                gain.gain.setValueAtTime(esFinal ? 0.3 : 0.08, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (esFinal ? 0.25 : 0.04));
+                gain.gain.setValueAtTime(0.7, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
 
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
                 
                 osc.start();
-                osc.stop(audioCtx.currentTime + (esFinal ? 0.25 : 0.04));
-            } catch(e) {
-                // Silencioso si el navegador bloquea audio
-            }
+                osc.stop(audioCtx.currentTime + 0.15);
+            } catch(e) {}
+        }
+
+        // EFECTO DE SONIDO DE GOLPE SECO Y VICTORIOSO AL FRENAR
+        function reproducirSonidoCampanaFinal() {
+            if (!audioHabilitado) return;
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.4);
+                
+                gain.gain.setValueAtTime(0.8, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.45);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.45);
+            } catch(e) {}
         }
 
         function switchGameMode(modo) {
@@ -679,114 +708,126 @@
             });
         }
 
-        // CIRCUITO 4x4 (Las 10 figuras en orden alrededor del marco)
-        const ordenCircuito4x4 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-
-        function sortearObjetoCasinoAutomatico() {
+        // GIRO AUTOMÁTICO CONTINUO HASTA QUE HAYA UN GANADOR (CON SONIDO TRRR Y FRENO LIMPIO)
+        function iniciarGiroAutomaticoContinuo() {
             if (juegoPausadoPorGanador) {
-                alert("⚠️ El juego está pausado porque un objeto ya ganó este premio. Presiona 'Continuar al Siguiente Premio'.");
+                alert("⚠️ El juego está pausado porque un objeto ya ganó este premio. Presiona 'Siguiente Premio'.");
                 return;
             }
 
+            if (estaGirandoSolo) return;
+            estaGirandoSolo = true;
+
+            let btnIniciar = document.getElementById('btn-iniciar-auto');
+            let btnPausar = document.getElementById('btn-pausar-auto');
+            if (btnIniciar) btnIniciar.classList.add('hidden');
+            if (btnPausar) btnPausar.classList.remove('hidden');
+
             let centroDiv = document.getElementById('centro-visor');
-            let visorEmoji = document.getElementById('visor-emoji');
-            let visorNombre = document.getElementById('visor-nombre');
-            let visorEstrellas = document.getElementById('visor-estrellas-centro');
-            let visorDueno = document.getElementById('visor-dueno-centro');
             let visorEstado = document.getElementById('visor-estado-txt');
 
-            if (centroDiv) centroDiv.classList.remove('activo');
-            if (visorEstado) visorEstado.innerText = "Sorteo en Vivo";
-            if (visorEmoji) { visorEmoji.innerText = "🎰"; visorEmoji.className = "text-3xl block mb-0.5 opacity-40"; }
-            if (visorNombre) visorNombre.innerText = "Girando...";
-            if (visorEstrellas) visorEstrellas.classList.add('hidden');
-            if (visorDueno) visorDueno.classList.add('hidden');
-
-            let totalPasos = ordenCircuito4x4.length;
-            let pasadas = 0;
-            let maxPasadas = 45; 
-            let indiceSecuencia = 0;
-            let velocidad = 55; 
-
-            let btnGirar = document.getElementById('btn-girar-ruleta');
-            if (btnGirar) btnGirar.disabled = true;
-
-            function pasoGiro() {
-                for (let i = 0; i < ordenCircuito4x4.length; i++) {
-                    let card = document.getElementById(`card-objeto-el-${ordenCircuito4x4[i]}`);
-                    if (card) card.classList.remove('titling');
+            intervaloGiroContinuo = setInterval(() => {
+                if (juegoPausadoPorGanador) {
+                    detenerGiroAutomaticoContinuo();
+                    return;
                 }
 
-                let idActual = ordenCircuito4x4[indiceSecuencia];
-                let cardActual = document.getElementById(`card-objeto-el-${idActual}`);
-                if (cardActual) cardActual.classList.add('titling');
+                reproducirSonidoTrrr();
 
-                reproducirSonidoClic(false);
+                if (centroDiv) centroDiv.classList.add('activo');
+                if (visorEstado) visorEstado.innerText = "Trrr... Girando Solita";
 
-                indiceSecuencia = (indiceSecuencia + 1) % totalPasos;
-                pasadas++;
-
-                if (pasadas < maxPasadas) {
-                    if (pasadas > maxPasadas - 15) {
-                        velocidad += 30; 
-                    }
-                    setTimeout(pasoGiro, velocidad);
-                } else {
-                    for (let i = 0; i < ordenCircuito4x4.length; i++) {
-                        let card = document.getElementById(`card-objeto-el-${ordenCircuito4x4[i]}`);
-                        if (card) card.classList.remove('titling');
-                    }
-
-                    let ganadorIndex = Math.floor(Math.random() * listaObjetosYune.length);
-                    let objGanador = listaObjetosYune[ganadorIndex];
-
-                    let cardGanadora = document.getElementById(`card-objeto-el-${objGanador.id}`);
-                    if (cardGanadora) cardGanadora.classList.add('titling');
-
-                    reproducirSonidoClic(true);
-                    cantarTextoVoz(objGanador.nombre);
-
-                    db.ref(`room/objetosData/${objGanador.id}`).once('value').then((snap) => {
-                        let d = snap.val() || { hits: 0, owner: null };
-                        let hits = (d.hits || 0) + 1;
-                        if (hits > 5) hits = 5;
-                        let duenoActual = d.owner || "Sin Dueño (Libre)";
-                        
-                        db.ref(`room/objetosData/${objGanador.id}/hits`).set(hits).then(() => {
-                            renderizarObjetosYune();
-
-                            if (centroDiv) centroDiv.classList.add('activo');
-                            if (visorEstado) visorEstado.innerText = "¡Resultado!";
-                            if (visorEmoji) { visorEmoji.innerText = objGanador.emoji; visorEmoji.className = "text-4xl block mb-0.5 animate-bounce"; }
-                            if (visorNombre) visorNombre.innerText = objGanador.nombre;
-                            if (visorEstrellas) { visorEstrellas.innerText = `⭐ ${hits} / 5 Estrellas`; visorEstrellas.classList.remove('hidden'); }
-                            if (visorDueno) { visorDueno.innerText = `Dueño: ${duenoActual}`; visorDueno.classList.remove('hidden'); }
-
-                            if (hits >= 5) {
-                                juegoPausadoPorGanador = true;
-                                cantarTextoVoz(`¡Tenemos ganador para el premio número ${etapaPremioActual}! El objeto ${objGanador.nombre} completó sus cinco estrellas. ¡Felicidades a ${duenoActual}!`);
-                                
-                                let tituloPremio = document.getElementById('premio-actual-titulo');
-                                if (tituloPremio) tituloPremio.innerHTML = `🎉 ¡GANADOR DEL PREMIO ${etapaPremioActual}! (${objGanador.emoji} ${objGanador.nombre})`;
-                                
-                                if (btnGirar) btnGirar.classList.add('hidden');
-                                let btnSiguiente = document.getElementById('btn-siguiente-premio');
-                                if (btnSiguiente) btnSiguiente.classList.remove('hidden');
-
-                                let spanPremio = document.getElementById(`ganador-premio-${etapaPremioActual}`);
-                                if (spanPremio) {
-                                    spanPremio.innerText = `${objGanador.emoji} ${objGanador.nombre} (Dueño: ${duenoActual})`;
-                                    spanPremio.className = "text-yellow-300 font-bold";
-                                }
-                            } else {
-                                if (btnGirar) btnGirar.disabled = false;
-                            }
-                        });
-                    });
+                // Apagar luces momentáneamente durante el giro
+                for (let i = 1; i <= 10; i++) {
+                    let c = document.getElementById(`card-objeto-el-${i}`);
+                    if (c) c.classList.remove('titling');
                 }
+
+                let aleatorioTemp = listaObjetosYune[Math.floor(Math.random() * listaObjetosYune.length)];
+                let visorEmoji = document.getElementById('visor-emoji');
+                let visorNombre = document.getElementById('visor-nombre');
+                if (visorEmoji) { visorEmoji.innerText = aleatorioTemp.emoji; visorEmoji.className = "text-3xl block mb-0.5 animate-spin"; }
+                if (visorNombre) visorNombre.innerText = aleatorioTemp.nombre;
+
+            }, 250); // Velocidad del trrr constante
+        }
+
+        function detenerGiroAutomaticoContinuo() {
+            if (!estaGirandoSolo) return;
+            estaGirandoSolo = false;
+            clearInterval(intervaloGiroContinuo);
+
+            let btnIniciar = document.getElementById('btn-iniciar-auto');
+            let btnPausar = document.getElementById('btn-pausar-auto');
+            if (btnIniciar) btnIniciar.classList.remove('hidden');
+            if (btnPausar) btnPausar.classList.add('hidden');
+
+            // SORTEO FINAL EXACTO Y LIMPIO (FRENO SECO)
+            let ganadorIndex = Math.floor(Math.random() * listaObjetosYune.length);
+            let objGanador = listaObjetosYune[ganadorIndex];
+            let targetId = objGanador.id;
+
+            for (let i = 1; i <= 10; i++) {
+                let c = document.getElementById(`card-objeto-el-${i}`);
+                if (c) c.classList.remove('titling');
             }
 
-            pasoGiro();
+            let cardGanadora = document.getElementById(`card-objeto-el-${targetId}`);
+            if (cardGanadora) cardGanadora.classList.add('titling');
+
+            reproducirSonidoCampanaFinal();
+            cantarTextoVoz(objGanador.nombre);
+
+            db.ref(`room/objetosData/${targetId}`).once('value').then((snap) => {
+                let d = snap.val() || { hits: 0, owner: null };
+                let hits = (d.hits || 0) + 1;
+                if (hits > 5) hits = 5;
+                let duenoActual = d.owner || "Sin Dueño (Libre)";
+                
+                db.ref(`room/objetosData/${targetId}/hits`).set(hits).then(() => {
+                    renderizarObjetosYune();
+
+                    let centroDiv = document.getElementById('centro-visor');
+                    let visorEmoji = document.getElementById('visor-emoji');
+                    let visorNombre = document.getElementById('visor-nombre');
+                    let visorEstrellas = document.getElementById('visor-estrellas-centro');
+                    let visorDueno = document.getElementById('visor-dueno-centro');
+                    let visorEstado = document.getElementById('visor-estado-txt');
+
+                    if (centroDiv) centroDiv.classList.add('activo');
+                    if (visorEstado) visorEstado.innerText = "¡Cayó Aquí!";
+                    if (visorEmoji) { visorEmoji.innerText = objGanador.emoji; visorEmoji.className = "text-4xl block mb-0.5 animate-bounce"; }
+                    if (visorNombre) visorNombre.innerText = objGanador.nombre;
+                    if (visorEstrellas) { visorEstrellas.innerText = `⭐ ${hits} / 5 Estrellas`; visorEstrellas.classList.remove('hidden'); }
+                    if (visorDueno) { visorDueno.innerText = `Dueño: ${duenoActual}`; visorDueno.classList.remove('hidden'); }
+
+                    if (hits >= 5) {
+                        juegoPausadoPorGanador = true;
+                        cantarTextoVoz(`¡Tenemos ganador para el premio número ${etapaPremioActual}! El objeto ${objGanador.nombre} completó sus cinco estrellas. ¡Felicidades a ${duenoActual}!`);
+                        
+                        let tituloPremio = document.getElementById('premio-actual-titulo');
+                        if (tituloPremio) tituloPremio.innerHTML = `🎉 ¡GANADOR DEL PREMIO ${etapaPremioActual}! (${objGanador.emoji} ${objGanador.nombre})`;
+                        
+                        if (btnIniciar) btnIniciar.classList.add('hidden');
+                        if (btnPausar) btnPausar.classList.add('hidden');
+                        let btnSiguiente = document.getElementById('btn-siguiente-premio');
+                        if (btnSiguiente) btnSiguiente.classList.remove('hidden');
+
+                        let spanPremio = document.getElementById(`ganador-premio-${etapaPremioActual}`);
+                        if (spanPremio) {
+                            spanPremio.innerText = `${objGanador.emoji} ${objGanador.nombre} (Dueño: ${duenoActual})`;
+                            spanPremio.className = "text-yellow-300 font-bold";
+                        }
+                    } else {
+                        // Si no ha ganado, vuelve a girar automáticamente en 2 segundos para mantener la emoción
+                        setTimeout(() => {
+                            if (!juegoPausadoPorGanador) {
+                                iniciarGiroAutomaticoContinuo();
+                            }
+                        }, 2000);
+                    }
+                });
+            });
         }
 
         function avanzarSiguientePremio() {
@@ -805,17 +846,21 @@
                     });
                 });
 
+                for (let i = 1; i <= 10; i++) {
+                    let c = document.getElementById(`card-objeto-el-${i}`);
+                    if (c) c.classList.remove('titling');
+                }
+
                 let tituloPremio = document.getElementById('premio-actual-titulo');
                 if (tituloPremio) {
                     let nombresFases = ["1er Premio", "2do Premio", "3er Premio", "4to Premio (Mayor)"];
                     tituloPremio.innerText = nombresFases[etapaPremioActual - 1] + " (Ronda en Curso)";
                 }
 
-                let btnGirar = document.getElementById('btn-girar-ruleta');
+                let btnIniciar = document.getElementById('btn-iniciar-auto');
                 let btnSiguiente = document.getElementById('btn-siguiente-premio');
-                if (btnGirar) {
-                    btnGirar.classList.remove('hidden');
-                    btnGirar.disabled = false;
+                if (btnIniciar) {
+                    btnIniciar.classList.remove('hidden');
                 }
                 if (btnSiguiente) btnSiguiente.classList.add('hidden');
 
@@ -826,7 +871,7 @@
                 let visorDueno = document.getElementById('visor-dueno-centro');
                 if (centroDiv) centroDiv.classList.remove('activo');
                 if (visorEmoji) { visorEmoji.innerText = "🎰"; visorEmoji.className = "text-3xl block mb-0.5 opacity-40"; }
-                if (visorNombre) visorNombre.innerText = "Girando...";
+                if (visorNombre) visorNombre.innerText = "Listo para girar";
                 if (visorEstrellas) visorEstrellas.classList.add('hidden');
                 if (visorDueno) visorDueno.classList.add('hidden');
 
@@ -841,15 +886,23 @@
                 db.ref('room/objetosData').remove().then(() => {
                     etapaPremioActual = 1;
                     juegoPausadoPorGanador = false;
+                    estaGirandoSolo = false;
+                    clearInterval(intervaloGiroContinuo);
+
                     let tituloPremio = document.getElementById('premio-actual-titulo');
                     if (tituloPremio) tituloPremio.innerText = "1er Premio (Ronda en Curso)";
-                    let btnGirar = document.getElementById('btn-girar-ruleta');
-                    if (btnGirar) {
-                        btnGirar.classList.remove('hidden');
-                        btnGirar.disabled = false;
-                    }
+                    
+                    let btnIniciar = document.getElementById('btn-iniciar-auto');
+                    let btnPausar = document.getElementById('btn-pausar-auto');
                     let btnSiguiente = document.getElementById('btn-siguiente-premio');
+                    if (btnIniciar) btnIniciar.classList.remove('hidden');
+                    if (btnPausar) btnPausar.classList.add('hidden');
                     if (btnSiguiente) btnSiguiente.classList.add('hidden');
+
+                    for (let i = 1; i <= 10; i++) {
+                        let c = document.getElementById(`card-objeto-el-${i}`);
+                        if (c) c.classList.remove('titling');
+                    }
 
                     let centroDiv = document.getElementById('centro-visor');
                     if (centroDiv) centroDiv.classList.remove('activo');
@@ -1941,7 +1994,6 @@
             container.innerHTML = '';
             let misCartones = [];
             for (let id in marketCards) {
-                let cardIdNum = Number(id);
                 if (marketCards[id].ownerControl === currentUser.control && marketCards[id].loaded) {
                     let analisis = obtenerNumerosFaltantesGanar(marketCards[id].grid, drawnBalls, gamePattern);
                     misCartones.push({ card: marketCards[id], analisis: analisis });
