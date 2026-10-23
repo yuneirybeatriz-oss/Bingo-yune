@@ -41,25 +41,26 @@
             background: #1e1e3f; border: 2px solid #333366; border-radius: 10px;
             padding: 6px; text-align: center; cursor: pointer;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            min-height: 70px; position: relative; transition: all 0.15s ease;
+            min-height: 70px; position: relative; transition: all 0.2s ease;
         }
         .objeto-card.active-step {
             border: 3px solid #38bdf8 !important;
             background: #0c4a6e !important; z-index: 10;
         }
-        /* TITILEO CLARO Y SUAVE DE LA LUZ BLANCA/AMARILLA */
-        @keyframes titileoElegante {
-            0% { border-color: #ffffff; box-shadow: 0 0 15px #ffffff, inset 0 0 10px #38bdf8; background: #0369a1; }
-            50% { border-color: #facc15; box-shadow: 0 0 30px #facc15, inset 0 0 20px #facc15; background: #312e81; }
-            100% { border-color: #ffffff; box-shadow: 0 0 15px #ffffff, inset 0 0 10px #38bdf8; background: #0369a1; }
+        /* TITILEO CLARO Y FIJO SINCRONIZADO */
+        @keyframes titileoFuerte {
+            0% { border-color: #ffffff; box-shadow: 0 0 25px #ffffff, inset 0 0 15px #38bdf8; background: #0284c7; transform: scale(1.08); }
+            50% { border-color: #facc15; box-shadow: 0 0 40px #facc15, inset 0 0 25px #facc15; background: #4338ca; transform: scale(1.12); }
+            100% { border-color: #ffffff; box-shadow: 0 0 25px #ffffff, inset 0 0 15px #38bdf8; background: #0284c7; transform: scale(1.08); }
         }
         .objeto-card.titling {
-            animation: titileoElegante 0.6s infinite alternate;
-            z-index: 20; transform: scale(1.06);
+            animation: titileoFuerte 0.4s infinite alternate !important;
+            z-index: 50 !important;
         }
         .objeto-card.selected-by-user {
             border-color: #38bdf8; background: #0d3b66;
         }
+        /* OBJETO GANADOR BLOQUEADO Y OSCURECIDO */
         .objeto-card.objeto-ganador-ronda {
             background: #020617 !important; border-color: #dc2626 !important;
             opacity: 0.35; filter: grayscale(100%); cursor: not-allowed; pointer-events: none;
@@ -423,7 +424,6 @@
 
         let etapaPremioActual = 1;
         let juegoPausadoPorGanador = false;
-        let intervaloGiroContinuo = null;
         let estaGirandoSolo = false;
 
         const ordenPerimetroRuleta = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -727,7 +727,7 @@
                     <div id="visor-objeto-central" class="flex flex-col items-center justify-center">
                         <span class="text-3xl block mb-0.5" id="visor-emoji">🎰</span>
                         <span class="text-xs font-bold text-slate-300" id="visor-nombre">Listo para girar</span>
-                        <div id="visor-estrellas-centro" class="text-[10px] font-bold text-yellow-400 mt-0.5 hidden">⭐ 0 / 5</div>
+                        <div id="visor-estrellas-centro" class="text-[10px] font-bold text-yellow-400 mt-0.5 hidden">⭐ 0 / 3</div>
                         <div id="visor-dueno-centro" class="text-[9px] text-pink-300 hidden">Dueño: --</div>
                     </div>
                 </div>
@@ -739,8 +739,11 @@
             `;
         }
 
+        // 🔥 SINCRONIZACIÓN EN TIEMPO REAL DEL ESTADO VISUAL DE LA RULETA (GIRO Y TITILEO EN TODOS LOS TELÉFONOS)
         function sincronizarObjetosYune() {
             construirEstructuraRuletaHTML();
+            
+            // Escuchar cambios en los datos de los objetos y estrellas
             db.ref('room/objetosData').on('value', (snap) => {
                 let objetosState = snap.val() || {};
                 let listaRespaldoHTML = '';
@@ -749,7 +752,7 @@
                     let estadoObj = objetosState[obj.id] || { owner: null, ownerControl: null, hits: 0 };
                     let esMio = currentUser.control && estadoObj.ownerControl === currentUser.control;
                     let hitsActuales = estadoObj.hits || 0;
-                    let yaGanoRonda = hitsActuales >= 5;
+                    let yaGanoRonda = hitsActuales >= 3;
 
                     let cardEl = document.getElementById(`card-objeto-el-${obj.id}`);
                     if (cardEl) {
@@ -768,7 +771,7 @@
                         cardEl.innerHTML = `
                             <span class="text-xl block">${obj.emoji}</span>
                             <span class="text-[9px] font-bold text-slate-200 block truncate w-full">${obj.nombre}</span>
-                            <span class="text-[8px] text-yellow-400 font-bold block mt-0.5">⭐ ${hitsActuales}/5</span>
+                            <span class="text-[8px] text-yellow-400 font-bold block mt-0.5">⭐ ${hitsActuales}/3</span>
                             ${yaGanoRonda ? `<span class="text-[7px] text-red-400 font-bold">🚫 Bloqueado</span>` : estadoObj.owner ? `<span class="text-[7px] text-pink-300 truncate w-full mt-0.5">👤 ${estadoObj.owner}</span>` : `<span class="text-[7px] text-emerald-400 font-semibold">Libre</span>`}
                         `;
                     }
@@ -786,6 +789,59 @@
                 let respaldoEl = document.getElementById('lista-respaldo-objetos');
                 if (respaldoEl) respaldoEl.innerHTML = listaRespaldoHTML;
             });
+
+            // Escuchar el estado actual del giro en vivo para que TODOS los teléfonos vean qué objeto va iluminado o titilando
+            db.ref('room/ruletaAnimacion').on('value', (snap) => {
+                let anim = snap.val();
+                
+                // Limpiar luces anteriores en todos los cuadros
+                for (let i = 1; i <= 10; i++) {
+                    let c = document.getElementById(`card-objeto-el-${i}`);
+                    if (c) c.classList.remove('active-step', 'titling');
+                }
+                let visorCentro = document.getElementById('centro-visor');
+                if (visorCentro) visorCentro.classList.remove('visor-ganador-alerta');
+
+                if (!anim) return;
+
+                if (anim.estado === 'girando' && anim.idActual) {
+                    let cardActual = document.getElementById(`card-objeto-el-${anim.idActual}`);
+                    if (cardActual && !cardActual.classList.contains('objeto-ganador-ronda')) {
+                        cardActual.classList.add('active-step');
+                    }
+                    let objTemp = listaObjetosYune.find(o => o.id === anim.idActual);
+                    if (objTemp && document.getElementById('visor-emoji')) {
+                        document.getElementById('visor-emoji').innerText = objTemp.emoji;
+                        document.getElementById('visor-nombre').innerText = objTemp.nombre;
+                        document.getElementById('visor-estado-txt').innerText = "Girando ruleta...";
+                    }
+                } else if (anim.estado === 'titilando' && anim.targetId) {
+                    let cardGanadora = document.getElementById(`card-objeto-el-${anim.targetId}`);
+                    if (cardGanadora) cardGanadora.classList.add('titling');
+
+                    let objGanador = listaObjetosYune.find(o => o.id === anim.targetId);
+                    if (objGanador && document.getElementById('visor-emoji')) {
+                        document.getElementById('visor-emoji').innerText = objGanador.emoji;
+                        document.getElementById('visor-nombre').innerText = objGanador.nombre;
+                    }
+
+                    if (anim.hits >= 3) {
+                        if (visorCentro) visorCentro.classList.add('visor-ganador-alerta');
+                        if (document.getElementById('visor-estado-txt')) document.getElementById('visor-estado-txt').innerText = "🎉 ¡OBJETO GANÓ EL PREMIO! 🎉";
+                    } else {
+                        if (document.getElementById('visor-estado-txt')) document.getElementById('visor-estado-txt').innerText = `⭐ ¡Estrella sumada! (${anim.hits}/3)`;
+                    }
+
+                    if (document.getElementById('visor-estrellas-centro')) {
+                        document.getElementById('visor-estrellas-centro').innerText = `⭐ ${anim.hits} / 3 Estrellas`;
+                        document.getElementById('visor-estrellas-centro').classList.remove('hidden');
+                    }
+                    if (document.getElementById('visor-dueno-centro')) {
+                        document.getElementById('visor-dueno-centro').innerText = `Dueño: ${anim.dueno}`;
+                        document.getElementById('visor-dueno-centro').classList.remove('hidden');
+                    }
+                }
+            });
         }
 
         function interactuarObjetoYune(idObj) {
@@ -797,14 +853,14 @@
             db.ref(`room/objetosData/${idObj}`).once('value').then((snap) => {
                 let data = snap.val() || { owner: null, ownerControl: null, hits: 0 };
                 
-                if (data.hits >= 5) {
+                if (data.hits >= 3) {
                     alert("⚠️ Este objeto ya ganó su premio en esta ronda y está bloqueado.");
                     return;
                 }
 
                 if (data.owner && data.ownerControl !== currentUser.control) {
                     if (currentUser.isAdmin) {
-                        if (confirm(`⚠️ Este objeto pertenece a "${data.owner}". ¿Deseas liberarlo como Administradora?`)) {
+                        if (confirm(`⚠️ Este objeto pertenece al usuario "${data.owner}". ¿Deseas liberarlo como Administradora?`)) {
                             db.ref(`room/objetosData/${idObj}`).update({ owner: null, ownerControl: null });
                             alert("¡Objeto liberado con éxito!");
                         }
@@ -830,7 +886,7 @@
             let objetosDisponibles = [];
             listaObjetosYune.forEach(obj => {
                 let estado = objetosState[obj.id] || { hits: 0 };
-                if (estado.hits < 5) {
+                if (estado.hits < 3) {
                     objetosDisponibles.push(obj);
                 }
             });
@@ -838,7 +894,7 @@
             return objetosDisponibles[Math.floor(Math.random() * objetosDisponibles.length)];
         }
 
-        /* RULETA DINÁMICA CON VUELTAS VARIABLES AL AZAR Y PAUSA TITILANTE */
+        // 🔥 GIRO AUTOMÁTICO SINCRONIZADO EN FIREBASE PARA QUE SE VEA EN TODOS LOS TELÉFONOS
         function iniciarGiroAutomaticoContinuo() {
             if (!currentUser.isAdmin) return;
             if (juegoPausadoPorGanador) {
@@ -852,7 +908,7 @@
                 let objGanador = seleccionarObjetoEquitativo(objetosState);
 
                 if (!objGanador) {
-                    alert("🏆 ¡Todos los objetos disponibles ya han ganado sus 5 estrellas en esta ronda! Presiona 'Siguiente Premio' o 'Reiniciar Ronda'.");
+                    alert("🏆 ¡Todos los objetos disponibles ya han ganado sus 3 estrellas en esta ronda! Presiona 'Siguiente Premio' o 'Reiniciar Ronda'.");
                     return;
                 }
 
@@ -864,16 +920,10 @@
 
                 let targetId = objGanador.id;
                 let targetPerimetroIndex = ordenPerimetroRuleta.indexOf(targetId);
-
-                // CANTIDAD DE VUELTAS COMPLETAS AL AZAR (Entre 1 y 3 vueltas extras aleatorias)
-                let vueltasAzar = Math.floor(Math.random() * 3) + 1; 
+                let vueltasAzar = Math.floor(Math.random() * 3) + 2; 
                 let totalPasosVueltas = (vueltasAzar * ordenPerimetroRuleta.length) + targetPerimetroIndex;
                 let pasoActual = 0;
 
-                let visorCentro = document.getElementById('centro-visor');
-                if (visorCentro) visorCentro.classList.remove('visor-ganador-alerta');
-
-                // VELOCIDAD LIGERAMENTE MÁS RÁPIDA (130ms en lugar de 220ms) pero dando más vueltas al azar
                 intervaloGiroContinuo = setInterval(() => {
                     if (juegoPausadoPorGanador) {
                         clearInterval(intervaloGiroContinuo);
@@ -881,23 +931,13 @@
                     }
                     reproducirSonidoTrrr();
 
-                    for (let i = 1; i <= 10; i++) {
-                        let c = document.getElementById(`card-objeto-el-${i}`);
-                        if (c && !c.classList.contains('objeto-ganador-ronda')) c.classList.remove('active-step', 'titling');
-                    }
-
                     let idActual = ordenPerimetroRuleta[pasoActual % ordenPerimetroRuleta.length];
-                    let cardActual = document.getElementById(`card-objeto-el-${idActual}`);
-                    if (cardActual && !cardActual.classList.contains('objeto-ganador-ronda')) {
-                        cardActual.classList.add('active-step');
-                    }
-
-                    let objTemp = listaObjetosYune.find(o => o.id === idActual);
-                    if (objTemp && document.getElementById('visor-emoji')) {
-                        document.getElementById('visor-emoji').innerText = objTemp.emoji;
-                        document.getElementById('visor-nombre').innerText = objTemp.nombre;
-                        document.getElementById('visor-estado-txt').innerText = "Girando ruleta al azar...";
-                    }
+                    
+                    // Enviar a Firebase el paso actual para que todos los dispositivos lo muestren
+                    db.ref('room/ruletaAnimacion').set({
+                        estado: 'girando',
+                        idActual: idActual
+                    });
 
                     pasoActual++;
 
@@ -905,46 +945,26 @@
                         clearInterval(intervaloGiroContinuo);
                         estaGirandoSolo = false;
 
-                        for (let i = 1; i <= 10; i++) {
-                            let c = document.getElementById(`card-objeto-el-${i}`);
-                            if (c) c.classList.remove('active-step');
-                        }
-
-                        // 🔥 SE QUEDA TITILANDO EN EL OBJETO GANADOR DURANTE 2.5 SEGUNDOS
-                        let cardGanadora = document.getElementById(`card-objeto-el-${targetId}`);
-                        if (cardGanadora) cardGanadora.classList.add('titling');
-
-                        if (document.getElementById('visor-emoji')) document.getElementById('visor-emoji').innerText = objGanador.emoji;
-                        if (document.getElementById('visor-nombre')) document.getElementById('visor-nombre').innerText = objGanador.nombre;
-
                         reproducirSonidoCampanaFinal();
 
                         db.ref(`room/objetosData/${targetId}`).once('value').then((snapObj) => {
                             let d = snapObj.val() || { hits: 0, owner: null };
                             let hits = (d.hits || 0) + 1;
-                            if (hits > 5) hits = 5;
+                            if (hits > 3) hits = 3;
                             let duenoActual = d.owner || "Sin Dueño";
 
                             db.ref(`room/objetosData/${targetId}/hits`).set(hits).then(() => {
-                                if (hits >= 5) {
-                                    if (visorCentro) visorCentro.classList.add('visor-ganador-alerta');
-                                    if (document.getElementById('visor-estado-txt')) document.getElementById('visor-estado-txt').innerText = "🎉 ¡OBJETO GANADOR DE PREMIO! 🎉";
-                                } else {
-                                    if (document.getElementById('visor-estado-txt')) document.getElementById('visor-estado-txt').innerText = `⭐ ¡Punto sumado! (${hits}/5)`;
-                                }
-
-                                if (document.getElementById('visor-estrellas-centro')) {
-                                    document.getElementById('visor-estrellas-centro').innerText = `⭐ ${hits} / 5 Estrellas`;
-                                    document.getElementById('visor-estrellas-centro').classList.remove('hidden');
-                                }
-                                if (document.getElementById('visor-dueno-centro')) {
-                                    document.getElementById('visor-dueno-centro').innerText = `Dueño: ${duenoActual}`;
-                                    document.getElementById('visor-dueno-centro').classList.remove('hidden');
-                                }
+                                // Enviar a Firebase el estado de TITILEO para que todos los dispositivos lo muestren y titilen a la vez
+                                db.ref('room/ruletaAnimacion').set({
+                                    estado: 'titilando',
+                                    targetId: targetId,
+                                    hits: hits,
+                                    dueno: duenoActual
+                                });
 
                                 cantarTextoVoz(`¡${objGanador.nombre}!`);
 
-                                if (hits >= 5) {
+                                if (hits >= 3) {
                                     juegoPausadoPorGanador = true;
                                     document.getElementById('premio-actual-titulo').innerHTML = `🎉 ¡GANADOR PREMIO ${etapaPremioActual}! (${objGanador.emoji} ${objGanador.nombre})`;
                                     
@@ -963,16 +983,16 @@
                                     }, 1000);
 
                                 } else {
-                                    // ⏱️ ESPERA 2.5 SEGUNDOS TITILANDO Y VUELVE A ARRANCAR AUTOMÁTICAMENTE
+                                    // ⏱️ SE QUEDA TITILANDO 2.5 SEGUNDOS Y LUEGO VUELVE A ARRANCAR AUTOMÁTICAMENTE
                                     setTimeout(() => {
-                                        if (cardGanadora) cardGanadora.classList.remove('titling');
+                                        db.ref('room/ruletaAnimacion').remove(); // Quitar animación
                                         if (!juegoPausadoPorGanador) iniciarGiroAutomaticoContinuo();
                                     }, 2500);
                                 }
                             });
                         });
                     }
-                }, 130); // ⚡ GIRO UN POCO MÁS RÁPIDO PERO CON MÁS VUELTAS
+                }, 130);
             });
         }
 
@@ -980,6 +1000,7 @@
             if (!estaGirandoSolo) return;
             estaGirandoSolo = false;
             clearInterval(intervaloGiroContinuo);
+            db.ref('room/ruletaAnimacion').remove();
             let btnI = document.getElementById('btn-iniciar-auto');
             let btnP = document.getElementById('btn-pausar-auto');
             if (btnI) btnI.classList.remove('hidden');
@@ -987,15 +1008,7 @@
         }
 
         function avanzarSiguientePremio() {
-            let visorCentro = document.getElementById('centro-visor');
-            if (visorCentro) visorCentro.classList.remove('visor-ganador-alerta');
-            if (document.getElementById('visor-estado-txt')) document.getElementById('visor-estado-txt').innerText = "Sorteo en Vivo";
-
-            // Quitar titileo de cualquier cuadro
-            for (let i = 1; i <= 10; i++) {
-                let c = document.getElementById(`card-objeto-el-${i}`);
-                if (c) c.classList.remove('titling');
-            }
+            db.ref('room/ruletaAnimacion').remove();
 
             if (!currentUser.isAdmin) return;
             if (etapaPremioActual < 4) {
@@ -1024,14 +1037,7 @@
         }
 
         function reiniciarObjetosRonda() {
-            let visorCentro = document.getElementById('centro-visor');
-            if (visorCentro) visorCentro.classList.remove('visor-ganador-alerta');
-            if (document.getElementById('visor-estado-txt')) document.getElementById('visor-estado-txt').innerText = "Sorteo en Vivo";
-
-            for (let i = 1; i <= 10; i++) {
-                let c = document.getElementById(`card-objeto-el-${i}`);
-                if (c) c.classList.remove('titling');
-            }
+            db.ref('room/ruletaAnimacion').remove();
 
             if (!currentUser.isAdmin) return;
             if (confirm("¿Reiniciar ronda de objetos por completo y liberar todas las figuras?")) {
@@ -1618,7 +1624,7 @@
 
         function cargarMisCartones() {
             if (drawnBalls.length > 0) return;
-            db.ref(`users/${currentUser.control}`).once('value').then((snap) => {
+            db.ref(`users/${currentUser.control}`).once('value', (snap) => {
                 let userData = snap.val() || { balance: 0, isCredit: false };
                 let balance = userData.balance || 0;
                 let isCredit = userData.isCredit || false;
@@ -1677,7 +1683,7 @@
                     }
                 });
                 if (caja1) { caja1.innerHTML = html; caja1.scrollTop = caja1.scrollHeight; }
-                if (caja2) { caja2.innerHTML = html; caja2.scrollHeight; }
+                if (caja2) { caja2.innerHTML = html; caja2.scrollTop = caja2.scrollHeight; }
             });
         }
 
