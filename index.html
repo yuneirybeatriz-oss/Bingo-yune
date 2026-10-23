@@ -827,6 +827,14 @@
 
                 isRoomLocked = data.isRoomLocked || false;
                 actualizarEstadoBloqueoUI(isRoomLocked);
+
+                // ¡Sincronización en vivo de la figura en juego para todos!
+                if (data.gamePattern) {
+                    gamePattern = data.gamePattern;
+                    let labelPatternEl = document.getElementById('player-pattern-label');
+                    if (labelPatternEl) labelPatternEl.innerText = nombresPatrones[gamePattern] || 'Línea';
+                    actualizarMiniDiagramaPatron(gamePattern);
+                }
             });
 
             db.ref('room/announcement').on('value', (snap) => {
