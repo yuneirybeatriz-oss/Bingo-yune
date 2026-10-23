@@ -62,8 +62,8 @@
             border: 2px solid #ffffff;
         }
     </style>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-between p-4" onclick="desbloquearAudioInicial()">
     <div id="app" class="w-full max-w-4xl mx-auto flex flex-col items-center flex-grow">
@@ -110,7 +110,6 @@
             <h2 class="text-2xl font-bold text-yellow-300 text-center">Registro de Jugadora</h2>
             <div id="welcome-back-msg" class="text-green-400 font-semibold text-center hidden"></div>
             
-            <!-- AVISO DE SALA CERRADA -->
             <div id="room-closed-warning" class="hidden w-full bg-red-950/80 border border-red-600 text-red-200 p-4 rounded-2xl text-center font-bold text-xs flex flex-col gap-1">
                 <span>🔒 ¡La sala de juego está cerrada por la Administradora en este momento!</span>
                 <span class="text-[10px] text-slate-300 font-normal">No se permiten nuevos ingresos ni accesos hasta nuevo aviso.</span>
@@ -433,7 +432,7 @@
                 <div class="flex justify-between items-center">
                     <div>
                         <h3 class="font-bold text-pink-400 text-lg">Selecciona tus Cartones (<span id="available-count">100</span> Disponibles)</h3>
-                        <p id="market-status-msg" class="text-xs text-slate-400">Toca el número para seleccionarlo, o mantén presionado / toca el botón de vista previa para inspeccionarlo.</p>
+                        <p id="market-status-msg" class="text-xs text-slate-400">Toca el número para seleccionarlo, o toca el botón 🔍 para inspeccionarlo.</p>
                     </div>
                 </div>
                 <div id="cards-market-grid" class="grid grid-cols-5 md:grid-cols-10 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900/60 rounded-2xl"></div>
@@ -448,8 +447,14 @@
     <footer class="text-center text-xs text-slate-500 py-6">Bingo Lineal Yune &bull; Tiempo Real 🌟</footer>
 
     <script>
-        const firebaseConfig = { databaseURL: "https://bingo-lineal-yune-default-rtdb.firebaseio.com/" };
-        firebase.initializeApp(firebaseConfig);
+        // CONFIGURACIÓN DE FIREBASE 8.X
+        const firebaseConfig = { 
+            databaseURL: "https://bingo-lineal-yune-default-rtdb.firebaseio.com/"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.database();
 
         let currentUser = { name: '', control: '', isAdmin: false };
@@ -599,23 +604,41 @@
             return matrizFilas;
         }
 
+        function generarMercadoLocalInicial() {
+            let localMarket = {};
+            for (let i = 1; i <= 100; i++) {
+                localMarket[i] = {
+                    id: i,
+                    grid: generarEstructuraCarton(),
+                    owner: null,
+                    ownerControl: null,
+                    loaded: false,
+                    paid: false
+                };
+            }
+            return localMarket;
+        }
+
         function inicializarMercadoCartones() {
             db.ref('room/marketCards').once('value', (snapshot) => {
                 if (!snapshot.exists()) {
-                    let initialMarket = {};
-                    for (let i = 1; i <= 100; i++) {
-                        initialMarket[i] = {
-                            id: i,
-                            grid: generarEstructuraCarton(),
-                            owner: null,
-                            ownerControl: null,
-                            loaded: false,
-                            paid: false
-                        };
-                    }
+                    let initialMarket = generarMercadoLocalInicial();
                     db.ref('room/marketCards').set(initialMarket);
+                    marketCards = initialMarket;
+                } else {
+                    marketCards = snapshot.val();
                 }
+                renderizarTablerosGarantizados();
             });
+        }
+
+        function renderizarTablerosGarantizados() {
+            if (!marketCards || Object.keys(marketCards).length === 0) {
+                marketCards = generarMercadoLocalInicial();
+            }
+            renderizarTableroAdmin();
+            renderizarTableroJugadora();
+            renderizarMercadoJugadora();
         }
 
         function esCeldaDelPatron(r, c, patron) {
@@ -765,7 +788,8 @@
         window.onload = function() {
             iniciarRelojEnVivo();
             inicializarMiniDiagrama();
-            inicializarMercadoCartones();
+            marketCards = generarMercadoLocalInicial();
+            renderizarTablerosGarantizados();
 
             let savedName = localStorage.getItem('bingo_player_name');
             let savedControl = localStorage.getItem('bingo_player_control');
@@ -905,6 +929,7 @@
                 inicializarMercadoCartones();
                 sincronizarDatosAdmin();
                 escucharChatEnVivo();
+                renderizarTablerosGarantizados();
             } else {
                 alert("Clave incorrecta. Intenta de nuevo.");
             }
@@ -971,6 +996,7 @@
 
             sincronizarDatosJugadora();
             escucharChatEnVivo();
+            renderizarTablerosGarantizados();
         }
 
         function sincronizarDatosAdmin() {
@@ -980,7 +1006,7 @@
 
                 drawnBalls = data.drawnBalls || [];
                 gamePattern = data.gamePattern || 'line';
-                marketCards = data.marketCards || {};
+                if (data.marketCards) marketCards = data.marketCards;
                 cardPrice = data.cardPrice || 300;
                 isRoomLocked = data.isRoomLocked || false;
 
@@ -1038,7 +1064,7 @@
 
                 drawnBalls = data.drawnBalls || [];
                 gamePattern = data.gamePattern || 'line';
-                marketCards = data.marketCards || {};
+                if (data.marketCards) marketCards = data.marketCards;
                 cardPrice = data.cardPrice || 300;
 
                 if (data.isRoomLocked) {
@@ -1742,19 +1768,11 @@
                 hasSpokenMyBingo = false;
                 lastSpokenBallCount = 0;
                 
-                let initialMarket = {};
-                for (let i = 1; i <= 100; i++) {
-                    initialMarket[i] = {
-                        id: i,
-                        grid: generarEstructuraCarton(),
-                        owner: null,
-                        ownerControl: null,
-                        loaded: false,
-                        paid: false
-                    };
-                }
+                let initialMarket = generarMercadoLocalInicial();
                 db.ref('room/marketCards').set(initialMarket);
                 db.ref('room/connectedPlayers').remove();
+                marketCards = initialMarket;
+                renderizarTablerosGarantizados();
                 alert("¡Juego reiniciado desde cero!");
             }
         }
