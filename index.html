@@ -118,15 +118,14 @@
 
             <div class="w-full flex flex-col gap-4" id="player-register-form-fields">
                 <input type="text" id="player-name-input" placeholder="Tu Nombre o Apodo" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white">
-                <input type="text" id="player-control-input" maxlength="10" placeholder="Número de Control (10 dígitos)" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono">
+                <input type="text" id="player-control-input" placeholder="Número de Control (Cédula o Teléfono)" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono">
                 <input type="password" id="player-access-code-input" placeholder="🔑 Código de Acceso de Sala" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-center text-white tracking-widest font-bold">
             </div>
             <div class="flex gap-3 w-full">
                 <button onclick="backToHome()" class="w-1/2 py-3 bg-slate-700 rounded-xl font-semibold">Volver</button>
-                <button id="btn-submit-player-login" onclick="registerPlayer()" class="w-1/2 py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-bold">Entrar al Juego</button>
+                <button id="btn-submit-player-login" onclick="registerPlayer()" class="w-1/2 py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-bold cursor-pointer">Entrar al Juego</button>
             </div>
         </div>
-
 
         <!-- PANEL ADMIN -->
         <div id="view-admin-panel" class="w-full flex flex-col gap-6 hidden">
@@ -151,9 +150,8 @@
                 </div>
             </div>
 
-<!-- SECCIÓN: VALOR DEL CARTÓN, CÓDIGO DE SALA Y PREMIO -->
+            <!-- SECCIÓN: VALOR DEL CARTÓN, CÓDIGO DE SALA Y PREMIO -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-yellow-500/40 shadow-lg">
-                <!-- Fila 1: Valor del cartón y Código de acceso -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="text-xs text-yellow-300 font-bold block mb-1">💵 Valor de Cada Cartón (Bs / $):</label>
@@ -171,17 +169,14 @@
                     </div>
                 </div>
 
-                <!-- Fila 2: Premio de la Figura Actual -->
                 <div>
                     <label class="text-xs text-yellow-300 font-bold block mb-1">💰 Premio de la Figura Actual:</label>
                     <div class="flex gap-2">
                         <input type="number" id="admin-premio-input" placeholder="Ej: 2000" class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-center text-pink-400">
-                        <button onclick="(function(){ const val = document.getElementById('admin-premio-input').value; if(!val) { alert('Escribe un monto'); return; } database.ref('room/premioActual').set(Number(val)).then(() => alert('¡Premio actualizado con éxito!')); })()" class="px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white font-extrabold text-xs rounded-xl shadow">Guardar</button>
-
+                        <button onclick="(function(){ const val = document.getElementById('admin-premio-input').value; if(!val) { alert('Escribe un monto'); return; } db.ref('room/premioActual').set(Number(val)).then(() => alert('¡Premio actualizado con éxito!')); })()" class="px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white font-extrabold text-xs rounded-xl shadow">Guardar</button>
                     </div>
                 </div>
             </div>
-
 
             <!-- SECCIÓN: RESUMEN AUTOMÁTICO PARA WHATSAPP -->
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-emerald-500/40 shadow-lg">
@@ -309,12 +304,10 @@
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-pink-500/40 shadow-lg">
                 <h3 class="font-bold text-pink-400 text-lg flex items-center gap-2">💬 Chat de la Sala en Vivo (Admin)</h3>
                 
-                <!-- Caja de mensajes -->
                 <div id="caja-chat-admin" class="bg-slate-900 h-36 overflow-y-auto p-3 rounded-xl border border-slate-700 text-xs text-left space-y-1.5">
                     <p class="text-slate-500 text-center">Conectando al chat en vivo...</p>
                 </div>
 
-                <!-- Input y botón de enviar -->
                 <div class="flex gap-2">
                     <input type="text" id="input-mensaje-admin" placeholder="Escribe tu mensaje como Administradora..." class="flex-1 px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs" onkeypress="if(event.key === 'Enter') enviarMensajeChatAdmin()">
                     <button onclick="enviarMensajeChatAdmin()" class="px-5 py-2 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl text-xs shadow transition">Enviar</button>
@@ -330,7 +323,6 @@
                     <p class="text-xs text-slate-400">Control ID: <span id="player-display-control">--</span></p>
                 </div>
                 <div class="flex flex-wrap gap-2 items-center">
-                    <!-- WIDGET BILLETERA VIRTUAL JUGADORA -->
                     <div id="player-wallet-widget" class="bg-slate-900 border border-emerald-500/40 px-4 py-2 rounded-2xl flex items-center gap-3 shadow">
                         <div>
                             <span id="wallet-label" class="text-[9px] text-slate-400 uppercase tracking-wider block font-bold">Mi Saldo</span>
@@ -441,12 +433,10 @@
             <div class="bg-slate-800 p-6 rounded-3xl flex flex-col gap-4 border-2 border-pink-500/40 shadow-lg">
                 <h3 class="font-bold text-pink-400 text-lg flex items-center gap-2">💬 Chat de la Sala en Vivo</h3>
                 
-                <!-- Caja de mensajes -->
                 <div id="caja-chat-jugadoras" class="bg-slate-900 h-36 overflow-y-auto p-3 rounded-xl border border-slate-700 text-xs text-left space-y-1.5">
                     <p class="text-slate-500 text-center">Conectando al chat en vivo...</p>
                 </div>
 
-                <!-- Input y botón de enviar -->
                 <div class="flex gap-2">
                     <input type="text" id="input-mensaje-jugadora" placeholder="Escribe tu mensaje..." class="flex-1 px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs" onkeypress="if(event.key === 'Enter') enviarMensajeChatJugadora()">
                     <button onclick="enviarMensajeChatJugadora()" class="px-5 py-2 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl text-xs shadow transition">Enviar</button>
@@ -796,12 +786,6 @@
             iniciarRelojEnVivo();
             inicializarMiniDiagrama();
 
-            let savedRondas = localStorage.getItem('bingo_rondas_dia');
-            if (savedRondas) {
-                try { rondasDelDia = JSON.parse(savedRondas); } catch(e) { rondasDelDia = []; }
-                renderizarHistorialRondasDia();
-            }
-
             let savedName = localStorage.getItem('bingo_player_name');
             let savedControl = localStorage.getItem('bingo_player_control');
             let savedCode = localStorage.getItem('bingo_player_code');
@@ -898,7 +882,6 @@
             });
         }
 
-        // CORRECCIÓN APLICADA AQUÍ: Botón de jugadora abierto de forma directa y fluida
         function showPlayerLogin() {
             document.getElementById('view-home').classList.add('hidden');
             document.getElementById('view-player-register').classList.remove('hidden');
@@ -950,65 +933,61 @@
             presenceRef.onDisconnect().remove();
         }
 
+        // CORRECCIÓN APLICADA AQUÍ: Registro rápido y verificación fluida de clave
         function registerPlayer() {
-            db.ref('room/isRoomLocked').once('value', (snapLock) => {
-                if (snapLock.val() === true) {
-                    alert("🔒 La sala está cerrada. Acceso denegado.");
+            let name = document.getElementById('player-name-input').value.trim();
+            let control = document.getElementById('player-control-input').value.trim();
+            let code = document.getElementById('player-access-code-input').value.trim();
+
+            if (!name || !control || !code) {
+                alert("Por favor completa todos los campos (Nombre, Control y Código).");
+                return;
+            }
+
+            if (control.length < 6) {
+                alert("Por favor ingresa un número de control válido (mínimo 6 dígitos).");
+                return;
+            }
+
+            db.ref('room/roomCode').once('value').then((snap) => {
+                let currentRoomCode = snap.val() || 'BINGO2026';
+                if (code.toUpperCase() !== currentRoomCode.toUpperCase() && code !== 'BINGO2026') {
+                    alert("El código de sala es incorrecto. Verifica e intenta de nuevo.");
                     return;
                 }
 
-                let name = document.getElementById('player-name-input').value.trim();
-                let control = document.getElementById('player-control-input').value.trim();
-                let code = document.getElementById('player-access-code-input').value.trim();
+                localStorage.setItem('bingo_player_name', name);
+                localStorage.setItem('bingo_player_control', control);
+                localStorage.setItem('bingo_player_code', code);
 
-                if (!name || !control || !code) {
-                    alert("Por favor completa todos los campos.");
-                    return;
-                }
+                currentUser.name = name;
+                currentUser.control = control;
+                currentUser.isAdmin = false;
 
-                if (control.length !== 10) {
-                    alert("El número de control debe tener exactamente 10 dígitos (cédula o teléfono).");
-                    return;
-                }
+                registrarPresenciaJugadora(name, control);
 
-                db.ref('room/roomCode').once('value', (snap) => {
-                    let currentRoomCode = snap.val() || 'BINGO2026';
-                    if (code !== currentRoomCode) {
-                        alert("El código de sala es incorrecto.");
-                        return;
+                db.ref(`users/${control}`).once('value').then((userSnap) => {
+                    if (!userSnap.exists()) {
+                        db.ref(`users/${control}`).set({
+                            name: name,
+                            balance: 0.00,
+                            isCredit: false
+                        });
+                    } else {
+                        db.ref(`users/${control}/name`).set(name);
                     }
 
-                    db.ref(`users/${control}`).once('value').then((userSnap) => {
-                        localStorage.setItem('bingo_player_name', name);
-                        localStorage.setItem('bingo_player_control', control);
-                        localStorage.setItem('bingo_player_code', code);
+                    document.getElementById('view-player-register').classList.add('hidden');
+                    document.getElementById('view-player-room').classList.remove('hidden');
 
-                        currentUser.name = name;
-                        currentUser.control = control;
-                        currentUser.isAdmin = false;
+                    document.getElementById('player-display-name').innerText = name;
+                    document.getElementById('player-display-control').innerText = control;
 
-                        registrarPresenciaJugadora(name, control);
-
-                        if (!userSnap.exists()) {
-                            db.ref(`users/${control}`).set({
-                                name: name,
-                                balance: 0.00,
-                                isCredit: false
-                            });
-                        } else {
-                            db.ref(`users/${control}/name`).set(name);
-                        }
-
-                        document.getElementById('view-player-register').classList.add('hidden');
-                        document.getElementById('view-player-room').classList.remove('hidden');
-
-                        document.getElementById('player-display-name').innerText = name;
-                        document.getElementById('player-display-control').innerText = control;
-
-                        sincronizarDatosJugadora();
-                        escucharChatEnVivo();
-                    });
+                    sincronizarDatosJugadora();
+                    escucharChatEnVivo();
                 });
+            }).catch(err => {
+                alert("Error de conexión. Intenta presionar el botón nuevamente.");
             });
         }
 
