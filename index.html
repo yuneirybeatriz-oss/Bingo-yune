@@ -996,7 +996,7 @@
             });
         }
 
-        // 🔥 RULETA DE COLORES CON GIROS LARGOS Y FRENADO GRADUAL DE ALTA EMOCIÓN
+        // 🔥 RULETA DE COLORES CON GIROS LARGOS, FRENADO GRADUAL DE SUSPENSO Y CORTE LIMPIO DE SONIDO AL CAER
         function girarRuletaColoresYune() {
             if (!currentUser.isAdmin) return;
             if (estaGirandoColores) return;
@@ -1028,11 +1028,11 @@
                 let arc = (2 * Math.PI) / numSectores;
                 let anguloObjetivoSector = (3 * Math.PI / 2) - (indexGanador * arc + arc / 2);
 
-                // 🔥 6 Vueltas completas y 4.5 segundos de duración para una experiencia emocionante y de suspenso real
+                // 🔥 6 Vueltas completas y 5 segundos de duración para una experiencia emocionante y de suspenso máximo
                 let girosCompletos = 6;
                 let anguloTotalMeta = anguloActualColores + (girosCompletos * 2 * Math.PI) + (anguloObjetivoSector - (anguloActualColores % (2 * Math.PI)));
 
-                let duracionMs = 4500;
+                let duracionMs = 5000;
                 let tiempoInicio = null;
                 estaGirandoColores = true;
 
@@ -1044,9 +1044,11 @@
                     let progreso = (timestamp - tiempoInicio) / duracionMs;
 
                     if (progreso < 1) {
-                        let easeOut = 1 - Math.pow(1 - progreso, 3); // Curva cúbica para frenado gradual, suave y emocionante
-                        anguloActualColores = anguloActualColores + (anguloTotalMeta - anguloActualColores) * (easeOut * 0.08);
+                        let easeOut = 1 - Math.pow(1 - progreso, 3); // Frenado gradual ultra suave
+                        anguloActualColores = anguloActualColores + (anguloTotalMeta - anguloActualColores) * (easeOut * 0.06);
                         dibujarRuletaColoresCanvas(anguloActualColores);
+                        
+                        // 🔥 El sonido de matraca solo suena mientras esté en movimiento activo
                         reproducirSonidoTrrr();
 
                         db.ref('room/ruletaColoresState').set({
@@ -1056,6 +1058,7 @@
 
                         requestAnimationFrame(animar);
                     } else {
+                        // 🔥 Al finalizar se fija exactamente en la meta y se SILENCIA la matraca de inmediato
                         anguloActualColores = anguloTotalMeta % (2 * Math.PI);
                         dibujarRuletaColoresCanvas(anguloActualColores);
                         estaGirandoColores = false;
