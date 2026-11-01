@@ -820,7 +820,7 @@
             }
         }
 
-        // 🔥 DIBUJO Y LÓGICA DE LA RULETA DE COLORES
+        // 🔥 DIBUJO Y LÓGICA DE LA RULETA DE COLORES OPTIMIZADA Y RÁPIDA
         function dibujarRuletaColoresCanvas(anguloRadianes) {
             let canvas = document.getElementById('canvasColoresYune');
             if (!canvas) return;
@@ -873,7 +873,7 @@
             ctx.fill();
         }
 
-        // 🔥 SELECCIÓN BLINDADA DE COLOR (NADIE SE LO QUITA A NADIE)
+        // 🔥 SELECCIÓN BLINDADA DE COLOR (NADIE SE LO QUITA A NADIE SALVO LA ADMIN)
         function seleccionarColorJugadora(nombreColor) {
             if (!currentUser.control) {
                 alert("Por favor ingresa primero con tu nombre en el sistema para elegir tu color.");
@@ -997,10 +997,11 @@
                 let arc = (2 * Math.PI) / numSectores;
                 let anguloObjetivoSector = (3 * Math.PI / 2) - (indexGanador * arc + arc / 2);
 
-                let girosCompletos = Math.floor(Math.random() * 3) + 4;
+                // 🔥 Giro optimizado y más ágil (3 a 4 segundos de duración con aceleración suave)
+                let girosCompletos = 4;
                 let anguloTotalMeta = anguloActualColores + (girosCompletos * 2 * Math.PI) + (anguloObjetivoSector - (anguloActualColores % (2 * Math.PI)));
 
-                let duracionMs = 4500;
+                let duracionMs = 3500;
                 let tiempoInicio = null;
                 estaGirandoColores = true;
 
@@ -1013,7 +1014,7 @@
 
                     if (progreso < 1) {
                         let easeOut = 1 - Math.pow(1 - progreso, 3);
-                        anguloActualColores = anguloActualColores + (anguloTotalMeta - anguloActualColores) * (easeOut * 0.08);
+                        anguloActualColores = anguloActualColores + (anguloTotalMeta - anguloActualColores) * (easeOut * 0.12);
                         dibujarRuletaColoresCanvas(anguloActualColores);
                         reproducirSonidoTrrr();
 
