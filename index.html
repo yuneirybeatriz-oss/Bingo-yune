@@ -405,7 +405,7 @@
             </div>
         </div>
 
-        <!-- SECCIÓN 3: RULETA COLORES YUNE (10 COLORES BÁSICOS CON SEGURIDAD TOTAL Y 3 PREMIOS) -->
+        <!-- SECCIÓN 3: RULETA COLORES YUNE (10 COLORES BÁSICOS CON SEGURIDAD TOTAL Y LISTA GENERAL) -->
         <div id="section-colores-main" class="w-full flex-col items-center gap-6 hidden">
             <div class="bg-slate-800 p-6 rounded-3xl card-shadow flex flex-col items-center gap-6 max-w-xl mx-auto w-full text-center">
                 <div>
@@ -431,6 +431,16 @@
                     <h3 class="text-xs font-bold text-pink-400 uppercase tracking-wider">✨ Elige tu Color (Bloqueado si ya tiene dueña)</h3>
                     <div id="lista-seleccion-colores" class="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
                         <!-- Generado dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- 🌟 LISTA GENERAL EN VIVO: EL COLOR QUE CADA JUGADORA LLEVA -->
+                <div class="w-full bg-slate-900 p-4 rounded-2xl border border-emerald-500/40 text-left shadow">
+                    <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                        <span>📋</span> Lista General: Colores de las Jugadoras en Vivo
+                    </h3>
+                    <div id="lista-general-colores-jugadoras" class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs max-h-40 overflow-y-auto p-2 bg-slate-950 rounded-xl">
+                        <span class="text-slate-500 italic">Ningún color asignado todavía...</span>
                     </div>
                 </div>
 
@@ -820,7 +830,7 @@
             }
         }
 
-        // 🔥 DIBUJO Y LÓGICA DE LA RULETA DE COLORES OPTIMIZADA Y RÁPIDA
+        // 🔥 DIBUJO DE LA RULETA DE COLORES
         function dibujarRuletaColoresCanvas(anguloRadianes) {
             let canvas = document.getElementById('canvasColoresYune');
             if (!canvas) return;
@@ -873,7 +883,7 @@
             ctx.fill();
         }
 
-        // 🔥 SELECCIÓN BLINDADA DE COLOR (NADIE SE LO QUITA A NADIE SALVO LA ADMIN)
+        // 🔥 SELECCIÓN BLINDADA DE COLOR
         function seleccionarColorJugadora(nombreColor) {
             if (!currentUser.control) {
                 alert("Por favor ingresa primero con tu nombre en el sistema para elegir tu color.");
@@ -924,8 +934,11 @@
                     let coloresGanadoresNombres = Object.values(ganadoresColores).map(g => g.color);
 
                     let contenedor = document.getElementById('lista-seleccion-colores');
+                    let listaGeneralEl = document.getElementById('lista-general-colores-jugadoras');
                     if (!contenedor) return;
                     let html = '';
+                    let htmlListaGeneral = '';
+                    let totalAsignados = 0;
 
                     listaColoresYune.forEach(c => {
                         let infoAsignada = asignaciones[c.nombre];
@@ -944,8 +957,25 @@
                                 </span>
                             </div>
                         `;
+
+                        if (infoAsignada) {
+                            totalAsignados++;
+                            htmlListaGeneral += `
+                                <div class="bg-slate-900 border border-slate-800 p-2 rounded-lg flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-3.5 h-3.5 rounded-full border border-white/40 shadow" style="background: ${c.hex};"></span>
+                                        <span class="font-bold text-yellow-300">${c.nombre}</span>
+                                    </div>
+                                    <span class="text-pink-300 font-semibold">👤 ${infoAsignada.nombre}</span>
+                                </div>
+                            `;
+                        }
                     });
+
                     contenedor.innerHTML = html;
+                    if (listaGeneralEl) {
+                        listaGeneralEl.innerHTML = totalAsignados === 0 ? '<span class="text-slate-500 italic">Ningún color asignado todavía...</span>' : htmlListaGeneral;
+                    }
                 });
             });
 
@@ -966,6 +996,7 @@
             });
         }
 
+        // 🔥 RULETA DE COLORES OPTIMIZADA (FRENADO RÁPIDO Y FLUIDO)
         function girarRuletaColoresYune() {
             if (!currentUser.isAdmin) return;
             if (estaGirandoColores) return;
@@ -997,11 +1028,11 @@
                 let arc = (2 * Math.PI) / numSectores;
                 let anguloObjetivoSector = (3 * Math.PI / 2) - (indexGanador * arc + arc / 2);
 
-                // 🔥 Giro optimizado y más ágil (3 a 4 segundos de duración con aceleración suave)
-                let girosCompletos = 4;
+                // 🔥 FRENADO RÁPIDO Y ÁGIL (Curva más directa sin ralentización eterna)
+                let girosCompletos = 3;
                 let anguloTotalMeta = anguloActualColores + (girosCompletos * 2 * Math.PI) + (anguloObjetivoSector - (anguloActualColores % (2 * Math.PI)));
 
-                let duracionMs = 3500;
+                let duracionMs = 2500; // Reducido a 2.5 segundos para máxima agilidad
                 let tiempoInicio = null;
                 estaGirandoColores = true;
 
@@ -1013,8 +1044,8 @@
                     let progreso = (timestamp - tiempoInicio) / duracionMs;
 
                     if (progreso < 1) {
-                        let easeOut = 1 - Math.pow(1 - progreso, 3);
-                        anguloActualColores = anguloActualColores + (anguloTotalMeta - anguloActualColores) * (easeOut * 0.12);
+                        let easeOut = 1 - Math.pow(1 - progreso, 2); // Frenado rápido y nítido
+                        anguloActualColores = anguloActualColores + (anguloTotalMeta - anguloActualColores) * (easeOut * 0.2);
                         dibujarRuletaColoresCanvas(anguloActualColores);
                         reproducirSonidoTrrr();
 
