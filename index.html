@@ -595,6 +595,7 @@
         }
 
         function toggleAudioJugadora() {
+            inicializarAudioGlobal();
             audioHabilitado = !audioHabilitado;
             let btn = document.getElementById('btn-toggle-audio');
             if (audioHabilitado) {
@@ -659,7 +660,7 @@
                 let gain = audioCtx.createGain();
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(320, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
                 
                 osc.connect(gain);
@@ -937,6 +938,7 @@
         }
 
         function seleccionarColorJugadora(nombreColor) {
+            inicializarAudioGlobal();
             if (!currentUser.control) {
                 alert("Por favor ingresa primero con tu nombre en el sistema para elegir tu color.");
                 return;
@@ -1049,6 +1051,7 @@
         }
 
         function girarRuletaColoresYune() {
+            inicializarAudioGlobal();
             if (!currentUser.isAdmin) return;
             if (estaGirandoColores) return;
 
@@ -1104,11 +1107,11 @@
                             ultimoTick = timestamp;
                         }
 
-                        // Emitimos el ángulo y la orden de sonido de giro hacia Firebase para que las jugadoras lo escuchen
+                        // Enviamos el ángulo y el tick por Firebase para que las jugadoras reproduzcan el sonido en tiempo real
                         db.ref('room/ruletaColoresState').set({
                             angulo: anguloActualColores,
                             estado: 'girando',
-                            tick: timestamp
+                            tick: Date.now()
                         });
 
                         requestAnimationFrame(animar);
@@ -1197,7 +1200,7 @@
                     anguloActualColores = data.angulo;
                     dibujarRuletaColoresCanvas(anguloActualColores);
                     
-                    // Si la administradora está girando, reproducimos el sonido de giro en los teléfonos de las jugadoras
+                    // Si está girando, reproducimos el tic en el teléfono de la jugadora al recibir el cambio de Firebase
                     if (data.estado === 'girando' && data.tick && data.tick !== ultimoTickEscuchado) {
                         reproducirSonidoTrrr();
                         ultimoTickEscuchado = data.tick;
@@ -1358,6 +1361,7 @@
         }
 
         function interactuarObjetoYune(idObj) {
+            inicializarAudioGlobal();
             if (!currentUser.control) {
                 alert("Por favor ingresa primero con tu nombre.");
                 return;
@@ -1378,6 +1382,7 @@
 
         let intervaloGiroContinuo = null;
         function iniciarGiroAutomaticoContinuo() {
+            inicializarAudioGlobal();
             if (!currentUser.isAdmin || juegoPausadoPorGanador || estaGirandoSolo) return;
             Promise.all([
                 db.ref('room/objetosData').once('value'),
