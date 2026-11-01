@@ -1099,15 +1099,16 @@
                         anguloActualColores = anguloActualColores + (anguloTotalMeta - anguloActualColores) * (easeOut * 0.06);
                         dibujarRuletaColoresCanvas(anguloActualColores);
                         
-                        // Sonido rítmico mientras gira cada ciertos milisegundos
                         if (timestamp - ultimoTick > 90) {
                             reproducirSonidoTrrr();
                             ultimoTick = timestamp;
                         }
 
+                        // Emitimos el ángulo y la orden de sonido de giro hacia Firebase para que las jugadoras lo escuchen
                         db.ref('room/ruletaColoresState').set({
                             angulo: anguloActualColores,
-                            estado: 'girando'
+                            estado: 'girando',
+                            tick: timestamp
                         });
 
                         requestAnimationFrame(animar);
@@ -1186,14 +1187,21 @@
         }
 
         let ultimoTimestampGanador = 0;
+        let ultimoTickEscuchado = 0;
         function escucharRuletaColoresFirebase() {
             db.ref('room/ruletaColoresState').on('value', (snap) => {
                 let data = snap.val();
                 if (!data) return;
+                
                 if (!currentUser.isAdmin && data.angulo !== undefined) {
                     anguloActualColores = data.angulo;
                     dibujarRuletaColoresCanvas(anguloActualColores);
-                    reproducirSonidoTrrr();
+                    
+                    // Si la administradora está girando, reproducimos el sonido de giro en los teléfonos de las jugadoras
+                    if (data.estado === 'girando' && data.tick && data.tick !== ultimoTickEscuchado) {
+                        reproducirSonidoTrrr();
+                        ultimoTickEscuchado = data.tick;
+                    }
                 }
 
                 if (data.estado === 'finalizado' && data.colorGanador && data.timestamp !== ultimoTimestampGanador) {
