@@ -6,6 +6,7 @@
     <title>Bingo Lineal Yune & Objetos Yune</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         body { font-family: 'Poppins', sans-serif; background: #0f172a; color: #f8fafc; }
         .neon-glow { text-shadow: 0 0 10px rgba(236, 72, 153, 0.7), 0 0 20px rgba(236, 72, 153, 0.5); }
@@ -90,10 +91,11 @@
     <div id="app" class="w-full max-w-4xl mx-auto flex flex-col items-center flex-grow">
         
         <!-- BARRA SUPERIOR CON RELOJ Y CAMBIO DE MODO -->
-        <div id="top-bar-nav" class="w-full flex justify-between items-center px-2 pt-2 hidden">
-            <div class="flex gap-2">
+        <div id="top-bar-nav" class="w-full flex justify-between items-center px-2 pt-2 hidden flex-wrap gap-2">
+            <div class="flex gap-2 flex-wrap">
                 <button onclick="switchGameMode('bingo')" id="btn-mode-bingo" class="px-4 py-1.5 bg-gradient-to-r from-pink-600 to-purple-600 font-bold text-xs rounded-xl shadow cursor-pointer transition">🎲 Modo Bingo</button>
                 <button onclick="switchGameMode('objetos')" id="btn-mode-objetos" class="px-4 py-1.5 bg-slate-800 border border-slate-700 text-slate-300 font-bold text-xs rounded-xl shadow cursor-pointer transition">⭐ Objetos Yune</button>
+                <button onclick="switchGameMode('colores')" id="btn-mode-colores" class="px-4 py-1.5 bg-slate-800 border border-slate-700 text-slate-300 font-bold text-xs rounded-xl shadow cursor-pointer transition">🎨 Colores Yune</button>
             </div>
             <div id="live-clock" class="bg-slate-800/90 border border-slate-700 px-3 py-1 rounded-xl text-xs font-semibold text-pink-300 shadow flex items-center gap-1.5">
                 <span>⏰</span> <span id="clock-time">--:--:-- --</span>
@@ -405,6 +407,33 @@
             </div>
         </div>
 
+        <!-- SECCIÓN 3: RULETA COLORES YUNE (NUEVA DINÁMICA DE 10 COLORES BÁSICOS) -->
+        <div id="section-colores-main" class="w-full flex-col items-center gap-6 hidden">
+            <div class="bg-slate-800 p-6 rounded-3xl card-shadow flex flex-col items-center gap-6 max-w-xl mx-auto w-full text-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-yellow-300">🎨 Ruleta Colores Yune 🎨</h2>
+                    <p class="text-xs text-slate-400 mt-1">Sorteo directo de los 10 colores básicos en vivo</p>
+                </div>
+
+                <!-- CONTENEDOR CANVAS RULETA DE COLORES -->
+                <div class="relative w-full max-w-[340px] aspect-square flex items-center justify-center my-2">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-20 w-0 h-0 border-l-[14px] border-l-transparent border-r-[14px] border-r-transparent border-t-[28px] border-t-yellow-400 drop-shadow-[0_4px_10px_rgba(250,204,21,0.8)]"></div>
+                    <canvas id="canvasColoresYune" width="340" height="340" class="rounded-full shadow-[0_0_30px_rgba(236,72,153,0.3)] border-4 border-yellow-400"></canvas>
+                </div>
+
+                <!-- INDICADOR DEL COLOR GANADOR -->
+                <div id="box-ganador-color" class="w-full bg-slate-950 p-4 rounded-2xl border border-slate-700 flex flex-col items-center gap-1 shadow">
+                    <span class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Último Color Seleccionado</span>
+                    <span id="texto-color-ganador" class="text-2xl font-black text-yellow-400">¡Listo para girar!</span>
+                </div>
+
+                <!-- CONTROLES EXCLUSIVOS ADMINISTRADORA PARA GIRAR COLOR -->
+                <div id="admin-colores-controls" class="w-full flex gap-3 justify-center hidden">
+                    <button id="btn-girar-color" onclick="girarRuletaColoresYune()" class="w-full py-3.5 bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 text-slate-950 font-black text-base rounded-2xl shadow-lg cursor-pointer hover:brightness-110 transition">🎰 ¡GIRAR RULETA DE COLORES!</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <footer class="text-center text-xs text-slate-500 py-6">Bingo Lineal Yune &bull; Tiempo Real 🌟</footer>
@@ -434,6 +463,23 @@
         let etapaPremioActual = 1;
         let juegoPausadoPorGanador = false;
         let estaGirandoSolo = false;
+
+        // 🔥 LISTA DE 10 COLORES BÁSICOS YUNE
+        const listaColoresYune = [
+            { nombre: 'Rojo', hex: '#E53935', textoDark: false },
+            { nombre: 'Azul', hex: '#1E88E5', textoDark: false },
+            { nombre: 'Verde', hex: '#4CAF50', textoDark: false },
+            { nombre: 'Amarillo', hex: '#FDD835', textoDark: true },
+            { nombre: 'Naranja', hex: '#FB8C00', textoDark: false },
+            { nombre: 'Morado', hex: '#8E24AA', textoDark: false },
+            { nombre: 'Rosado', hex: '#E91E63', textoDark: false },
+            { nombre: 'Celeste', hex: '#00BCD4', textoDark: true },
+            { nombre: 'Marrón', hex: '#795548', textoDark: false },
+            { nombre: 'Blanco', hex: '#FFFFFF', textoDark: true }
+        ];
+
+        let anguloActualColores = 0;
+        let estaGirandoColores = false;
 
         // 🔥 ORDEN PERIMETRAL DE LOS 20 OBJETOS ALREDEDOR DEL CUADRO 6x6
         const ordenPerimetroRuleta = [
@@ -598,6 +644,7 @@
             renderizarTableroJugadora();
             renderizarMercadoJugadora();
             sincronizarObjetosYune();
+            dibujarRuletaColoresCanvas(anguloActualColores);
         }
 
         function verificarFiguraGanadora(grid, drawnArray, patron) {
@@ -724,24 +771,178 @@
         function switchGameMode(modo) {
             let sectionBingo = document.getElementById('section-bingo-main');
             let sectionObjetos = document.getElementById('section-objetos-main');
+            let sectionColores = document.getElementById('section-colores-main');
+            
             let btnBingo = document.getElementById('btn-mode-bingo');
             let btnObjetos = document.getElementById('btn-mode-objetos');
+            let btnColores = document.getElementById('btn-mode-colores');
+
+            sectionBingo.style.display = 'none';
+            sectionObjetos.style.display = 'none';
+            sectionColores.style.display = 'none';
+
+            btnBingo.className = "px-4 py-1.5 bg-slate-800 border border-slate-700 text-slate-300 font-bold text-xs rounded-xl shadow cursor-pointer transition";
+            btnObjetos.className = "px-4 py-1.5 bg-slate-800 border border-slate-700 text-slate-300 font-bold text-xs rounded-xl shadow cursor-pointer transition";
+            btnColores.className = "px-4 py-1.5 bg-slate-800 border border-slate-700 text-slate-300 font-bold text-xs rounded-xl shadow cursor-pointer transition";
 
             if (modo === 'bingo') {
                 sectionBingo.style.display = 'flex';
-                sectionObjetos.style.display = 'none';
                 btnBingo.className = "px-4 py-1.5 bg-gradient-to-r from-pink-600 to-purple-600 font-bold text-xs rounded-xl shadow cursor-pointer transition";
-                btnObjetos.className = "px-4 py-1.5 bg-slate-800 border border-slate-700 text-slate-300 font-bold text-xs rounded-xl shadow cursor-pointer transition";
-            } else {
-                sectionBingo.style.display = 'none';
+            } else if (modo === 'objetos') {
                 sectionObjetos.style.display = 'flex';
                 btnObjetos.className = "px-4 py-1.5 bg-gradient-to-r from-pink-600 to-purple-600 font-bold text-xs rounded-xl shadow cursor-pointer transition";
-                btnBingo.className = "px-4 py-1.5 bg-slate-800 border border-slate-700 text-slate-300 font-bold text-xs rounded-xl shadow cursor-pointer transition";
                 sincronizarObjetosYune();
+            } else if (modo === 'colores') {
+                sectionColores.style.display = 'flex';
+                btnColores.className = "px-4 py-1.5 bg-gradient-to-r from-pink-600 to-purple-600 font-bold text-xs rounded-xl shadow cursor-pointer transition";
+                dibujarRuletaColoresCanvas(anguloActualColores);
+                escucharRuletaColoresFirebase();
             }
         }
 
-        // 🔥 CONSTRUCCIÓN DINÁMICA DE LA CUADRÍCULA 6x6 PARA LOS 20 OBJETOS
+        // 🔥 DIBUJO Y LÓGICA DE LA NUEVA RULETA DE 10 COLORES BÁSICOS
+        function dibujarRuletaColoresCanvas(anguloRadianes) {
+            let canvas = document.getElementById('canvasColoresYune');
+            if (!canvas) return;
+            let ctx = canvas.getContext('2d');
+            let centroX = canvas.width / 2;
+            let centroY = canvas.height / 2;
+            let radio = centroX - 10;
+            let numSectores = listaColoresYune.length;
+            let arc = (2 * Math.PI) / numSectores;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < numSectores; i++) {
+                let anguloSector = anguloRadianes + i * arc;
+                let colorObj = listaColoresYune[i];
+
+                ctx.beginPath();
+                ctx.fillStyle = colorObj.hex;
+                ctx.moveTo(centroX, centroY);
+                ctx.arc(centroX, centroY, radio, anguloSector, anguloSector + arc);
+                ctx.lineTo(centroX, centroY);
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#0f172a';
+                ctx.stroke();
+
+                // Texto del Color
+                ctx.save();
+                ctx.translate(centroX, centroY);
+                ctx.rotate(anguloSector + arc / 2);
+                ctx.textAlign = "right";
+                ctx.fillStyle = colorObj.textoDark ? '#000000' : '#FFFFFF';
+                ctx.font = 'bold 15px Poppins, sans-serif';
+                ctx.shadowColor = colorObj.textoDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)';
+                ctx.shadowBlur = 4;
+                ctx.fillText(colorObj.nombre, radio - 20, 5);
+                ctx.restore();
+            }
+
+            // Centro Decorativo Doradito
+            ctx.beginPath();
+            ctx.arc(centroX, centroY, 28, 0, 2 * Math.PI);
+            ctx.fillStyle = '#facc15';
+            ctx.fill();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = '#ffffff';
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(centroX, centroY, 12, 0, 2 * Math.PI);
+            ctx.fillStyle = '#0f172a';
+            ctx.fill();
+        }
+
+        function girarRuletaColoresYune() {
+            if (!currentUser.isAdmin) return;
+            if (estaGirandoColores) return;
+
+            let girosCompletos = Math.floor(Math.random() * 4) + 5;
+            let anguloFinalRandom = Math.random() * 2 * Math.PI;
+            let anguloTotalMeta = anguloActualColores + (girosCompletos * 2 * Math.PI) + anguloFinalRandom;
+
+            let duracionMs = 4500;
+            let tiempoInicio = null;
+            estaGirandoColores = true;
+
+            let btnGirar = document.getElementById('btn-girar-color');
+            if (btnGirar) btnGirar.disabled = true;
+
+            function animar(timestamp) {
+                if (!tiempoInicio) tiempoInicio = timestamp;
+                let progreso = (timestamp - tiempoInicio) / duracionMs;
+
+                if (progreso < 1) {
+                    let easeOut = 1 - Math.pow(1 - progreso, 3);
+                    anguloActualColores = anguloActualColores + (anguloTotalMeta - anguloActualColores) * (easeOut * 0.08);
+                    dibujarRuletaColoresCanvas(anguloActualColores);
+                    reproducirSonidoTrrr();
+
+                    db.ref('room/ruletaColoresState').set({
+                        angulo: anguloActualColores,
+                        estado: 'girando'
+                    });
+
+                    requestAnimationFrame(animar);
+                } else {
+                    anguloActualColores = anguloTotalMeta % (2 * Math.PI);
+                    dibujarRuletaColoresCanvas(anguloActualColores);
+                    estaGirandoColores = false;
+                    if (btnGirar) btnGirar.disabled = false;
+
+                    reproducirSonidoCampanaFinal();
+
+                    // Calcular Color Ganador en el puntero superior (3PI/2)
+                    let numSectores = listaColoresYune.length;
+                    let arc = (2 * Math.PI) / numSectores;
+                    let anguloNormalizado = (3 * Math.PI / 2 - anguloActualColores) % (2 * Math.PI);
+                    if (anguloNormalizado < 0) anguloNormalizado += 2 * Math.PI;
+
+                    let indexGanador = Math.floor(anguloNormalizado / arc) % numSectores;
+                    let colorGanador = listaColoresYune[indexGanador];
+
+                    db.ref('room/ruletaColoresState').set({
+                        angulo: anguloActualColores,
+                        estado: 'finalizado',
+                        colorGanador: colorGanador.nombre
+                    });
+
+                    cantarTextoVoz(`¡Color ${colorGanador.nombre}!`);
+
+                    if (typeof confetti === 'function') {
+                        confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+                    }
+                }
+            }
+            requestAnimationFrame(animar);
+        }
+
+        function escucharRuletaColoresFirebase() {
+            db.ref('room/ruletaColoresState').on('value', (snap) => {
+                let data = snap.val();
+                if (!data) return;
+
+                if (!currentUser.isAdmin && data.angulo !== undefined) {
+                    anguloActualColores = data.angulo;
+                    dibujarRuletaColoresCanvas(anguloActualColores);
+                }
+
+                let txtGanador = document.getElementById('texto-color-ganador');
+                if (txtGanador) {
+                    if (data.estado === 'girando') {
+                        txtGanador.innerText = "Girando ruleta de colores...";
+                        txtGanador.className = "text-xl font-bold text-yellow-300 animate-pulse";
+                    } else if (data.estado === 'finalizado' && data.colorGanador) {
+                        txtGanador.innerText = `🎨 ¡COLOR ${data.colorGanador.toUpperCase()}!`;
+                        txtGanador.className = "text-2xl font-black text-yellow-400";
+                    }
+                }
+            });
+        }
+
+        // CONSTRUCCIÓN DINÁMICA DE LA CUADRÍCULA 6x6 PARA LOS 20 OBJETOS
         function construirEstructuraRuletaHTML() {
             let gridEl = document.getElementById('ruleta-cuadros-grid');
             if (!gridEl) return;
@@ -782,7 +983,7 @@
             `;
         }
 
-        // 🔥 SINCRONIZACIÓN EN TIEMPO REAL CON BLOQUEO ABSOLUTO DE OBJETOS GANADORES
+        // SINCRONIZACIÓN EN TIEMPO REAL CON BLOQUEO ABSOLUTO DE OBJETOS GANADORES
         function sincronizarObjetosYune() {
             construirEstructuraRuletaHTML();
             
@@ -978,7 +1179,7 @@
                 let ganadoresPremios = snapGanadores.val() || {};
                 let nombresGanadoresPremios = Object.values(ganadoresPremios).map(g => g.nombre);
 
-                // 🔥 CAMINO DINÁMICO EXCLUYENDO TOTALMENTE A LOS OBJETOS QUE YA GANARON
+                // CAMINO DINÁMICO EXCLUYENDO TOTALMENTE A LOS OBJETOS QUE YA GANARON
                 let caminoDisponibleIds = [];
                 ordenPerimetroRuleta.forEach(id => {
                     let obj = listaObjetosYune.find(o => o.id === id);
@@ -1213,6 +1414,7 @@
             document.getElementById('view-player-register').classList.add('hidden');
             document.getElementById('section-bingo-main').style.display = 'none';
             document.getElementById('section-objetos-main').style.display = 'none';
+            document.getElementById('section-colores-main').style.display = 'none';
             if (autoDrawInterval) clearInterval(autoDrawInterval);
             isAutoRunning = false;
         }
@@ -1233,7 +1435,9 @@
                 escucharChatEnVivo();
                 sincronizarObjetosYune();
                 escucharChatObjetos();
+                escucharRuletaColoresFirebase();
                 document.getElementById('admin-objetos-controls').classList.remove('hidden');
+                document.getElementById('admin-colores-controls').classList.remove('hidden');
             } else {
                 alert("Clave incorrecta.");
             }
@@ -1283,7 +1487,9 @@
             escucharChatEnVivo();
             sincronizarObjetosYune();
             escucharChatObjetos();
+            escucharRuletaColoresFirebase();
             document.getElementById('admin-objetos-controls').classList.add('hidden');
+            document.getElementById('admin-colores-controls').classList.add('hidden');
         }
 
         function sincronizarDatosAdmin() {
