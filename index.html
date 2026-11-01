@@ -996,7 +996,7 @@
             });
         }
 
-        // 🔥 RULETA DE COLORES OPTIMIZADA (FRENADO RÁPIDO Y FLUIDO)
+        // 🔥 RULETA DE COLORES CON GIROS LARGOS Y FRENADO GRADUAL DE ALTA EMOCIÓN
         function girarRuletaColoresYune() {
             if (!currentUser.isAdmin) return;
             if (estaGirandoColores) return;
@@ -1028,11 +1028,11 @@
                 let arc = (2 * Math.PI) / numSectores;
                 let anguloObjetivoSector = (3 * Math.PI / 2) - (indexGanador * arc + arc / 2);
 
-                // 🔥 FRENADO RÁPIDO Y ÁGIL (Curva más directa sin ralentización eterna)
-                let girosCompletos = 3;
+                // 🔥 6 Vueltas completas y 4.5 segundos de duración para una experiencia emocionante y de suspenso real
+                let girosCompletos = 6;
                 let anguloTotalMeta = anguloActualColores + (girosCompletos * 2 * Math.PI) + (anguloObjetivoSector - (anguloActualColores % (2 * Math.PI)));
 
-                let duracionMs = 2500; // Reducido a 2.5 segundos para máxima agilidad
+                let duracionMs = 4500;
                 let tiempoInicio = null;
                 estaGirandoColores = true;
 
@@ -1044,8 +1044,8 @@
                     let progreso = (timestamp - tiempoInicio) / duracionMs;
 
                     if (progreso < 1) {
-                        let easeOut = 1 - Math.pow(1 - progreso, 2); // Frenado rápido y nítido
-                        anguloActualColores = anguloActualColores + (anguloTotalMeta - anguloActualColores) * (easeOut * 0.2);
+                        let easeOut = 1 - Math.pow(1 - progreso, 3); // Curva cúbica para frenado gradual, suave y emocionante
+                        anguloActualColores = anguloActualColores + (anguloTotalMeta - anguloActualColores) * (easeOut * 0.08);
                         dibujarRuletaColoresCanvas(anguloActualColores);
                         reproducirSonidoTrrr();
 
