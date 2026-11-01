@@ -279,7 +279,6 @@
                     </div>
                 </div>
 
-                <!-- 🌟 MODAL DE BINGO GANADOR PARA LA JUGADORA CON CONFETI Y AUDIO -->
                 <div id="player-winner-notification" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
                     <div class="aviso-ganador-suave text-white p-6 rounded-3xl font-bold text-center shadow-2xl flex flex-col gap-4 max-w-lg w-full">
                         <div class="text-3xl text-yellow-300 font-extrabold">👑 ¡B I N G O ! 👑</div>
@@ -327,7 +326,7 @@
             </div>
         </div>
 
-        <!-- SECCIÓN 2: GAME OBJETOS YUNE (AMPLIADO A 20 OBJETOS) -->
+        <!-- SECCIÓN 2: GAME OBJETOS YUNE -->
         <div id="section-objetos-main" class="w-full flex-col gap-6 hidden">
             <div class="bg-slate-800 p-6 rounded-3xl card-shadow flex flex-col gap-6 max-w-2xl mx-auto w-full">
                 <div class="text-center">
@@ -335,7 +334,6 @@
                     <p class="text-xs text-slate-400">Selecciona tu objeto, sigue el sorteo en vivo y gana con los premios gordos</p>
                 </div>
 
-                <!-- PERSONAS CONECTADAS EN VIVO -->
                 <div class="bg-slate-900 p-4 rounded-2xl border border-emerald-500/40 shadow">
                     <div class="flex justify-between items-center mb-2">
                         <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider">🟢 Personas Conectadas en Vivo</h3>
@@ -346,7 +344,6 @@
                     </div>
                 </div>
 
-                <!-- TABLERO CUADRADO PERIMETRAL 20 OBJETOS -->
                 <div class="bg-slate-950 p-4 rounded-3xl border-4 border-yellow-400 shadow-2xl relative">
                     <div class="text-center mb-3">
                         <span class="text-xs text-yellow-300 font-bold uppercase tracking-widest bg-slate-900 px-3 py-1 rounded-full border border-yellow-500/40">
@@ -354,11 +351,8 @@
                         </span>
                     </div>
 
-                    <div class="ruleta-cuadrada-20" id="ruleta-cuadros-grid">
-                        <!-- Generado dinámicamente con los 20 objetos -->
-                    </div>
+                    <div class="ruleta-cuadrada-20" id="ruleta-cuadros-grid"></div>
 
-                    <!-- CONTROLES EXCLUSIVOS DE LA ADMINISTRADORA -->
                     <div id="admin-objetos-controls" class="mt-4 flex gap-2 justify-center flex-wrap hidden">
                         <button onclick="iniciarGiroAutomaticoContinuo()" id="btn-iniciar-auto" class="px-4 py-2.5 bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-extrabold text-xs rounded-xl shadow cursor-pointer">▶ Iniciar Ruleta</button>
                         <button onclick="detenerGiroAutomaticoContinuo()" id="btn-pausar-auto" class="px-4 py-2.5 bg-orange-600 text-white font-extrabold text-xs rounded-xl shadow cursor-pointer hidden">⏸ Pausar</button>
@@ -367,13 +361,11 @@
                     </div>
                 </div>
 
-                <!-- LISTA DE RESPALDO EN TIEMPO REAL -->
                 <div class="bg-slate-900 border border-slate-700 p-4 rounded-2xl shadow">
                     <h3 class="text-xs font-bold text-pink-400 uppercase tracking-wider mb-2">📋 Respaldo en Vivo: Asignación de Objetos</h3>
                     <div id="lista-respaldo-objetos" class="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs"></div>
                 </div>
 
-                <!-- GANADORES DE LOS PREMIOS -->
                 <div class="bg-slate-900 p-4 rounded-2xl border border-yellow-500/30">
                     <h3 class="text-sm font-bold text-yellow-300 mb-2">🏆 Ganadores de los Premios en Vivo:</h3>
                     <div class="flex flex-col gap-2 text-xs" id="panel-ganadores-objetos">
@@ -383,7 +375,6 @@
                     </div>
                 </div>
 
-                <!-- CHAT EN VIVO -->
                 <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 flex flex-col gap-3">
                     <h3 class="font-bold text-pink-400 text-xs">💬 Chat en Vivo de la Partida</h3>
                     <div id="caja-chat-objetos" class="bg-slate-900 h-28 overflow-y-auto p-3 rounded-xl border border-slate-700 text-xs space-y-1.5"></div>
@@ -460,6 +451,15 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- 🌟 MODAL GENERAL DE VICTORIA PARA CUALQUIER JUEGO (CON CONFETI Y AUDIO) -->
+    <div id="modal-victoria-general" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+        <div class="aviso-ganador-suave text-white p-6 rounded-3xl font-bold text-center shadow-2xl flex flex-col gap-4 max-w-lg w-full">
+            <div class="text-3xl text-yellow-300 font-extrabold animate-bounce">👑 ¡FELICIDADES! 👑</div>
+            <div id="texto-alerta-victoria-general" class="text-base font-bold bg-white/10 py-3 px-4 rounded-xl text-pink-200">¡Has ganado un premio!</div>
+            <button onclick="cerrarModalVictoriaGeneral()" class="py-2.5 px-6 bg-slate-900 text-yellow-300 text-xs rounded-xl font-bold mx-auto cursor-pointer shadow">¡Genial!</button>
+        </div>
     </div>
 
     <footer class="text-center text-xs text-slate-500 py-6">Bingo Lineal Yune &bull; Tiempo Real 🌟</footer>
@@ -604,6 +604,16 @@
                 osc.connect(gain); gain.connect(audioCtx.destination);
                 osc.start(); osc.stop(audioCtx.currentTime + 0.3);
             } catch(e){}
+        }
+
+        function dispararConfettiVictoria() {
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 160, spread: 100, origin: { y: 0.5 } });
+            }
+        }
+
+        function cerrarModalVictoriaGeneral() {
+            document.getElementById('modal-victoria-general').classList.add('hidden');
         }
 
         function obtenerLetraYNumeroVoz(num) {
@@ -1057,24 +1067,24 @@
 
                         let infoDuenoColor = asignaciones[colorGanador.nombre];
                         let nombreDueno = infoDuenoColor ? infoDuenoColor.nombre : "Sin dueña asignada";
+                        let controlDueno = infoDuenoColor ? infoDuenoColor.control : "";
 
                         db.ref(`room/ganadoresColores/${etapaPremioColorActual}`).set({
                             color: colorGanador.nombre,
-                            dueno: nombreDueno
+                            dueno: nombreDueno,
+                            control: controlDueno
                         }).then(() => {
                             db.ref('room/ruletaColoresState').set({
                                 angulo: anguloActualColores,
                                 estado: 'finalizado',
                                 colorGanador: colorGanador.nombre,
                                 ganadorNombre: nombreDueno,
+                                controlDueno: controlDueno,
                                 etapa: etapaPremioColorActual
                             });
 
                             cantarTextoVoz(`¡Ganó el color ${colorGanador.nombre}! Se lo lleva ${nombreDueno}`);
-
-                            if (typeof confetti === 'function') {
-                                confetti({ particleCount: 120, spread: 90, origin: { y: 0.6 } });
-                            }
+                            dispararConfettiVictoria();
 
                             if (btnGirar) btnGirar.classList.add('hidden');
                             document.getElementById('btn-siguiente-premio-color').classList.remove('hidden');
@@ -1121,6 +1131,7 @@
             }
         }
 
+        let ultimoColorGanadorDetectado = null;
         function escucharRuletaColoresFirebase() {
             db.ref('room/ruletaColoresState').on('value', (snap) => {
                 let data = snap.val();
@@ -1128,6 +1139,20 @@
                 if (!currentUser.isAdmin && data.angulo !== undefined) {
                     anguloActualColores = data.angulo;
                     dibujarRuletaColoresCanvas(anguloActualColores);
+                }
+
+                if (data.estado === 'finalizado' && data.colorGanador && ultimoColorGanadorDetectado !== data.etapa) {
+                    ultimoColorGanadorDetectado = data.etapa;
+                    if (!currentUser.isAdmin && data.controlDueno === currentUser.control) {
+                        reproducirSonidoCampanaFinal();
+                        dispararConfettiVictoria();
+                        cantarTextoVoz(`¡Felicidades! Tu color ${data.colorGanador} ha ganado el premio`);
+                        
+                        let modal = document.getElementById('modal-victoria-general');
+                        let txt = document.getElementById('texto-alerta-victoria-general');
+                        if (txt) txt.innerHTML = `⭐ ¡Felicidades ${currentUser.name}! Tu color <strong>${data.colorGanador}</strong> ha ganado el premio. ⭐`;
+                        if (modal) modal.classList.remove('hidden');
+                    }
                 }
             });
         }
@@ -1223,6 +1248,13 @@
                         if (ganadores[i]) {
                             spanPremio.innerText = `${ganadores[i].emoji} ${ganadores[i].nombre} (Dueño: ${ganadores[i].dueno})`;
                             spanPremio.className = "text-yellow-300 font-bold";
+
+                            // Si la jugadora actual es la dueña del objeto ganador, activamos confeti, campanita y voz
+                            if (!currentUser.isAdmin && ganadores[i].ownerControl === currentUser.control) {
+                                reproducirSonidoCampanaFinal();
+                                dispararConfettiVictoria();
+                                cantarTextoVoz(`¡Felicidades! Tu objeto ${ganadores[i].nombre} ha ganado el premio`);
+                            }
                         } else {
                             spanPremio.innerText = "Por sortear";
                             spanPremio.className = "text-slate-400 font-semibold";
@@ -1309,16 +1341,22 @@
                         estaGirandoSolo = false;
                         reproducirSonidoCampanaFinal();
                         db.ref(`room/objetosData/${targetId}`).once('value').then((snapObj) => {
-                            let d = snapObj.val() || { hits: 0, owner: null };
+                            let d = snapObj.val() || { hits: 0, owner: null, ownerControl: null };
                             let hits = Math.min(3, (d.hits || 0) + 1);
                             let duenoActual = d.owner || "Sin Dueño";
+                            let controlDuenoActual = d.ownerControl || "";
                             db.ref(`room/objetosData/${targetId}/hits`).set(hits).then(() => {
                                 db.ref('room/ruletaAnimacion').set({ estado: 'titilando', targetId: targetId, hits: hits, dueno: duenoActual });
                                 cantarTextoVoz(`¡${objGanador.nombre}!`);
                                 if (hits >= 3) {
                                     juegoPausadoPorGanador = true;
                                     document.getElementById('premio-actual-titulo').innerHTML = `🎉 ¡GANADOR PREMIO ${etapaPremioActual}! (${objGanador.emoji} ${objGanador.nombre})`;
-                                    db.ref(`room/ganadoresPremios/${etapaPremioActual}`).set({ emoji: objGanador.emoji, nombre: objGanador.nombre, dueno: duenoActual });
+                                    db.ref(`room/ganadoresPremios/${etapaPremioActual}`).set({ 
+                                        emoji: objGanador.emoji, 
+                                        nombre: objGanador.nombre, 
+                                        dueno: duenoActual,
+                                        ownerControl: controlDuenoActual
+                                    });
                                 }
                             });
                         });
@@ -1534,7 +1572,6 @@
             });
         }
 
-        // 🌟 VERIFICADOR DE BINGO EN LA VISTA DE LA JUGADORA CON CONFEIT Y AUDIO
         let yaCantóBingoJugadora = false;
         function verificarGanadoresEnVivoJugadora() {
             if (!currentUser.control || currentUser.isAdmin) return;
@@ -1554,9 +1591,7 @@
                     yaCantóBingoJugadora = true;
                     reproducirSonidoCampanaFinal();
                     cantarTextoVoz("¡Felicidades! ¡Tu cartón hizo bingo!");
-                    if (typeof confetti === 'function') {
-                        confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
-                    }
+                    dispararConfettiVictoria();
                 }
             } else {
                 yaCantóBingoJugadora = false;
