@@ -77,6 +77,11 @@
 <body class="min-h-screen flex flex-col items-center justify-between p-4" onclick="desbloquearAudioInicial()">
     <div id="app" class="w-full max-w-4xl mx-auto flex flex-col items-center flex-grow">
         
+        <!-- BOTÓN FLOTANTE OBLIGATORIO DE ACTIVACIÓN DE AUDIO PARA MÓVILES -->
+        <div id="audio-unlock-banner" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 p-3 rounded-2xl font-black text-center mb-4 shadow-xl flex items-center justify-center gap-2 cursor-pointer animate-pulse" onclick="forzarDesbloqueoAudioMovil()">
+            <span>🔊 ¡TOCA AQUÍ PARA ACTIVAR LA VOZ Y LOS SONIDOS EN TU TELÉFONO! 🔊</span>
+        </div>
+
         <!-- BARRA SUPERIOR CON RELOJ Y CAMBIO DE MODO -->
         <div id="top-bar-nav" class="w-full flex justify-between items-center px-2 pt-2 hidden flex-wrap gap-2">
             <div class="flex gap-2 flex-wrap">
@@ -453,7 +458,7 @@
 
     </div>
 
-    <!-- 🌟 MODAL GENERAL DE VICTORIA PARA CUALQUIER JUEGO (CON CONFETI Y AUDIO) -->
+    <!-- 🌟 MODAL GENERAL DE VICTORIA PARA LA JUGADORA -->
     <div id="modal-victoria-general" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
         <div class="aviso-ganador-suave text-white p-6 rounded-3xl font-bold text-center shadow-2xl flex flex-col gap-4 max-w-lg w-full">
             <div class="text-3xl text-yellow-300 font-extrabold animate-bounce">👑 ¡FELICIDADES! 👑</div>
@@ -556,6 +561,20 @@
             setInterval(actualizarReloj, 1000);
         }
 
+        function forzarDesbloqueoAudioMovil() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                let utterance = new SpeechSynthesisUtterance("Audio activado correctamente");
+                utterance.lang = 'es-ES';
+                window.speechSynthesis.speak(utterance);
+            }
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            let banner = document.getElementById('audio-unlock-banner');
+            if (banner) banner.style.display = 'none';
+        }
+
         function desbloquearAudioInicial() {
             if ('speechSynthesis' in window && audioHabilitado) {
                 let utterance = new SpeechSynthesisUtterance("");
@@ -595,20 +614,24 @@
             if (!audioHabilitado) return;
             try {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
                 let osc = audioCtx.createOscillator();
                 let gain = audioCtx.createGain();
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
                 osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.4);
             } catch(e){}
         }
 
         function dispararConfettiVictoria() {
             if (typeof confetti === 'function') {
-                confetti({ particleCount: 160, spread: 100, origin: { y: 0.5 } });
+                confetti({ particleCount: 220, spread: 130, origin: { y: 0.5 } });
+            }
+            if (navigator.vibrate) {
+                try { navigator.vibrate([200, 100, 200, 100, 300]); } catch(e){}
             }
         }
 
@@ -1080,6 +1103,7 @@
                                 colorGanador: colorGanador.nombre,
                                 ganadorNombre: nombreDueno,
                                 controlDueno: controlDueno,
+                                timestamp: Date.now(),
                                 etapa: etapaPremioColorActual
                             });
 
@@ -1131,7 +1155,7 @@
             }
         }
 
-        let ultimoColorGanadorDetectado = null;
+        let ultimoTimestampGanador = 0;
         function escucharRuletaColoresFirebase() {
             db.ref('room/ruletaColoresState').on('value', (snap) => {
                 let data = snap.val();
@@ -1141,9 +1165,9 @@
                     dibujarRuletaColoresCanvas(anguloActualColores);
                 }
 
-                if (data.estado === 'finalizado' && data.colorGanador && ultimoColorGanadorDetectado !== data.etapa) {
-                    ultimoColorGanadorDetectado = data.etapa;
-                    if (!currentUser.isAdmin && data.controlDueno === currentUser.control) {
+                if (data.estado === 'finalizado' && data.colorGanador && data.timestamp !== ultimoTimestampGanador) {
+                    ultimoTimestampGanador = data.timestamp;
+                    if (!currentUser.isAdmin && data.controlDueno && currentUser.control && data.controlDueno === currentUser.control) {
                         reproducirSonidoCampanaFinal();
                         dispararConfettiVictoria();
                         cantarTextoVoz(`¡Felicidades! Tu color ${data.colorGanador} ha ganado el premio`);
@@ -1197,6 +1221,7 @@
             `;
         }
 
+        let ultimoPremioObjetoTimestamp = 0;
         function sincronizarObjetosYune() {
             construirEstructuraRuletaHTML();
             db.ref('room/objetosData').on('value', (snap) => {
@@ -1249,11 +1274,16 @@
                             spanPremio.innerText = `${ganadores[i].emoji} ${ganadores[i].nombre} (Dueño: ${ganadores[i].dueno})`;
                             spanPremio.className = "text-yellow-300 font-bold";
 
-                            // Si la jugadora actual es la dueña del objeto ganador, activamos confeti, campanita y voz
-                            if (!currentUser.isAdmin && ganadores[i].ownerControl === currentUser.control) {
+                            if (!currentUser.isAdmin && ganadores[i].timestamp && ganadores[i].timestamp !== ultimoPremioObjetoTimestamp && ganadores[i].ownerControl === currentUser.control) {
+                                ultimoPremioObjetoTimestamp = ganadores[i].timestamp;
                                 reproducirSonidoCampanaFinal();
                                 dispararConfettiVictoria();
                                 cantarTextoVoz(`¡Felicidades! Tu objeto ${ganadores[i].nombre} ha ganado el premio`);
+                                
+                                let modal = document.getElementById('modal-victoria-general');
+                                let txt = document.getElementById('texto-alerta-victoria-general');
+                                if (txt) txt.innerHTML = `⭐ ¡Felicidades ${currentUser.name}! Tu objeto <strong>${ganadores[i].emoji} ${ganadores[i].nombre}</strong> ha ganado el premio. ⭐`;
+                                if (modal) modal.classList.remove('hidden');
                             }
                         } else {
                             spanPremio.innerText = "Por sortear";
@@ -1355,7 +1385,8 @@
                                         emoji: objGanador.emoji, 
                                         nombre: objGanador.nombre, 
                                         dueno: duenoActual,
-                                        ownerControl: controlDuenoActual
+                                        ownerControl: controlDuenoActual,
+                                        timestamp: Date.now()
                                     });
                                 }
                             });
