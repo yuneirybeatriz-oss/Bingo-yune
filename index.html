@@ -70,7 +70,6 @@
             padding: 8px; text-align: center;
         }
 
-        /* ESTILOS PARA EL CONFETI NATIVO DE EMERGENCIA */
         .confetti-piece {
             position: fixed;
             width: 10px;
@@ -578,7 +577,6 @@
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
-            // Forzar disparo de audio silencioso para desbloquear el navegador
             try {
                 let osc = audioCtx.createOscillator();
                 let gain = audioCtx.createGain();
@@ -588,6 +586,13 @@
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.1);
             } catch(e){}
+
+            // Desbloquear motor de voz de manera inmediata al primer toque
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                let dummyUtterance = new SpeechSynthesisUtterance("");
+                window.speechSynthesis.speak(dummyUtterance);
+            }
         }
 
         function toggleAudioJugadora() {
@@ -613,6 +618,14 @@
                     utterance.lang = 'es-ES';
                     utterance.rate = 1.0;
                     utterance.pitch = 1.1;
+                    
+                    // Asegurar selección de voz en español si está disponible en el dispositivo
+                    let voces = window.speechSynthesis.getVoices();
+                    let vozEspanol = voces.find(v => v.lang.startsWith('es') || v.lang.startsWith('ES'));
+                    if (vozEspanol) {
+                        utterance.voice = vozEspanol;
+                    }
+
                     window.speechSynthesis.speak(utterance);
                 }
             } catch(e){}
@@ -624,7 +637,6 @@
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 if (audioCtx.state === 'suspended') audioCtx.resume();
                 
-                // Doble toque de campana melódica
                 let ahora = audioCtx.currentTime;
                 [0, 0.25, 0.5].forEach((delay, idx) => {
                     let osc = audioCtx.createOscillator();
@@ -640,7 +652,6 @@
         }
 
         function dispararConfettiNativo() {
-            // Generador de confeti visual directo con elementos HTML
             const colores = ['#facc15', '#ec4899', '#38bdf8', '#4ade80', '#a855f7', '#ff5722'];
             for (let i = 0; i < 70; i++) {
                 let pieza = document.createElement('div');
