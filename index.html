@@ -30,7 +30,6 @@
             font-weight: 800; font-size: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
 
-        /* RULETA CUADRADA PERIMETRAL AMPLIADA PARA 20 OBJETOS */
         .ruleta-cuadrada-20 {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
@@ -406,7 +405,7 @@
             </div>
         </div>
 
-        <!-- SECCIÓN 3: RULETA COLORES YUNE (10 COLORES BÁSICOS CON 3 PREMIOS) -->
+        <!-- SECCIÓN 3: RULETA COLORES YUNE (10 COLORES BÁSICOS CON SEGURIDAD TOTAL Y 3 PREMIOS) -->
         <div id="section-colores-main" class="w-full flex-col items-center gap-6 hidden">
             <div class="bg-slate-800 p-6 rounded-3xl card-shadow flex flex-col items-center gap-6 max-w-xl mx-auto w-full text-center">
                 <div>
@@ -427,9 +426,9 @@
                     <canvas id="canvasColoresYune" width="300" height="300" class="rounded-full shadow-[0_0_30px_rgba(236,72,153,0.3)] border-4 border-yellow-400"></canvas>
                 </div>
 
-                <!-- PANEL DE SELECCIÓN DE COLORES PARA LAS JUGADORAS -->
+                <!-- PANEL DE SELECCIÓN DE COLORES PARA LAS JUGADORAS (BLINDADO) -->
                 <div class="w-full bg-slate-900 p-4 rounded-2xl border border-slate-700 flex flex-col gap-3">
-                    <h3 class="text-xs font-bold text-pink-400 uppercase tracking-wider">✨ Elige tu Color (Se bloquea si ya ganó el premio)</h3>
+                    <h3 class="text-xs font-bold text-pink-400 uppercase tracking-wider">✨ Elige tu Color (Bloqueado si ya tiene dueña)</h3>
                     <div id="lista-seleccion-colores" class="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
                         <!-- Generado dinámicamente -->
                     </div>
@@ -445,7 +444,7 @@
                     </div>
                 </div>
 
-                <!-- CONTROLES EXCLUSIVOS ADMINISTRADORA PARA GIRAR COLOR Y AVANZAR -->
+                <!-- CONTROLES EXCLUSIVOS ADMINISTRADORA -->
                 <div id="admin-colores-controls" class="w-full flex flex-col gap-2 justify-center hidden">
                     <button id="btn-girar-color" onclick="girarRuletaColoresYune()" class="w-full py-3.5 bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 text-slate-950 font-black text-base rounded-2xl shadow-lg cursor-pointer hover:brightness-110 transition">🎰 ¡GIRAR RULETA DE COLORES!</button>
                     <button id="btn-siguiente-premio-color" onclick="avanzarSiguientePremioColor()" class="w-full py-2.5 bg-emerald-600 text-white font-extrabold text-xs rounded-xl shadow cursor-pointer hidden">▶ Pasar al Siguiente Premio de Color</button>
@@ -821,7 +820,7 @@
             }
         }
 
-        // 🔥 DIBUJO Y LÓGICA DE LA NUEVA RULETA DE 10 COLORES BÁSICOS
+        // 🔥 DIBUJO Y LÓGICA DE LA RULETA DE COLORES
         function dibujarRuletaColoresCanvas(anguloRadianes) {
             let canvas = document.getElementById('canvasColoresYune');
             if (!canvas) return;
@@ -874,7 +873,7 @@
             ctx.fill();
         }
 
-        // 🔥 SELECCIÓN DE COLOR CON BLOQUEO ESTRICTO SI YA GANÓ PREMIO
+        // 🔥 SELECCIÓN BLINDADA DE COLOR (NADIE SE LO QUITA A NADIE)
         function seleccionarColorJugadora(nombreColor) {
             if (!currentUser.control) {
                 alert("Por favor ingresa primero con tu nombre en el sistema para elegir tu color.");
@@ -890,12 +889,19 @@
                 let coloresGanadoresNombres = Object.values(ganadoresColores).map(g => g.color);
 
                 if (coloresGanadoresNombres.includes(nombreColor)) {
-                    alert("⚠️ Este color ya ganó un premio en esta ronda y está bloqueado.");
+                    alert("⚠️ Este color ya ganó un premio y está bloqueado.");
                     return;
                 }
 
                 if (duenoActual && duenoActual.control !== currentUser.control) {
-                    alert(`⚠️ Este color ya fue seleccionado por ${duenoActual.nombre}.`);
+                    if (currentUser.isAdmin) {
+                        if (confirm(`⚠️ Como Administradora, ¿deseas liberar el color ${nombreColor} que tenía ${duenoActual.nombre}?`)) {
+                            db.ref(`room/coloresAsignados/${nombreColor}`).remove();
+                            alert("¡Color liberado con éxito!");
+                        }
+                    } else {
+                        alert(`❌ Este color ya fue seleccionado por ${duenoActual.nombre} y no puede ser modificado.`);
+                    }
                     return;
                 }
 
@@ -911,13 +917,6 @@
         }
 
         function sincronizarPanelColoresJugadoras() {
-            Promise.all([
-                db.ref('room/coloresAsignados').once('value'),
-                db.ref('room/ganadoresColores').once('value')
-            ]).then(([snapAsignados, snapGanadores]) => {
-                // Se conecta mediante listener en tiempo real
-            });
-
             db.ref('room/coloresAsignados').on('value', (snap) => {
                 let asignaciones = snap.val() || {};
                 db.ref('room/ganadoresColores').once('value', (snapG) => {
@@ -935,10 +934,10 @@
                         let ocupadoPorOtro = infoAsignada && !esMio;
 
                         let estiloBoton = `background: ${c.hex}; color: ${c.textoDark ? '#000' : '#fff'};`;
-                        let bordeExtra = yaGano ? 'opacity: 0.25; filter: grayscale(100%); cursor: not-allowed;' : esMio ? 'border: 3px solid #38bdf8; transform: scale(1.03);' : ocupadoPorOtro ? 'opacity: 0.5;' : 'border: 2px solid rgba(255,255,255,0.3);';
+                        let bordeExtra = yaGano ? 'opacity: 0.25; filter: grayscale(100%); cursor: not-allowed;' : esMio ? 'border: 3px solid #38bdf8; transform: scale(1.03);' : ocupadoPorOtro ? 'opacity: 0.6;' : 'border: 2px solid rgba(255,255,255,0.3);';
 
                         html += `
-                            <div onclick="${yaGano ? '' : `seleccionarColorJugadora('${c.nombre}')`}" class="p-2.5 rounded-xl text-center font-bold text-xs cursor-pointer shadow flex flex-col items-center justify-center gap-1 transition" style="${estiloBoton} ${bordeExtra}">
+                            <div onclick="seleccionarColorJugadora('${c.nombre}')" class="p-2.5 rounded-xl text-center font-bold text-xs cursor-pointer shadow flex flex-col items-center justify-center gap-1 transition" style="${estiloBoton} ${bordeExtra}">
                                 <span>${c.nombre}</span>
                                 <span class="text-[9px] font-semibold truncate w-full ${c.textoDark ? 'text-slate-800' : 'text-slate-200'}">
                                     ${yaGano ? '🚫 Ganador' : esMio ? '⭐ ¡Tuyo!' : infoAsignada ? `👤 ${infoAsignada.nombre}` : 'Libre'}
@@ -950,7 +949,6 @@
                 });
             });
 
-            // Sincronizar ganadores de los 3 premios de colores
             db.ref('room/ganadoresColores').on('value', (snap) => {
                 let ganadores = snap.val() || {};
                 for (let i = 1; i <= 3; i++) {
@@ -980,7 +978,6 @@
                 let ganadoresColores = snapGanadores.val() || {};
                 let coloresGanadoresNombres = Object.values(ganadoresColores).map(g => g.color);
 
-                // Filtrar sectores disponibles que no hayan ganado ya
                 let sectoresDisponibles = [];
                 listaColoresYune.forEach((c, idx) => {
                     if (!coloresGanadoresNombres.includes(c.nombre)) {
@@ -1103,20 +1100,13 @@
             db.ref('room/ruletaColoresState').on('value', (snap) => {
                 let data = snap.val();
                 if (!data) return;
-
                 if (!currentUser.isAdmin && data.angulo !== undefined) {
                     anguloActualColores = data.angulo;
                     dibujarRuletaColoresCanvas(anguloActualColores);
                 }
-
-                let txtGanador = document.getElementById('texto-color-ganador');
-                if (data.estado === 'finalizado' && data.colorGanador) {
-                    let duenoTexto = data.ganadorNombre && data.ganadorNombre !== "Sin dueña asignada" ? `¡Se lo lleva ${data.ganadorNombre}!` : "¡Sin dueña asignada!";
-                }
             });
         }
 
-        // CONSTRUCCIÓN DINÁMICA DE LA CUADRÍCULA 6x6 PARA LOS 20 OBJETOS
         function construirEstructuraRuletaHTML() {
             let gridEl = document.getElementById('ruleta-cuadros-grid');
             if (!gridEl) return;
@@ -1157,10 +1147,8 @@
             `;
         }
 
-        // SINCRONIZACIÓN EN TIEMPO REAL CON BLOQUEO ABSOLUTO DE OBJETOS GANADORES
         function sincronizarObjetosYune() {
             construirEstructuraRuletaHTML();
-            
             db.ref('room/objetosData').on('value', (snap) => {
                 let objetosState = snap.val() || {};
                 let listaRespaldoHTML = '';
@@ -1174,15 +1162,10 @@
                     let cardEl = document.getElementById(`card-objeto-el-${obj.id}`);
                     if (cardEl) {
                         let claseCSS = "objeto-card ";
-                        if (yaGanoRonda) {
-                            claseCSS += "objeto-ganador-ronda";
-                        } else if (esMio) {
-                            claseCSS += "selected-by-user border-cyan-400";
-                        } else if (estadoObj.owner) {
-                            claseCSS += "bg-slate-900 border-slate-700";
-                        } else {
-                            claseCSS += "bg-slate-900 border-slate-800";
-                        }
+                        if (yaGanoRonda) claseCSS += "objeto-ganador-ronda";
+                        else if (esMio) claseCSS += "selected-by-user border-cyan-400";
+                        else if (estadoObj.owner) claseCSS += "bg-slate-900 border-slate-700";
+                        else claseCSS += "bg-slate-900 border-slate-800";
                         cardEl.className = claseCSS;
 
                         cardEl.innerHTML = `
@@ -1228,69 +1211,13 @@
                 let lista = Object.values(players);
                 let containerVivo = document.getElementById('lista-personas-conectadas-vivo');
                 let badgeConectadas = document.getElementById('contador-conectadas-badge');
-
                 if (badgeConectadas) badgeConectadas.innerText = `${lista.length} en línea`;
-
                 if (containerVivo) {
-                    if (lista.length === 0) {
-                        containerVivo.innerHTML = '<span class="text-slate-500 text-xs italic">No hay personas conectadas en este momento.</span>';
-                    } else {
+                    if (lista.length === 0) containerVivo.innerHTML = '<span class="text-slate-500 text-xs italic">No hay personas conectadas.</span>';
+                    else {
                         let html = '';
-                        lista.forEach(p => {
-                            html += `<div class="bg-slate-900 border border-emerald-500/30 px-3 py-1.5 rounded-lg flex items-center gap-2 text-xs"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span class="font-bold text-pink-300">${p.name}</span></div>`;
-                        });
+                        lista.forEach(p => { html += `<div class="bg-slate-900 border border-emerald-500/30 px-3 py-1.5 rounded-lg flex items-center gap-2 text-xs"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span class="font-bold text-pink-300">${p.name}</span></div>`; });
                         containerVivo.innerHTML = html;
-                    }
-                }
-            });
-
-            db.ref('room/ruletaAnimacion').on('value', (snap) => {
-                let anim = snap.val();
-                
-                listaObjetosYune.forEach(o => {
-                    let c = document.getElementById(`card-objeto-el-${o.id}`);
-                    if (c) c.classList.remove('active-step', 'titling');
-                });
-                let visorCentro = document.getElementById('centro-visor');
-                if (visorCentro) visorCentro.classList.remove('visor-ganador-alerta');
-
-                if (!anim) return;
-
-                if (anim.estado === 'girando' && anim.idActual) {
-                    let cardActual = document.getElementById(`card-objeto-el-${anim.idActual}`);
-                    if (cardActual && !cardActual.classList.contains('objeto-ganador-ronda')) {
-                        cardActual.classList.add('active-step');
-                    }
-                    let objTemp = listaObjetosYune.find(o => o.id === anim.idActual);
-                    if (objTemp && document.getElementById('visor-emoji')) {
-                        document.getElementById('visor-emoji').innerText = objTemp.emoji;
-                        document.getElementById('visor-nombre').innerText = objTemp.nombre;
-                        document.getElementById('visor-estado-txt').innerText = "Girando ruleta...";
-                    }
-                } else if (anim.estado === 'titilando' && anim.targetId) {
-                    let cardGanadora = document.getElementById(`card-objeto-el-${anim.targetId}`);
-                    if (cardGanadora) cardGanadora.classList.add('titling');
-
-                    let objGanador = listaObjetosYune.find(o => o.id === anim.targetId);
-                    if (objGanador && document.getElementById('visor-emoji')) {
-                        document.getElementById('visor-emoji').innerText = objGanador.emoji;
-                        document.getElementById('visor-nombre').innerText = objGanador.nombre;
-                    }
-
-                    if (anim.hits >= 3) {
-                        if (visorCentro) visorCentro.classList.add('visor-ganador-alerta');
-                        if (document.getElementById('visor-estado-txt')) document.getElementById('visor-estado-txt').innerText = "🎉 ¡OBJETO GANÓ EL PREMIO! 🎉";
-                    } else {
-                        if (document.getElementById('visor-estado-txt')) document.getElementById('visor-estado-txt').innerText = `⭐ ¡Estrella sumada! (${anim.hits}/3)`;
-                    }
-
-                    if (document.getElementById('visor-estrellas-centro')) {
-                        document.getElementById('visor-estrellas-centro').innerText = `⭐ ${anim.hits} / 3 Estrellas`;
-                        document.getElementById('visor-estrellas-centro').classList.remove('hidden');
-                    }
-                    if (document.getElementById('visor-dueno-centro')) {
-                        document.getElementById('visor-dueno-centro').innerText = `Dueño: ${anim.dueno}`;
-                        document.getElementById('visor-dueno-centro').classList.remove('hidden');
                     }
                 }
             });
@@ -1298,50 +1225,26 @@
 
         function interactuarObjetoYune(idObj) {
             if (!currentUser.control) {
-                alert("Por favor ingresa primero con tu nombre para seleccionar un objeto.");
+                alert("Por favor ingresa primero con tu nombre.");
                 return;
             }
-
             db.ref(`room/objetosData/${idObj}`).once('value').then((snap) => {
                 let data = snap.val() || { owner: null, ownerControl: null, hits: 0 };
-                
-                if (data.hits >= 3) {
-                    alert("⚠️ Este objeto ya ganó su premio en esta ronda y está bloqueado.");
-                    return;
-                }
-
+                if (data.hits >= 3) return;
                 if (data.owner && data.ownerControl !== currentUser.control) {
                     if (currentUser.isAdmin) {
-                        if (confirm(`⚠️ Este objeto pertenece al usuario "${data.owner}". ¿Deseas liberarlo como Administradora?`)) {
-                            db.ref(`room/objetosData/${idObj}`).update({ owner: null, ownerControl: null });
-                            alert("¡Objeto liberado con éxito!");
-                        }
-                    } else {
-                        alert(`❌ No disponible. Este objeto ya fue seleccionado por ${data.owner}.`);
+                        if (confirm(`¿Liberar objeto de ${data.owner}?`)) db.ref(`room/objetosData/${idObj}`).update({ owner: null, ownerControl: null });
                     }
                     return;
                 }
-
-                if (data.ownerControl === currentUser.control) {
-                    db.ref(`room/objetosData/${idObj}`).update({ owner: null, ownerControl: null });
-                } else {
-                    db.ref(`room/objetosData/${idObj}`).set({
-                        owner: currentUser.name,
-                        ownerControl: currentUser.control,
-                        hits: data.hits || 0
-                    });
-                }
+                if (data.ownerControl === currentUser.control) db.ref(`room/objetosData/${idObj}`).update({ owner: null, ownerControl: null });
+                else db.ref(`room/objetosData/${idObj}`).set({ owner: currentUser.name, ownerControl: currentUser.control, hits: data.hits || 0 });
             });
         }
 
+        let intervaloGiroContinuo = null;
         function iniciarGiroAutomaticoContinuo() {
-            if (!currentUser.isAdmin) return;
-            if (juegoPausadoPorGanador) {
-                alert("⚠️ Pausado por ganador. Presiona 'Siguiente Premio'.");
-                return;
-            }
-            if (estaGirandoSolo) return;
-
+            if (!currentUser.isAdmin || juegoPausadoPorGanador || estaGirandoSolo) return;
             Promise.all([
                 db.ref('room/objetosData').once('value'),
                 db.ref('room/ganadoresPremios').once('value')
@@ -1349,97 +1252,40 @@
                 let objetosState = snapObjetos.val() || {};
                 let ganadoresPremios = snapGanadores.val() || {};
                 let nombresGanadoresPremios = Object.values(ganadoresPremios).map(g => g.nombre);
-
                 let caminoDisponibleIds = [];
                 ordenPerimetroRuleta.forEach(id => {
                     let obj = listaObjetosYune.find(o => o.id === id);
                     let estado = objetosState[id] || { hits: 0 };
-                    let yaGano = estado.hits >= 3 || nombresGanadoresPremios.includes(obj.nombre);
-                    if (!yaGano) {
-                        caminoDisponibleIds.push(id);
-                    }
+                    if (!(estado.hits >= 3 || nombresGanadoresPremios.includes(obj.nombre))) caminoDisponibleIds.push(id);
                 });
-
-                if (caminoDisponibleIds.length === 0) {
-                    alert("🏆 ¡Todos los objetos disponibles ya han ganado sus 3 estrellas en esta ronda! Presiona 'Siguiente Premio' o 'Reiniciar Ronda'.");
-                    return;
-                }
-
+                if (caminoDisponibleIds.length === 0) return;
                 let targetId = caminoDisponibleIds[Math.floor(Math.random() * caminoDisponibleIds.length)];
                 let objGanador = listaObjetosYune.find(o => o.id === targetId);
-
                 estaGirandoSolo = true;
-                let btnIniciar = document.getElementById('btn-iniciar-auto');
-                let btnPausar = document.getElementById('btn-pausar-auto');
-                if (btnIniciar) btnIniciar.classList.add('hidden');
-                if (btnPausar) btnPausar.classList.remove('hidden');
-
                 let targetIndexEnCamino = caminoDisponibleIds.indexOf(targetId);
-                let vueltasAzar = Math.floor(Math.random() * 2) + 2;
-                let totalPasosVueltas = (vueltasAzar * caminoDisponibleIds.length) + targetIndexEnCamino;
+                let totalPasosVueltas = (2 * caminoDisponibleIds.length) + targetIndexEnCamino;
                 let pasoActual = 0;
-
                 intervaloGiroContinuo = setInterval(() => {
-                    if (juegoPausadoPorGanador) {
-                        clearInterval(intervaloGiroContinuo);
-                        return;
-                    }
+                    if (juegoPausadoPorGanador) { clearInterval(intervaloGiroContinuo); return; }
                     reproducirSonidoTrrr();
-
                     let idActual = caminoDisponibleIds[pasoActual % caminoDisponibleIds.length];
-                    
-                    db.ref('room/ruletaAnimacion').set({
-                        estado: 'girando',
-                        idActual: idActual
-                    });
-
+                    db.ref('room/ruletaAnimacion').set({ estado: 'girando', idActual: idActual });
                     pasoActual++;
-
                     if (pasoActual > totalPasosVueltas) {
                         clearInterval(intervaloGiroContinuo);
                         estaGirandoSolo = false;
-
                         reproducirSonidoCampanaFinal();
-
                         db.ref(`room/objetosData/${targetId}`).once('value').then((snapObj) => {
                             let d = snapObj.val() || { hits: 0, owner: null };
-                            let hits = (d.hits || 0) + 1;
-                            if (hits > 3) hits = 3;
+                            let hits = Math.min(3, (d.hits || 0) + 1);
                             let duenoActual = d.owner || "Sin Dueño";
-
                             db.ref(`room/objetosData/${targetId}/hits`).set(hits).then(() => {
-                                db.ref('room/ruletaAnimacion').set({
-                                    estado: 'titilando',
-                                    targetId: targetId,
-                                    hits: hits,
-                                    dueno: duenoActual
-                                });
-
+                                db.ref('room/ruletaAnimacion').set({ estado: 'titilando', targetId: targetId, hits: hits, dueno: duenoActual });
                                 cantarTextoVoz(`¡${objGanador.nombre}!`);
-
                                 if (hits >= 3) {
                                     juegoPausadoPorGanador = true;
                                     document.getElementById('premio-actual-titulo').innerHTML = `🎉 ¡GANADOR PREMIO ${etapaPremioActual}! (${objGanador.emoji} ${objGanador.nombre})`;
-                                    
-                                    if (btnIniciar) btnIniciar.classList.add('hidden');
-                                    if (btnPausar) btnPausar.classList.add('hidden');
-                                    document.getElementById('btn-siguiente-premio').classList.remove('hidden');
-
-                                    db.ref(`room/ganadoresPremios/${etapaPremioActual}`).set({
-                                        emoji: objGanador.emoji,
-                                        nombre: objGanador.nombre,
-                                        dueno: duenoActual
-                                    });
-
-                                    setTimeout(() => {
-                                        cantarTextoVoz(`¡Felicidades a ${duenoActual}! Ganó el premio con ${objGanador.nombre}`);
-                                    }, 1000);
-
-                                } else {
-                                    setTimeout(() => {
-                                        db.ref('room/ruletaAnimacion').remove();
-                                        if (!juegoPausadoPorGanador) iniciarGiroAutomaticoContinuo();
-                                    }, 2500);
+                                    db.ref(`room/ganadoresPremios/${etapaPremioActual}`).set({ emoji: objGanador.emoji, nombre: objGanador.nombre, dueno: duenoActual });
                                 }
                             });
                         });
@@ -1453,128 +1299,53 @@
             estaGirandoSolo = false;
             clearInterval(intervaloGiroContinuo);
             db.ref('room/ruletaAnimacion').remove();
-            let btnI = document.getElementById('btn-iniciar-auto');
-            let btnP = document.getElementById('btn-pausar-auto');
-            if (btnI) btnI.classList.remove('hidden');
-            if (btnP) btnP.classList.add('hidden');
         }
 
         function avanzarSiguientePremio() {
             db.ref('room/ruletaAnimacion').remove();
-
-            if (!currentUser.isAdmin) return;
-            if (etapaPremioActual < 3) {
-                etapaPremioActual++;
-                juegoPausadoPorGanador = false;
-
-                db.ref('room/objetosData').once('value').then((snap) => {
-                    let objetos = snap.val() || {};
-                    let updates = {};
-                    for (let id in objetos) updates[`${id}/hits`] = 0;
-                    db.ref('room/objetosData').update(updates);
-                });
-
-                let nombresFases = ["1er Premio (¡10.000!)", "2do Premio (¡5.000!)", "3er Premio (¡3.000!)"];
-                document.getElementById('premio-actual-titulo').innerText = nombresFases[etapaPremioActual - 1] + " (Ronda en Curso)";
-                
-                let btnI = document.getElementById('btn-iniciar-auto');
-                let btnS = document.getElementById('btn-siguiente-premio');
-                let btnP = document.getElementById('btn-pausar-auto');
-                if (btnI) btnI.classList.remove('hidden');
-                if (btnP) btnP.classList.add('hidden');
-                if (btnS) btnS.classList.add('hidden');
-            } else {
-                alert("🏆 ¡Los 3 premios principales de esta ronda ya fueron entregados!");
-            }
+            if (!currentUser.isAdmin || etapaPremioActual >= 3) return;
+            etapaPremioActual++;
+            juegoPausadoPorGanador = false;
+            db.ref('room/objetosData').once('value').then((snap) => {
+                let objetos = snap.val() || {};
+                let updates = {};
+                for (let id in objetos) updates[`${id}/hits`] = 0;
+                db.ref('room/objetosData').update(updates);
+            });
+            let nombresFases = ["1er Premio (¡10.000!)", "2do Premio (¡5.000!)", "3er Premio (¡3.000!)"];
+            document.getElementById('premio-actual-titulo').innerText = nombresFases[etapaPremioActual - 1] + " (Ronda en Curso)";
         }
 
         function reiniciarObjetosRonda() {
             db.ref('room/ruletaAnimacion').remove();
             db.ref('room/ganadoresPremios').remove();
-
             if (!currentUser.isAdmin) return;
-            if (confirm("¿Reiniciar ronda de objetos por completo y liberar todas las figuras?")) {
-                db.ref('room/objetosData').remove().then(() => {
-                    etapaPremioActual = 1;
-                    juegoPausadoPorGanador = false;
-                    estaGirandoSolo = false;
-                    clearInterval(intervaloGiroContinuo);
-                    document.getElementById('premio-actual-titulo').innerText = "1er Premio (¡10.000!) (Ronda en Curso)";
-                    
-                    let btnI = document.getElementById('btn-iniciar-auto');
-                    let btnP = document.getElementById('btn-pausar-auto');
-                    let btnS = document.getElementById('btn-siguiente-premio');
-                    if (btnI) btnI.classList.remove('hidden');
-                    if (btnP) btnP.classList.add('hidden');
-                    if (btnS) btnS.classList.add('hidden');
-
-                    for(let i=1; i<=3; i++) {
-                        let spanP = document.getElementById(`ganador-premio-${i}`);
-                        if (spanP) { spanP.innerText = "Por sortear"; spanP.className = "text-slate-400 font-semibold"; }
-                    }
-
-                    alert("¡Ronda de objetos reiniciada desde cero y figuras disponibles!");
-                });
-            }
+            db.ref('room/objetosData').remove().then(() => {
+                etapaPremioActual = 1;
+                juegoPausadoPorGanador = false;
+                estaGirandoSolo = false;
+                document.getElementById('premio-actual-titulo').innerText = "1er Premio (¡10.000!) (Ronda en Curso)";
+            });
         }
 
         function enviarMensajeChatObjetos() {
             let input = document.getElementById('input-mensaje-objetos');
             if (!input || !input.value.trim()) return;
-            let nombreRemitente = currentUser.name || (currentUser.isAdmin ? "Administradora ⭐" : "Jugadora");
-            db.ref('chatObjetos').push({ nombre: nombreRemitente, mensaje: input.value.trim(), tiempo: Date.now() }, () => { input.value = ""; });
+            db.ref('chatObjetos').push({ nombre: currentUser.name || "Admin", mensaje: input.value.trim(), tiempo: Date.now() }, () => { input.value = ""; });
         }
-
         function escucharChatObjetos() {
-            db.ref('chatObjetos').on('value', function(snapshot) {
-                let cajaChat = document.getElementById('caja-chat-objetos');
-                if (!snapshot.exists() || !cajaChat) return;
-                let htmlMensajes = "";
-                snapshot.forEach(function(child) {
-                    let data = child.val();
-                    if (data && data.nombre && data.mensaje) {
-                        htmlMensajes += `<div class="bg-slate-950/50 p-2 rounded-lg border border-slate-800"><strong class="text-yellow-400">${data.nombre}:</strong> <span class="text-slate-200">${data.mensaje}</span></div>`;
-                    }
-                });
-                cajaChat.innerHTML = htmlMensajes;
-                cajaChat.scrollTop = cajaChat.scrollHeight;
+            db.ref('chatObjetos').on('value', (snap) => {
+                let c = document.getElementById('caja-chat-objetos');
+                if (!snap.exists() || !c) return;
+                let html = "";
+                snap.forEach(ch => { let d = ch.val(); html += `<div class="bg-slate-950 p-2 rounded"><strong class="text-yellow-400">${d.nombre}:</strong> ${d.mensaje}</div>`; });
+                c.innerHTML = html;
+                c.scrollTop = c.scrollHeight;
             });
         }
 
-        function registrarYReiniciarSiguienteRonda() { reiniciarBalotasParaSiguienteFigura(); }
-        function actualizarEstadoBloqueoUI(cerrado) {
-            let badgeHome = document.getElementById('home-room-status-badge');
-            let warningReg = document.getElementById('room-closed-warning');
-            let formFields = document.getElementById('player-register-form-fields');
-            let submitBtn = document.getElementById('btn-submit-player-login');
-            let adminToggleBtn = document.getElementById('admin-toggle-room-btn');
-            if (cerrado) {
-                if (badgeHome) { badgeHome.className = "w-full text-center py-2 px-4 rounded-xl text-xs font-bold bg-red-500/20 text-red-300 border border-red-500/40"; badgeHome.innerText = "🔒 Sala Cerrada por la Administradora"; }
-                if (warningReg) warningReg.classList.remove('hidden');
-                if (formFields) formFields.classList.add('opacity-40', 'pointer-events-none');
-                if (submitBtn) { submitBtn.disabled = true; submitBtn.classList.add('opacity-50', 'cursor-not-allowed'); }
-                if (adminToggleBtn) { adminToggleBtn.className = "px-4 py-2 bg-red-600 text-white text-xs font-bold rounded-xl shadow"; adminToggleBtn.innerText = "🔒 Sala Cerrada (Abrir)"; }
-            } else {
-                if (badgeHome) { badgeHome.className = "w-full text-center py-2 px-4 rounded-xl text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"; badgeHome.innerText = "🟢 Sala Abierta a Jugadoras"; }
-                if (warningReg) warningReg.classList.add('hidden');
-                if (formFields) formFields.classList.remove('opacity-40', 'pointer-events-none');
-                if (submitBtn) { submitBtn.disabled = false; submitBtn.classList.remove('opacity-50', 'cursor-not-allowed'); }
-                if (adminToggleBtn) { adminToggleBtn.className = "px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl shadow"; adminToggleBtn.innerText = "🟢 Sala Abierta (Cerrar)"; }
-            }
-        }
-        function toggleRoomLockAdmin() {
-            let nuevoEstado = !isRoomLocked;
-            db.ref('room/isRoomLocked').set(nuevoEstado);
-        }
-
-        function showPlayerLogin() {
-            document.getElementById('view-home').classList.add('hidden');
-            document.getElementById('view-player-register').classList.remove('hidden');
-        }
-        function showAdminLogin() {
-            document.getElementById('view-home').classList.add('hidden');
-            document.getElementById('view-admin-login').classList.remove('hidden');
-        }
+        function showPlayerLogin() { document.getElementById('view-home').classList.add('hidden'); document.getElementById('view-player-register').classList.remove('hidden'); }
+        function showAdminLogin() { document.getElementById('view-home').classList.add('hidden'); document.getElementById('view-admin-login').classList.remove('hidden'); }
         function backToHome() {
             if (presenceRef) { presenceRef.remove(); presenceRef = null; }
             document.getElementById('top-bar-nav').classList.add('hidden');
@@ -1584,21 +1355,16 @@
             document.getElementById('section-bingo-main').style.display = 'none';
             document.getElementById('section-objetos-main').style.display = 'none';
             document.getElementById('section-colores-main').style.display = 'none';
-            if (autoDrawInterval) clearInterval(autoDrawInterval);
-            isAutoRunning = false;
         }
 
         function verifyAdminPassword() {
-            let pass = document.getElementById('admin-password-input').value;
-            if (pass === adminSecretKey) {
-                localStorage.setItem('bingo_admin_pass', pass);
+            if (document.getElementById('admin-password-input').value === adminSecretKey) {
                 currentUser.isAdmin = true;
                 currentUser.name = "Administradora";
                 document.getElementById('view-admin-login').classList.add('hidden');
                 document.getElementById('top-bar-nav').classList.remove('hidden');
                 document.getElementById('section-bingo-main').style.display = 'flex';
-                let adminPanel = document.getElementById('view-admin-panel');
-                if (adminPanel) adminPanel.style.display = 'flex';
+                document.getElementById('view-admin-panel').style.display = 'flex';
                 inicializarMercadoCartones();
                 sincronizarDatosAdmin();
                 escucharChatEnVivo();
@@ -1608,73 +1374,44 @@
                 sincronizarPanelColoresJugadoras();
                 document.getElementById('admin-objetos-controls').classList.remove('hidden');
                 document.getElementById('admin-colores-controls').classList.remove('hidden');
-            } else {
-                alert("Clave incorrecta.");
-            }
-        }
-
-        function registrarPresenciaJugadora(name, control) {
-            let safeControl = control.replace(/[.#$\/\[\]]/g, "_");
-            presenceRef = db.ref(`room/connectedPlayers/${safeControl}`);
-            presenceRef.set({ name: name, control: control, lastSeen: firebase.database.ServerValue.TIMESTAMP });
-            presenceRef.onDisconnect().remove();
+            } else alert("Clave incorrecta.");
         }
 
         function registerPlayer() {
             let name = document.getElementById('player-name-input').value.trim();
             let control = document.getElementById('player-control-input').value.trim();
             let code = document.getElementById('player-access-code-input').value.trim();
-
-            if (!name || !control || !code) { alert("Completa todos los campos."); return; }
-            if (code.toUpperCase() !== 'BINGO2026') { alert("Código de acceso incorrecto."); return; }
-
-            localStorage.setItem('bingo_player_name', name);
-            localStorage.setItem('bingo_player_control', control);
-
-            currentUser.name = name;
-            currentUser.control = control;
-            currentUser.isAdmin = false;
-
+            if (!name || !control || !code || code.toUpperCase() !== 'BINGO2026') { alert("Datos incorrectos."); return; }
+            currentUser.name = name; currentUser.control = control; currentUser.isAdmin = false;
             document.getElementById('view-player-register').classList.add('hidden');
             document.getElementById('top-bar-nav').classList.remove('hidden');
             document.getElementById('section-bingo-main').style.display = 'flex';
-            let playerRoom = document.getElementById('view-player-room');
-            if (playerRoom) playerRoom.style.display = 'flex';
+            document.getElementById('view-player-room').style.display = 'flex';
             document.getElementById('player-display-name').innerText = name;
             document.getElementById('player-display-control').innerText = control;
-
-            registrarPresenciaJugadora(name, control);
-
-            db.ref(`users/${control}`).once('value', (userSnap) => {
-                if (!userSnap.exists()) {
-                    db.ref(`users/${control}`).set({ name: name, balance: 0.00, isCredit: false });
-                } else {
-                    db.ref(`users/${control}/name`).set(name);
-                }
-            });
-
+            presenceRef = db.ref(`room/connectedPlayers/${control.replace(/[.#$\/\[\]]/g, "_")}`);
+            presenceRef.set({ name: name, control: control });
+            presenceRef.onDisconnect().remove();
             sincronizarDatosJugadora();
             escucharChatEnVivo();
             sincronizarObjetosYune();
             escucharChatObjetos();
             escucharRuletaColoresFirebase();
             sincronizarPanelColoresJugadoras();
-            document.getElementById('admin-objetos-controls').classList.add('hidden');
-            document.getElementById('admin-colores-controls').classList.add('hidden');
         }
 
         function sincronizarDatosAdmin() {
-            db.ref('room').on('value', (snapshot) => {
-                let data = snapshot.val();
-                if (!data) return;
-                drawnBalls = data.drawnBalls || [];
-                gamePattern = data.gamePattern || 'line';
-                if (data.marketCards) marketCards = data.marketCards;
-                cardPrice = data.cardPrice || 300;
-                isRoomLocked = data.isRoomLocked || false;
+            db.ref('room').on('value', (snap) => {
+                let d = snap.val();
+                if (!d) return;
+                drawnBalls = d.drawnBalls || [];
+                gamePattern = d.gamePattern || 'line';
+                if (d.marketCards) marketCards = d.marketCards;
+                cardPrice = d.cardPrice || 300;
+                isRoomLocked = d.isRoomLocked || false;
 
                 let roomCodeInput = document.getElementById('admin-room-code');
-                if (roomCodeInput && data.roomCode && !roomCodeInput.value) roomCodeInput.value = data.roomCode;
+                if (roomCodeInput && d.roomCode && !roomCodeInput.value) roomCodeInput.value = d.roomCode;
                 let priceInput = document.getElementById('admin-card-price-input');
                 if (priceInput && document.activeElement !== priceInput) priceInput.value = cardPrice;
 
@@ -1698,22 +1435,22 @@
                 renderizarTableroAdmin();
                 renderizarVentanaCartonesPagadosAdmin();
                 renderizarAdminWallets();
-                renderizarJugadorasConectadasAdmin(data.connectedPlayers || {});
+                renderizarJugadorasConectadasAdmin(d.connectedPlayers || {});
                 actualizarPreviewWhatsApp();
                 verificarGanadoresEnVivoAdmin();
             });
         }
 
         function sincronizarDatosJugadora() {
-            db.ref('room').on('value', (snapshot) => {
-                let data = snapshot.val();
-                if (!data) return;
-                drawnBalls = data.drawnBalls || [];
-                gamePattern = data.gamePattern || 'line';
-                if (data.marketCards) marketCards = data.marketCards;
-                cardPrice = data.cardPrice || 300;
+            db.ref('room').on('value', (snap) => {
+                let d = snap.val();
+                if (!d) return;
+                drawnBalls = d.drawnBalls || [];
+                gamePattern = d.gamePattern || 'line';
+                if (d.marketCards) marketCards = d.marketCards;
+                cardPrice = d.cardPrice || 300;
 
-                if (data.isRoomLocked) {
+                if (d.isRoomLocked) {
                     alert("🔒 La sala está cerrada. Cerrando sesión.");
                     backToHome();
                     return;
@@ -1745,8 +1482,7 @@
             });
 
             db.ref(`users/${currentUser.control}`).on('value', (snap) => {
-                let userData = snap.val();
-                if (!userData) return;
+                let userData = snap.val() || {};
                 let balance = userData.balance || 0;
                 let isCredit = userData.isCredit || false;
                 let balanceEl = document.getElementById('wallet-balance-display');
@@ -2010,6 +1746,32 @@
                     drawBallManually();
                 }, 3000);
             }
+        }
+
+        function registrarYReiniciarSiguienteRonda() { reiniciarBalotasParaSiguienteFigura(); }
+        function actualizarEstadoBloqueoUI(cerrado) {
+            let badgeHome = document.getElementById('home-room-status-badge');
+            let warningReg = document.getElementById('room-closed-warning');
+            let formFields = document.getElementById('player-register-form-fields');
+            let submitBtn = document.getElementById('btn-submit-player-login');
+            let adminToggleBtn = document.getElementById('admin-toggle-room-btn');
+            if (cerrado) {
+                if (badgeHome) { badgeHome.className = "w-full text-center py-2 px-4 rounded-xl text-xs font-bold bg-red-500/20 text-red-300 border border-red-500/40"; badgeHome.innerText = "🔒 Sala Cerrada por la Administradora"; }
+                if (warningReg) warningReg.classList.remove('hidden');
+                if (formFields) formFields.classList.add('opacity-40', 'pointer-events-none');
+                if (submitBtn) { submitBtn.disabled = true; submitBtn.classList.add('opacity-50', 'cursor-not-allowed'); }
+                if (adminToggleBtn) { adminToggleBtn.className = "px-4 py-2 bg-red-600 text-white text-xs font-bold rounded-xl shadow"; adminToggleBtn.innerText = "🔒 Sala Cerrada (Abrir)"; }
+            } else {
+                if (badgeHome) { badgeHome.className = "w-full text-center py-2 px-4 rounded-xl text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"; badgeHome.innerText = "🟢 Sala Abierta a Jugadoras"; }
+                if (warningReg) warningReg.classList.add('hidden');
+                if (formFields) formFields.classList.remove('opacity-40', 'pointer-events-none');
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.classList.remove('opacity-50', 'cursor-not-allowed'); }
+                if (adminToggleBtn) { adminToggleBtn.className = "px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl shadow"; adminToggleBtn.innerText = "🟢 Sala Abierta (Cerrar)"; }
+            }
+        }
+        function toggleRoomLockAdmin() {
+            let nuevoEstado = !isRoomLocked;
+            db.ref('room/isRoomLocked').set(nuevoEstado);
         }
 
         function reiniciarBalotasParaSiguienteFigura() {
