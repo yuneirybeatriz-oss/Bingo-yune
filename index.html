@@ -587,7 +587,6 @@
                 osc.stop(audioCtx.currentTime + 0.1);
             } catch(e){}
 
-            // Desbloquear motor de voz de manera inmediata al primer toque
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 let dummyUtterance = new SpeechSynthesisUtterance("");
@@ -619,7 +618,6 @@
                     utterance.rate = 1.0;
                     utterance.pitch = 1.1;
                     
-                    // Asegurar selección de voz en español si está disponible en el dispositivo
                     let voces = window.speechSynthesis.getVoices();
                     let vozEspanol = voces.find(v => v.lang.startsWith('es') || v.lang.startsWith('ES'));
                     if (vozEspanol) {
@@ -648,6 +646,26 @@
                     osc.connect(gain); gain.connect(audioCtx.destination);
                     osc.start(ahora + delay); osc.stop(ahora + delay + 0.35);
                 });
+            } catch(e){}
+        }
+
+        function reproducirSonidoTrrr() {
+            if (!audioHabilitado) return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(320, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.04);
             } catch(e){}
         }
 
@@ -831,32 +849,6 @@
                 }
             });
             return { faltantes: mejorFaltantes, count: menorFaltasCount };
-        }
-
-        function reproducirSonidoTrrr() {
-            if (!audioHabilitado) return;
-            try {
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-                
-                let bufferSize = audioCtx.sampleRate * 0.015;
-                let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-                let data = buffer.getChannelData(0);
-                for (let i = 0; i < bufferSize; i++) { data[i] = Math.random() * 2 - 1; }
-
-                let noise = audioCtx.createBufferSource();
-                noise.buffer = buffer;
-                let filter = audioCtx.createBiquadFilter();
-                filter.type = 'highpass';
-                filter.frequency.setValueAtTime(1400, audioCtx.currentTime);
-
-                let gain = audioCtx.createGain();
-                gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.015);
-
-                noise.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
-                noise.start();
-            } catch(e){}
         }
 
         function switchGameMode(modo) {
@@ -1097,6 +1089,7 @@
                 let btnGirar = document.getElementById('btn-girar-color');
                 if (btnGirar) btnGirar.disabled = true;
 
+                let ultimoTick = 0;
                 function animar(timestamp) {
                     if (!tiempoInicio) tiempoInicio = timestamp;
                     let progreso = (timestamp - tiempoInicio) / duracionMs;
@@ -1106,7 +1099,11 @@
                         anguloActualColores = anguloActualColores + (anguloTotalMeta - anguloActualColores) * (easeOut * 0.06);
                         dibujarRuletaColoresCanvas(anguloActualColores);
                         
-                        reproducirSonidoTrrr();
+                        // Sonido rítmico mientras gira cada ciertos milisegundos
+                        if (timestamp - ultimoTick > 90) {
+                            reproducirSonidoTrrr();
+                            ultimoTick = timestamp;
+                        }
 
                         db.ref('room/ruletaColoresState').set({
                             angulo: anguloActualColores,
@@ -1196,6 +1193,7 @@
                 if (!currentUser.isAdmin && data.angulo !== undefined) {
                     anguloActualColores = data.angulo;
                     dibujarRuletaColoresCanvas(anguloActualColores);
+                    reproducirSonidoTrrr();
                 }
 
                 if (data.estado === 'finalizado' && data.colorGanador && data.timestamp !== ultimoTimestampGanador) {
