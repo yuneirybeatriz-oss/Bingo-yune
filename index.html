@@ -6,7 +6,6 @@
     <title>Bingo Lineal Yune & Objetos Yune</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         body { font-family: 'Poppins', sans-serif; background: #0f172a; color: #f8fafc; }
         .neon-glow { text-shadow: 0 0 10px rgba(236, 72, 153, 0.7), 0 0 20px rgba(236, 72, 153, 0.5); }
@@ -69,6 +68,22 @@
             background: #060913; border: 2px dashed #334155; border-radius: 14px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             padding: 8px; text-align: center;
+        }
+
+        /* ESTILOS PARA EL CONFETI NATIVO DE EMERGENCIA */
+        .confetti-piece {
+            position: fixed;
+            width: 10px;
+            height: 14px;
+            background-color: #facc15;
+            top: -20px;
+            z-index: 99999;
+            opacity: 0.9;
+            animation: caerConfeti 3s linear forwards;
+        }
+        @keyframes caerConfeti {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
         }
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -557,11 +572,22 @@
         }
 
         function inicializarAudioGlobal() {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            // Forzar disparo de audio silencioso para desbloquear el navegador
+            try {
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            } catch(e){}
         }
 
         function toggleAudioJugadora() {
@@ -580,40 +606,54 @@
 
         function cantarTextoVoz(texto) {
             if (!audioHabilitado) return;
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                let utterance = new SpeechSynthesisUtterance(texto);
-                utterance.lang = 'es-ES';
-                utterance.rate = 1.0;
-                utterance.pitch = 1.1;
-                window.speechSynthesis.speak(utterance);
-            }
+            try {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    let utterance = new SpeechSynthesisUtterance(texto);
+                    utterance.lang = 'es-ES';
+                    utterance.rate = 1.0;
+                    utterance.pitch = 1.1;
+                    window.speechSynthesis.speak(utterance);
+                }
+            } catch(e){}
         }
 
-        function reproducirSonidoCampanaFinal() {
+        function reproducirCampanaGanadora() {
             if (!audioHabilitado) return;
             try {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 if (audioCtx.state === 'suspended') audioCtx.resume();
-                let osc = audioCtx.createOscillator();
-                let gain = audioCtx.createGain();
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+                
+                // Doble toque de campana melódica
+                let ahora = audioCtx.currentTime;
+                [0, 0.25, 0.5].forEach((delay, idx) => {
+                    let osc = audioCtx.createOscillator();
+                    let gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600 + (idx * 200), ahora + delay);
+                    gain.gain.setValueAtTime(0.4, ahora + delay);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ahora + delay + 0.35);
+                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    osc.start(ahora + delay); osc.stop(ahora + delay + 0.35);
+                });
             } catch(e){}
         }
 
-        function dispararConfettiVictoria() {
-            if (typeof confetti === 'function') {
-                try {
-                    confetti({ particleCount: 200, spread: 120, origin: { y: 0.6 } });
-                } catch(e) {}
+        function dispararConfettiNativo() {
+            // Generador de confeti visual directo con elementos HTML
+            const colores = ['#facc15', '#ec4899', '#38bdf8', '#4ade80', '#a855f7', '#ff5722'];
+            for (let i = 0; i < 70; i++) {
+                let pieza = document.createElement('div');
+                pieza.className = 'confetti-piece';
+                pieza.style.left = Math.random() * window.innerWidth + 'px';
+                pieza.style.backgroundColor = colores[Math.floor(Math.random() * colores.length)];
+                pieza.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
+                pieza.style.transform = `rotate(${Math.random() * 360}deg)`;
+                document.body.appendChild(pieza);
+                setTimeout(() => { pieza.remove(); }, 3500);
             }
             if (navigator.vibrate) {
-                try { navigator.vibrate([200, 100, 200, 100, 300]); } catch(e){}
+                try { navigator.vibrate([150, 80, 150, 80, 250]); } catch(e){}
             }
         }
 
@@ -1068,7 +1108,8 @@
                         dibujarRuletaColoresCanvas(anguloActualColores);
                         estaGirandoColores = false;
 
-                        reproducirSonidoCampanaFinal();
+                        reproducirCampanaGanadora();
+                        dispararConfettiNativo();
 
                         let infoDuenoColor = asignaciones[colorGanador.nombre];
                         let nombreDueno = infoDuenoColor ? infoDuenoColor.nombre : "Sin dueña asignada";
@@ -1090,7 +1131,6 @@
                             });
 
                             cantarTextoVoz(`¡Ganó el color ${colorGanador.nombre}! Se lo lleva ${nombreDueno}`);
-                            dispararConfettiVictoria();
 
                             if (btnGirar) btnGirar.classList.add('hidden');
                             document.getElementById('btn-siguiente-premio-color').classList.remove('hidden');
@@ -1150,8 +1190,8 @@
                 if (data.estado === 'finalizado' && data.colorGanador && data.timestamp !== ultimoTimestampGanador) {
                     ultimoTimestampGanador = data.timestamp;
                     if (!currentUser.isAdmin && data.controlDueno && currentUser.control && data.controlDueno === currentUser.control) {
-                        reproducirSonidoCampanaFinal();
-                        dispararConfettiVictoria();
+                        reproducirCampanaGanadora();
+                        dispararConfettiNativo();
                         cantarTextoVoz(`¡Felicidades! Tu color ${data.colorGanador} ha ganado el premio`);
                         
                         let modal = document.getElementById('modal-victoria-general');
@@ -1258,8 +1298,8 @@
 
                             if (!currentUser.isAdmin && ganadores[i].timestamp && ganadores[i].timestamp !== ultimoPremioObjetoTimestamp && ganadores[i].ownerControl === currentUser.control) {
                                 ultimoPremioObjetoTimestamp = ganadores[i].timestamp;
-                                reproducirSonidoCampanaFinal();
-                                dispararConfettiVictoria();
+                                reproducirCampanaGanadora();
+                                dispararConfettiNativo();
                                 cantarTextoVoz(`¡Felicidades! Tu objeto ${ganadores[i].nombre} ha ganado el premio`);
                                 
                                 let modal = document.getElementById('modal-victoria-general');
@@ -1351,7 +1391,8 @@
                     if (pasoActual > totalPasosVueltas) {
                         clearInterval(intervaloGiroContinuo);
                         estaGirandoSolo = false;
-                        reproducirSonidoCampanaFinal();
+                        reproducirCampanaGanadora();
+                        dispararConfettiNativo();
                         db.ref(`room/objetosData/${targetId}`).once('value').then((snapObj) => {
                             let d = snapObj.val() || { hits: 0, owner: null, ownerControl: null };
                             let hits = Math.min(3, (d.hits || 0) + 1);
@@ -1617,9 +1658,9 @@
                 modalNoti.classList.remove('hidden');
                 if (!yaCantóBingoJugadora) {
                     yaCantóBingoJugadora = true;
-                    reproducirSonidoCampanaFinal();
+                    reproducirCampanaGanadora();
+                    dispararConfettiNativo();
                     cantarTextoVoz("¡Felicidades! ¡Tu cartón hizo bingo!");
-                    dispararConfettiVictoria();
                 }
             } else {
                 yaCantóBingoJugadora = false;
@@ -2015,7 +2056,7 @@
         function enviarMensajeChatAdmin() {
             let input = document.getElementById('input-mensaje-admin');
             if (!input || !input.value.trim()) return;
-            db.ref('chatSalaCaja').push({ nombre: "Administradora ⭐", mensaje: input.value.trim(), tiempo: Date.now() }, () => { input.value = ""; });
+            db.ref('chatSala').push({ nombre: "Administradora ⭐", mensaje: input.value.trim(), tiempo: Date.now() }, () => { input.value = ""; });
         }
         function escucharChatEnVivo() {
             db.ref('chatSala').on('value', function(snapshot) {
